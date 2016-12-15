@@ -1,0 +1,196 @@
+/*--------------------------------*/
+/* = STEPS CONTAINER
+----------------------------*/
+.wizard-steps-parent
+{
+	text-align:center;
+	width:100%;
+	position:relation;
+}
+
+.wizard-steps {
+    clear:both;
+    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    margin:0 auto;
+    position:relative;
+}
+
+.wizard-steps-parent2
+{
+	text-align:center;
+	width:100%;
+	position:relation;
+}
+
+.wizard-steps2 {
+    clear:both;
+    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    margin:0 auto;
+    position:relative;
+}
+.wizard-steps div {
+	position:relative;
+	display:block;
+}
+/* = STEP NUMBERS
+----------------------------*/
+.wizard-steps span {
+    display: block;
+    float: left;
+    font-size: 10px;
+    text-align:center;
+    width:15px;
+    margin: 2px 5px 0px 0px;
+    line-height:15px;
+    color: #ccc;
+    background: #FFF;
+    border: 2px solid #CCC;
+    -webkit-border-radius:10px;
+    -moz-border-radius:10px;
+    border-radius:10px;
+}
+/* = DEFAULT STEPS
+----------------------------*/
+.wizard-steps a {
+    position:relative;
+    display:block;
+    width:114px;;
+    height:40px;
+    padding:0px 10px 0px 3px;
+    float: left;
+    font-size:12px;
+    line-height:24px;
+    color:#666;
+    text-decoration:none;
+    line-height:40px;
+    font-size:12px;
+    /*text-shadow:1px 1px 1px rgba(255,255,255, 0.8);*/
+}
+/* = COMPLETED STEPS
+----------------------------*/
+ 
+.wizard-steps .completed-step a {
+    color:#fff;
+    height: 34px;
+    width: 120px;
+    font-size:12px;
+    line-height:40px;
+    padding-left:10px;
+    padding-right:10px;
+    cursor:default;
+    background:url("../images/Complete.png") right no-repeat;
+}
+.wizard-steps .completed-step span {
+    border: 2px solid #163038;
+    color: #163038;
+    text-shadow:none;
+}
+
+/* = ACTIVE STEPS
+----------------------------*/
+.wizard-steps .active-step a{
+    color:#3F3F3F;
+    width: 120px;
+    height: 34px;
+    text-shadow:1px 1px 1px rgba(0,0,0, 0.8);
+    background:url("../images/nonComplete.png") right no-repeat;
+    text-align:center;
+    
+}
+.wizard-steps .active-step span {
+    color: #3F3F3F;
+    -webkit-box-shadow:0px 0px 2px rgba(0,0,0, 0.8);
+    -moz-box-shadow:0px 0px 2px rgba(0,0,0, 0.8);
+    box-shadow:0px 0px 2px rgba(0,0,0, 0.8);
+    text-shadow:none;
+    border: 2px solid #CD1644;
+}
+.warningImg{
+	width:23px;
+	heigth:20px;
+	display:inline-block; 
+    vertical-align:bottom;
+}
+
+.errorImg{
+	width:22px;
+	heigth:20px;
+	display:inline-block; 
+    vertical-align:bottom;
+}
+
+.informImg{
+	width:22px;
+	heigth:20px;
+	display:inline-block; 
+    vertical-align:bottom;
+}
+
+.successImg{
+	width:22px;
+	heigth:20px;
+	display:inline-block; 
+    vertical-align:bottom;
+}
+
+.warningDiv{
+	border: 1px solid #FAB418;
+    background-color:#FFE9AD;
+    width:90%;
+    padding:3px 0px;
+}
+
+.errorDiv{
+	border: 1px solid #EB5439;
+    background-color:#FCCAC1;
+    width:90%;
+    padding:3px 0px;
+}
+
+.informDiv{
+	border: 1px solid #4D8FCB;
+    background-color:#D1E4F3;
+    width:90%;
+    padding:3px 0px;
+}
+
+.successDiv{
+	border: 1px solid #98C700;
+    background-color:#EFFEB9;
+    width:90%;
+    padding:3px 0px;
+}
+
+.warningMsg {
+    font-size:12px;
+    line-height:21px;
+    display:inline-block; 
+    vertical-align:middle;
+    margin:0 8px;
+}
+
+.errorMsg {
+    font-size:12px;
+    line-height:21px;
+    display:inline-block; 
+    vertical-align:middle;
+    margin:0 8px;
+}
+
+.informMsg {
+    font-size:12px;
+    line-height:21px;
+    display:inline-block; 
+    vertical-align:middle;
+    margin:0 8px;
+}
+
+.successMsg {
+    font-size:12px;
+    line-height:21px;
+    display:inline-block; 
+    vertical-align:middle;
+    margin:0 8px;
+}

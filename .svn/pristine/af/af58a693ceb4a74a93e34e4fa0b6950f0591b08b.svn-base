@@ -1,0 +1,443 @@
+package com.aiait.eflow.wkf.dao;
+
+import java.sql.*;
+import java.util.*;
+
+import com.aiait.eflow.common.CommonName;
+import com.aiait.eflow.common.helper.ParamConfigHelper;
+import com.aiait.eflow.formmanage.vo.SpecialFieldVo;
+import com.aiait.eflow.util.StringUtil;
+import com.aiait.eflow.wkf.vo.*;
+import com.aiait.framework.common.DataType;
+import com.aiait.framework.db.IDBManager;
+import com.aiait.framework.exception.DAOException;
+import com.aiait.framework.page.PageVO;
+
+/*
+ *NO. Task_ID  Author   Modify_Date   Description
+ *1		N/A		asnpg9a	 11/16/2009	  added search criteria "completed date".
+ *
+ */
+
+public class ListInquiryFormDAO extends WorkFlowProcessDAO {
+
+    public ListInquiryFormDAO(IDBManager dbManager) {
+        super(dbManager);
+    }
+
+    public int getTotalRecordsNum(WorkFlowProcessVO queryVo, PageVO page, String supperOrgs) throws DAOException {
+        StringBuffer sql = new StringBuffer("select count(distinct a.request_no) ");
+        sql.append(" from teflow_wkf_process a");
+		if (queryVo.getNodeType() != null && !"".equals(queryVo.getNodeType())) {
+            sql.append(" INNER JOIN ");
+        } else {
+            sql.append(" LEFT OUTER JOIN ");
+        }		
+		sql.append(" teflow_wkf_detail e on (a.flow_id = e.flow_id) and (a.node_id = e.node_id),teflow_wkf_define b,teflow_form c, tpma_staffbasic d where 1=1 ");
+
+        HashMap resultMap = makeCondition(queryVo, supperOrgs);
+
+        sql.append(resultMap.get("conditionSQL"));
+
+        sql.append(" and (a.flow_id = b.flow_id) and (b.form_system_id = c.form_system_id) and (a.request_staff_code = d.staff_code) ");
+
+        // For query condition related to node.
+        /*if (queryVo.getNodeType() != null && !"".equals(queryVo.getNodeType())) {
+            sql.append("and (a.flow_id = e.flow_id) and (a.node_id = e.node_id)");
+        } else {
+            sql.append("and (a.flow_id *= e.flow_id) and (a.node_id *= e.node_id)");
+        }*/
+        // System.out.println("-----sql_1: " + sql);
+
+        int count = dbManager.getRecordCount(sql.toString(), (Object[]) resultMap.get("parameters"), (int[]) resultMap
+                .get("dataType"));
+        return count;
+    }
+  
+  /**IT0958 : add filter : requested by
+	 * 获取指定用户所申请的记录
+	 * @param staffCode
+	 * @return
+	 * @throws DAOException
+	 */
+	public Collection searchInquiryForm(WorkFlowProcessVO queryVo, PageVO page, String supperOrgs)throws DAOException{
+		StringBuffer sql = new StringBuffer("select distinct a.request_no,a.flow_id,a.submission_date,a.request_staff_code,a.receiving_date,a.previous_processor,a.current_processor,a.status,a.inprocess,c.form_name,c.form_system_id,a.node_id,e.node_type,e.node_name,a.is_deputy,a.origin_processor, a.handle_date, a.org_id, a.team_code, a.SUBMIT_STAFF_CODE ");
+		sql.append(" from teflow_wkf_process a ");
+		if (queryVo.getNodeType() != null && !"".equals(queryVo.getNodeType())) {
+            sql.append(" INNER JOIN ");
+        } else {
+            sql.append(" LEFT OUTER JOIN ");
+        }		
+		sql.append(" teflow_wkf_detail e on (a.flow_id = e.flow_id) and (a.node_id = e.node_id),teflow_wkf_define b,teflow_form c, tpma_staffbasic d  where 1=1 ");
+		
+		HashMap resultMap = makeCondition(queryVo, supperOrgs);
+		
+		sql.append(resultMap.get("conditionSQL"));
+		
+		//sql.append(" and a.flow_id=b.flow_id and b.form_system_id = c.form_system_id and a.flow_id = e.flow_id and a.node_id = e.node_id and a.request_staff_code = d.staff_code order by a.submission_date desc");
+		//join -> left join
+		sql.append(" and (a.flow_id = b.flow_id) and (b.form_system_id = c.form_system_id) and (a.request_staff_code = d.staff_code) ");
+
+		// For query condition related to node.
+        /*if (queryVo.getNodeType() != null && !"".equals(queryVo.getNodeType())) {
+            sql.append("and (a.flow_id = e.flow_id) and (a.node_id = e.node_id)");
+        } else {
+            sql.append("and (a.flow_id *= e.flow_id) and (a.node_id *= e.node_id)");
+        }*/
+        
+        sql.append(" order by a.submission_date desc");
+		//Collection list = dbManager.query(sql.toString());
+		//Collection list = dbManager.query(sql.toString(),(Object[])resultMap.get("parameters"),(int[])resultMap.get("dataType"));
+		// System.out.println("-----sql_2: " + sql);
+		long timeStart = System.currentTimeMillis();
+		Collection list = dbManager.query(sql.toString(),(Object[])resultMap.get("parameters"),(int[])resultMap.get("dataType"),page.getPageSize(),page.getCurrentPage());
+		boolean logTime = "yes".equalsIgnoreCase(ParamConfigHelper.getInstance().getParamValue(CommonName.PARAM_LOG_TIME));
+		if (logTime) {
+            System.out.println("Inquiry List sql: " + sql);
+            System.out.println("Inquiry List Time - 1: " + (System.currentTimeMillis() - timeStart));
+        }
+		
+		boolean contentField2 = false;
+		boolean contentField3 = false;
+		String contentFields = ParamConfigHelper.getInstance().getParamValue(CommonName.PARAM_LIST_CONTENT_FIELDS);
+		if (contentFields != null && !"".equals(contentFields)) {
+		    String[] aryContentFields = contentFields.split(";");
+		    for (int i = 0; i < aryContentFields.length; i++) {
+		        if (aryContentFields[i].equals("2")) {
+		            contentField2 = true;
+		        } else if (aryContentFields[i].equals("3")) {
+		            contentField3 = true;
+                }
+		    }
+		}
+		
+		if(list==null && list.size()==0)
+		  return null;
+	    Collection result = new ArrayList();
+	    Iterator it = list.iterator();
+	    int count = 1;
+	    while( it.hasNext()){ 
+	        // System.out.println("count - " + count++);
+	    	HashMap map = (HashMap)it.next();
+	    	WorkFlowProcessVO vo = convertMapToVo(map);
+	    	
+	    	//if(page.getPageSize()>0 ){ 
+		    	// Set tip field
+		    	vo.setTipField(this.getSpecialField(vo.getRequestNo(), SpecialFieldVo.TYPE_TIP, vo.getFormSystemId()));
+		    	// Set highlight fields
+	            vo.setHighlightField(this.getSpecialField(vo.getRequestNo(), SpecialFieldVo.TYPE_HIGHLIGHT_1, vo.getFormSystemId()));
+	            if (contentField2) {
+	                vo.setHighlightField2(this.getSpecialField(vo.getRequestNo(), SpecialFieldVo.TYPE_HIGHLIGHT_2, vo.getFormSystemId()));
+	            }
+	            if (contentField3) {
+	                vo.setHighlightField3(this.getSpecialField(vo.getRequestNo(), SpecialFieldVo.TYPE_HIGHLIGHT_3, vo.getFormSystemId()));
+	            }
+	    	//}
+	    	result.add(vo);
+	    }
+	    if (logTime) {
+            System.out.println("Inquiry List Time - 2: " + (System.currentTimeMillis() - timeStart));
+        }
+	    return result;
+	}
+
+	/**
+     * Get export form data with basic information, such as requester, company, etc.
+     */
+    public Collection exportInquiryForm(WorkFlowProcessVO queryVo, PageVO page, String supperOrgs) throws DAOException {
+        Collection list = this.searchInquiryForm(queryVo, page, supperOrgs);
+
+        String SQL1 = "select table_name from teflow_form_section where (form_system_id = ?) and (section_type = '03')";
+
+        String SQL2 = "select a.*, t.handle_date, b.staff_name as submit_staff_name, c.org_name as company_name, d.team_name, e.staff_name as request_staff_name "
+                + "from <table_name> a left join teflow_wkf_process_trace t on (a.request_no = t.request_no) and (t.handle_type = '05'), "
+                + "tpma_staffbasic b, teflow_company c, tpma_team d, tpma_staffbasic e "
+                + "where (a.request_no = ?) and (a.submit_staff_code = b.staff_code) and "
+                + "(a.company_id = c.org_id) and (a.team_code = d.team_code) and (a.request_staff_code = e.staff_code)";
+
+        Connection conn = dbManager.getJDBCConnection();
+        PreparedStatement stm1 = null;
+        PreparedStatement stm2 = null;
+
+        try {
+            stm1 = conn.prepareStatement(SQL1);
+
+            Iterator it = list.iterator();
+            int count = 1;
+            while (it.hasNext()) {
+                // System.out.println("count: " + count++);
+                WorkFlowProcessVO vo = (WorkFlowProcessVO) it.next();
+                int i = 1;
+                stm1.setInt(i++, vo.getFormSystemId());
+                ResultSet rs = stm1.executeQuery();
+                if (!rs.next()) {
+                    rs.close();
+                    continue;
+                }
+                String tableName = rs.getString("table_name");
+
+                rs.close();
+                stm2 = conn.prepareStatement(SQL2.replaceAll("<table_name>", tableName));
+                i = 1;
+                stm2.setString(i++, vo.getRequestNo());
+                rs = stm2.executeQuery();
+                if (!rs.next()) {
+                    rs.close();
+                    stm2.close();
+                    continue;
+                }
+
+                FormBasicDataVO formBasicData = new FormBasicDataVO();
+                formBasicData.setRequestNo(rs.getString("request_no"));
+                formBasicData.setSubmiterCode(rs.getString("submit_staff_code"));
+                formBasicData.setSubmiterName(rs.getString("submit_staff_name"));
+                formBasicData.setCompanyCode(rs.getString("company_id"));
+                formBasicData.setCompanyName(rs.getString("company_name"));
+                formBasicData.setTeamCode(rs.getString("team_code"));
+                formBasicData.setTeamName(rs.getString("team_name"));
+                formBasicData.setRequesterCode(rs.getString("request_staff_code"));
+                formBasicData.setRequesterName(rs.getString("request_staff_name"));
+                formBasicData.setCompleteDate(rs.getTimestamp("handle_date"));
+                vo.setFormBasicData(formBasicData);
+
+                rs.close();
+                stm2.close();
+            }
+
+            return list;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        } finally {
+            if (stm1 != null) {
+                try {
+                    stm1.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (stm2 != null) {
+                try {
+                    stm2.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+	
+	protected HashMap makeCondition(WorkFlowProcessVO queryVo, String supperOrgs){
+		HashMap map = new HashMap();
+		StringBuffer sql = new StringBuffer("");
+		int index = 0;
+		int parameterNum = 0;
+		if(queryVo.getRequestNo()!=null && !"".equals(queryVo.getRequestNo())){
+			parameterNum++;
+		}
+		if(queryVo.getStatus()!=null && !"".equals(queryVo.getStatus())){
+			parameterNum++;
+		}
+		if (queryVo.getOrgId() != null && !queryVo.getOrgId().equals("")) {
+			parameterNum++;
+		}
+		if(queryVo.getRequestStaffCode()!=null && !"".equals(queryVo.getRequestStaffCode())){
+			parameterNum++;
+		}
+		if(queryVo.getBeginSubmissionDate()!=null && !"".equals(queryVo.getBeginSubmissionDate())){
+			parameterNum++;
+		}
+		if(queryVo.getEndSubmissionDate()!=null && !"".equals(queryVo.getEndSubmissionDate())){
+			parameterNum++;
+		}
+		if(queryVo.getFormSystemId()>0){
+			parameterNum++;
+		}
+		if(queryVo.getInProcess()!=null && !"".equals(queryVo.getInProcess())){
+			parameterNum++;
+		}
+		
+		if (!(StringUtil.isEmptyString(queryVo.getBeginCompleteDate()))){
+			parameterNum++;
+		}
+		if (!(StringUtil.isEmptyString(queryVo.getEndCompleteDate()))){
+			parameterNum++;
+		}
+		
+		if (queryVo.getPreviousProcessor() != null && !"".equals(queryVo.getPreviousProcessor())) {
+            parameterNum++;
+        }
+		
+		if (queryVo.getNodeType() != null && !"".equals(queryVo.getNodeType())) {
+            parameterNum++;
+        }
+
+		int[] dataType = new int[parameterNum];
+		Object[] parameters = new Object[parameterNum];
+		
+		if(queryVo.getRequestNo()!=null && !"".equals(queryVo.getRequestNo())){
+			sql.append(" and a.request_no=? ");
+			dataType[index] = DataType.VARCHAR;
+			parameters[index] = queryVo.getRequestNo();
+			index++;
+		}
+		if(queryVo.getFormType()!=null && !"".equals(queryVo.getFormType())){
+			sql.append(" and c.form_type in (").append(queryVo.getFormType()).append(") ");
+		}
+		if(queryVo.getStatus()!=null && !"".equals(queryVo.getStatus())){
+			sql.append(" and a.status=? ");
+			dataType[index] = DataType.VARCHAR;
+			parameters[index] = queryVo.getStatus();
+			index++;
+		}
+		
+		if (queryVo.getOrgId() != null && !queryVo.getOrgId().equals("")) {
+			sql.append(" and COALESCE(a.org_id, d.org_id) = ? ");
+			dataType[index] = DataType.VARCHAR;
+			parameters[index] = queryVo.getOrgId();
+			index++;
+		}
+		
+		//IT0958 DS-007 Begin
+		if(queryVo.getRequestStaffCode()!=null && !"".equals(queryVo.getRequestStaffCode())){
+			sql.append(" and a.request_staff_code=? ");
+			dataType[index] = DataType.VARCHAR;
+			parameters[index] = queryVo.getRequestStaffCode();
+			index++;
+		}
+		//IT0958 DS-007 End
+		if(queryVo.getBeginSubmissionDate()!=null && !"".equals(queryVo.getBeginSubmissionDate())){
+			  if(queryVo.getEndSubmissionDate()!=null && !"".equals(queryVo.getEndSubmissionDate())){
+				  sql.append(" and Convert(varchar(10),a.submission_date,101)>=? and Convert(varchar(10),a.submission_date,101)<=?");
+			      dataType[index] = DataType.DATE;
+				  try{
+			        parameters[index] = new java.sql.Date(StringUtil.stringToSqlDate(queryVo.getBeginSubmissionDate()+" 00:00:00","MM/dd/yyyy HH:mm:ss").getTime());
+				  }catch(Exception e){}
+				  index++;
+				  
+				  dataType[index] = DataType.DATE;
+				  try{
+				        parameters[index] = new java.sql.Date(StringUtil.stringToSqlDate(queryVo.getEndSubmissionDate()+" 23:59:59","MM/dd/yyyy HH:mm:ss").getTime());
+					  }catch(Exception e){}
+				 index++;
+			  }else{
+			      sql.append( " and a.submission_date>=? ");
+			      dataType[index] = DataType.DATE;
+				  try{
+			        parameters[index] = new java.sql.Date(StringUtil.stringToSqlDate(queryVo.getBeginSubmissionDate()+" 00:00:00","MM/dd/yyyy HH:mm:ss").getTime());
+				  }catch(Exception e){}
+				  index++;
+			  }
+		  }else{
+			  if(queryVo.getEndSubmissionDate()!=null && !"".equals(queryVo.getEndSubmissionDate())){
+				  sql.append( " and a.submission_date<=? ");
+				  dataType[index] = DataType.DATE;
+				  try{
+				        parameters[index] = new java.sql.Date(StringUtil.stringToSqlDate(queryVo.getEndSubmissionDate()+" 23:59:59","MM/dd/yyyy HH:mm:ss").getTime());
+					  }catch(Exception e){}
+				 index++;
+			  }
+		}
+		
+		if(queryVo.getFormSystemId()>0){
+			sql.append(" and b.form_system_id=?");
+			dataType[index] = DataType.INT;
+			parameters[index] = ""+queryVo.getFormSystemId();
+			index++;
+		}
+		//IT0973 BEGIN
+		if(queryVo.getInProcess()!=null && !"".equals(queryVo.getInProcess())){
+			sql.append(" and a.inprocess=? ");
+			dataType[index] = DataType.CHAR;
+			parameters[index] = queryVo.getInProcess();
+			index++;
+		}
+		//IT0973 END
+		
+		if(supperOrgs != null && !"".equals(supperOrgs)){
+			sql.append(" and c.org_id in (" + supperOrgs + ") ");
+		}
+		
+		if (!(StringUtil.isEmptyString(queryVo.getBeginCompleteDate()))){
+			sql.append(" and a.handle_date >= ? ");
+			dataType[index] = DataType.DATE;
+			try{
+			     parameters[index] = StringUtil.stringToSqlDate(queryVo.getBeginCompleteDate()+" 00:00:00","MM/dd/yyyy HH:mm:ss");
+			}catch(Exception e){}
+			index++;			
+		}
+		if (!(StringUtil.isEmptyString(queryVo.getEndCompleteDate()))){
+			sql.append(" and Convert(varchar(10),a.handle_date,101) <= ? ");
+			dataType[index] = DataType.DATE;
+			try{
+				java.sql.Date tdate = StringUtil.stringToSqlDate(queryVo.getEndCompleteDate()+" 00:00:00","MM/dd/yyyy HH:mm:ss");
+			     parameters[index] = tdate;
+			}catch(Exception e){}
+			index++;				
+		} 
+		if (!StringUtil.isEmptyString(queryVo.getEndCompleteDate()) || !StringUtil.isEmptyString(queryVo.getBeginCompleteDate())){
+			sql.append(" and a.status = '04' ");	//initial 00 submitted 01 Approved    02 Rejected 03 completed   04
+			// sql.append(" and ptrace.handle_type = '05' ");	//Initial 00  Submit 01  WithDraw 02   Approve  03   Reject  04   Completed 05Invite Expert 06Expert advise 07
+		}
+		
+		if (queryVo.getPreviousProcessor() != null && !"".equals(queryVo.getPreviousProcessor())) {
+            sql.append(" and a.previous_processor = ? ");
+            dataType[index] = DataType.VARCHAR;
+            parameters[index] = queryVo.getPreviousProcessor();
+            index++;
+        }
+		
+		if (queryVo.getNodeType() != null && !"".equals(queryVo.getNodeType())) {
+            sql.append(" and e.node_type = ? ");
+            dataType[index] = DataType.VARCHAR;
+            parameters[index] = queryVo.getNodeType();
+            index++;
+        }
+		
+		//System.out.println(sql.toString());
+		map.put("conditionSQL",sql);
+		map.put("parameters",parameters);
+		map.put("dataType",dataType);
+		return map;
+	}
+	
+	public Collection queryForms(WorkFlowProcessVO queryVo) throws DAOException {
+        String SQL = "select a.*, b.form_system_id from teflow_wkf_process a, teflow_wkf_define b "
+                + "where (a.flow_id = b.flow_id) and (a.request_no like ?) order by a.submission_date desc";
+
+        Connection conn = dbManager.getJDBCConnection();
+        PreparedStatement stm = null;
+
+        try {
+            stm = conn.prepareStatement(SQL);
+            int i = 1;
+            if ("Yes".equalsIgnoreCase(ParamConfigHelper.getInstance().getParamValue(
+                    CommonName.PARAM_REF_FORM_SELECT_LIKE))) {
+                stm.setString(i++, "%" + queryVo.getRequestNo() + "%");
+            } else {
+                stm.setString(i++, queryVo.getRequestNo());
+            }
+            ResultSet rs = stm.executeQuery();
+            Collection forms = new Vector();
+            while (rs.next()) {
+                WorkFlowProcessVO vo = new WorkFlowProcessVO();
+                vo.setRequestNo(rs.getString("request_no"));
+                vo.setFormSystemId(rs.getInt("form_system_id"));
+                forms.add(vo);
+            }
+            return forms;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new DAOException(ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+	
+}

@@ -1,0 +1,215 @@
+<%@ page contentType="text/html; charset=gb2312"%>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page import="java.util.*,com.aiait.eflow.wkf.vo.WorkFlowItemVO,com.aiait.eflow.report.vo.PersonalHandleSummaryVO,com.aiait.eflow.formmanage.vo.FormManageVO,com.aiait.eflow.common.CommonName,com.aiait.eflow.common.helper.StaffTeamHelper" %>
+<html>
+<head>
+<title>Personal Summary Report</title>
+<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+<i18n:jsmessage jsRelativePath="js" prefixName="message"/>
+<script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+<script language="javascript">
+  var xmlhttp = createXMLHttpRequest();
+  var type;
+  var bFlag = true;
+  
+  function getOptionList(typeValue,paramTwo){
+
+    type = typeValue;
+    var url = "";
+    if(typeValue=="formList"){
+      url = "<%=request.getContextPath()%>/reportAction.it?method=getFormList&formType="+paramTwo;
+    }else if(typeValue=="nodeList"){
+      url = "<%=request.getContextPath()%>/reportAction.it?method=getNodeList&formSystemId="+paramTwo;
+      if(paramTwo==""){
+        clearSelect(document.getElementById("nodeId"));
+        return;
+      }
+    }
+    xmlhttp.open("GET", url, true);
+    xmlhttp.onreadystatechange=handleStateChange;
+    xmlhttp.setRequestHeader("If-Modified-Since","0");
+    xmlhttp.send(null);	
+  }
+  
+  function handleStateChange(){
+     if(xmlhttp.readyState == 4) {
+        if(xmlhttp.status == 200) {
+          updateList();
+        }
+     }
+  }
+  function updateList(){
+    var select;
+    if(type=="formList"){
+      select = document.getElementById("formSystemId");
+    }else{
+       select = document.getElementById("nodeId");
+    }
+    //first,remove all old options
+    clearSelect(select);
+    var options = xmlhttp.responseXML.getElementsByTagName("option");
+    for (var i = 0, n = options.length; i < n; i++) {
+        select.appendChild(createElementWithValue(options[i]));
+    }
+    if(type=="formList"){
+      getOptionList("nodeList",document.all.formSystemId.value)
+      bFlag = false;
+    }
+  }
+  function createElementWithValue(text) {
+      var element = document.createElement("option");
+      element.setAttribute("value", text.getAttribute("id"));
+      var text = document.createTextNode(text.firstChild.nodeValue);
+      element.appendChild(text);
+      return element;
+  }
+  
+  function clearSelect(obj){
+    var count = obj.options.length;
+    for(var i=0;i<count;i++){
+      obj.options.remove(0);
+    }
+  }
+  
+  function submitForm(){
+      if(document.all.formSystemId.value==""){
+        alert("Please select the Form");
+        return;
+     }
+     if(document.all.nodeId.value==""){
+        alert("Please select the Handle Node");
+        return;
+     }
+     document.forms[0].submit();
+  }
+</script>
+<body>
+<%
+  String formType = (String)request.getParameter("formType");
+  String formSystemId = (String)request.getParameter("formSystemId");
+  String nodeId = (String)request.getParameter("nodeId");
+  Collection formList = (ArrayList)request.getAttribute("formList");
+  Collection resultList = (ArrayList)request.getAttribute("resultList");
+  Collection nodeList = (ArrayList)request.getAttribute("nodeList");
+%>
+<FORM nane=myForm method="post" action="<%=request.getContextPath()%>/reportAction.it?method=summaryPersonalHandle"> 
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+ <tr>
+ 	<td height="10"></td>
+ </tr>
+ <!--<tr>
+ 	<td>
+ 	  <strong><font color='#5980BB' family='Times New Roman'><i18n:message key="report_personalsumreport.location"/></font></strong>
+ 	 </td>
+ </tr>
+--></table>
+<TABLE WIDTH=100% bordercolor="#6595D6" style="border-collapse:collapse;"  BORDER=1 CELLPADDING=3 CELLSPACING=0 class="tr0" >
+   <TR align="center" >
+      <TD height="25" colspan="4" class="tr1"><i18n:message key="report_personalsumreport.title"/></TD>
+   </TR>
+   <TR > 
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="report_personalsumreport.formtype"/></span></div></TD>
+      <TD width=35% height="20" > 
+      <font size="2"> 
+        <select name="formType" onchange="getOptionList('formList',this.value)">
+          <option value=""></option>
+          <option value="01" <%=(formType!=null && CommonName.FORM_TYPE_TS.equals(formType))?"selected" : ""%>>TS Form</option>
+          <option value="02" <%=(formType!=null && CommonName.FORM_TYPE_ADMIN.equals(formType))?"selected" : ""%>>Admin Form</option>
+          <option value="03" <%=(formType!=null && CommonName.FORM_TYPE_ACCOUNT.equals(formType))?"selected" : ""%>>Account Form</option>
+          <option value="04" <%=(formType!=null && CommonName.FORM_TYPE_HR.equals(formType))?"selected" : ""%>>HR Form</option>
+        </select>
+      </font>
+      </TD>
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="report_personalsumreport.form"/></span></div></TD>
+      <TD width=30% height="20" ><font size="2"> 
+       <select name="formSystemId" onchange="getOptionList('nodeList',this.value)">
+        <% 
+           if(formList!=null && formList.size()>0){
+        	   Iterator formIt = formList.iterator();
+        	   while(formIt.hasNext()){
+        		   FormManageVO form = (FormManageVO)formIt.next();
+        		   out.print("<option value='" + form.getFormSystemId()+"'");
+        		   if(formSystemId!=null && !"".equals(formSystemId) && formSystemId.equals(""+form.getFormSystemId())){
+        			   out.print(" selected ");
+        		   }
+        		   out.print(">"+form.getFormName()+"("+form.getFormId()+")</option>");
+               }
+         }%>
+       </select>
+      </TD>
+    </TR>
+   <TR> 
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="report_personalsumreport.processednode"/></span></div></TD>
+      <TD width=35% height="20" colspan='3'> 
+      <font size="2"> 
+        <select name="nodeId">
+ 
+         <% 
+           if(nodeList!=null && nodeList.size()>0){
+        	   Iterator nodeIt = nodeList.iterator();
+        	   while(nodeIt.hasNext()){
+        		   WorkFlowItemVO node = (WorkFlowItemVO)nodeIt.next();
+        		   out.print("<option value='" + node.getItemId() + "'");
+        		   if(nodeId!=null && !"".equals(nodeId) && nodeId.equals(""+node.getItemId())){
+        			   out.print(" selected ");
+        		   }
+        		   out.print(">"+node.getName()+"</option>");
+               }
+         }%>
+        </select>
+      </font>
+      </TD>
+    </TR>
+    <TR> 
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="report_personalsumreport.processedfrom"/></span></div></TD>
+      <TD width=35% height="20" > 
+        <input type="text" readonly name="beginDateStr" onclick='setday(this)' value="<%=((String)request.getParameter("beginDateStr")==null || "".equals((String)request.getParameter("beginDateStr"))?"":(String)request.getParameter("beginDateStr"))%>">(MM/DD/YYYY)
+      </font>
+      </TD>
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="report_personalsumreport.processedto"/></span></div></TD>
+      <TD width=30% height="20" >
+        <input type="text" readonly name="endDateStr" onclick='setday(this)' value="<%=((String)request.getParameter("endDateStr")==null || "".equals((String)request.getParameter("endDateStr"))?"":(String)request.getParameter("endDateStr"))%>">(MM/DD/YYYY)
+      </TD>
+    </TR>
+    <tr>
+      <td colspan='4' align='center'>
+         <input type="button" name="searchBtn" value='<i18n:message key="button.search"/>' onclick="submitForm()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+         <input type="Reset" name="resetBtn" value='<i18n:message key="button.reset"/>' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+      </td>
+    </tr>
+ </TABLE>
+</FORM>
+<table width="100%"  border="0" cellpadding="0" cellspacing="1" class=sortable id=mytable style="border:1px #8899cc solid;">
+          <tr class="liebiao_tou">
+            <td align='center'><i18n:message key="report_personalsumreport.staffname"/></td>
+            <td align='center'><i18n:message key="report_personalsumreport.processedform"/></td>
+          </tr>
+          <%
+            if(resultList!=null){
+            	int i = 1;
+            	Iterator resultIt = resultList.iterator();
+            while(resultIt.hasNext()){
+            	PersonalHandleSummaryVO vo = (PersonalHandleSummaryVO)resultIt.next();
+          %>
+            <tr class="<%=(i%2==0?"liebiao_nr3":"liebiao_nr2")%>">
+              
+              <td><%=StaffTeamHelper.getInstance().getStaffNameByCode(vo.getHandleStaffCode())%>&nbsp;&nbsp;</td>
+              <td><%=vo.getHandleCount()%>&nbsp;&nbsp;</td>
+            
+            </tr>
+          <%
+            i++;}
+          }else{
+          %>
+            <tr class="liebiao_nr2">
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+            </tr>
+          <%}%>
+        </table>
+</body>
+</html>

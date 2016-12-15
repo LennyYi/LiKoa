@@ -1,0 +1,18 @@
+spnego-client_sun {
+	com.sun.security.auth.module.Krb5LoginModule required;
+};
+
+spnego-server_sun {
+	com.sun.security.auth.module.Krb5LoginModule required
+	storeKey=true
+	isInitiator=false;
+};
+
+spnego-client_ibm {
+	com.ibm.security.auth.module.Krb5LoginModule required;
+};
+
+spnego-server_ibm {
+	com.ibm.security.auth.module.Krb5LoginModule required
+	credsType="acceptor";
+};

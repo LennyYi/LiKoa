@@ -1,0 +1,357 @@
+<%@ include file="/common/head.jsp" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@ page contentType="text/html;charset=GBK" pageEncoding="GBK"%>
+<%@page import="java.util.*,com.aiait.eflow.wkf.vo.*,com.aiait.eflow.formmanage.vo.*,com.aiait.eflow.housekeeping.vo.*,com.aiait.eflow.util.StringUtil"%>
+<%
+  FormManageVO form = (FormManageVO)request.getAttribute("form");
+  Collection conditionList = (ArrayList)request.getAttribute("conditionList");
+  //System.out.println("-------------conditionList.size="+conditionList.size());
+  
+  String beginNodeName = (String)request.getAttribute("beginNodeName");
+  String endNodeName = (String)request.getAttribute("endNodeName");
+
+  String flowId = (String)request.getParameter("flowId");
+  String formSystemId = (String)request.getParameter("formSystemId");
+  String beginNodeId = (String)request.getParameter("beginNodeId");
+  String endNodeId = (String)request.getParameter("endNodeId");
+%>
+<HTML>
+  <HEAD>
+		<title>Node Condition Setting</title>
+  </HEAD>
+  <META HTTP-EQUIV="pragma" CONTENT="no-cache">
+  <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate">
+  <META HTTP-EQUIV="expires" CONTENT="Wed, 26 Feb 1997 08:21:57 GMT">
+  <link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+  <i18n:jsmessage jsRelativePath="js" prefixName="message"/>
+  <script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+  <script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+  <script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+  <script language="javascript">
+    var xmlhttp = createXMLHttpRequest();
+    function submitForm(){
+       if(confirm(flow_condition_save_con)==false){
+         return;
+       }
+       document.all['subBtn'].disabled = 'true';
+       var url = "<%=request.getContextPath()%>/wkfDesignAction.it?method=saveNodeCondition&saveType="+document.all['saveType'].value
+                 +"&flowId=<%=flowId%>&beginNodeId=<%=beginNodeId%>&endNodeId=<%=endNodeId%>";
+       document.forms[0].action = url;
+       document.forms[0].submit();
+    }
+    
+    function delRow1(tableId,checkBoxId) //删除指定行   
+  {   
+      var alltbDetailUsed = document.all(tableId).rows; 
+      
+      if(checkSelect(checkBoxId)<=0){
+        alert(flow_condition_seltodel);
+        return;
+      }  
+      if(confirm(flow_condition_delsel)==false)   
+        return false;   
+      for(var i=0;i<alltbDetailUsed.length;i++)   
+      {   
+         if(alltbDetailUsed[i].all(checkBoxId)!=null && alltbDetailUsed[i].all(checkBoxId).checked==true)   
+         {   
+           document.all(tableId).deleteRow(i);   
+           i=i-1;   
+         }   
+      }   
+  } 
+    
+    function addRow(){
+      var insertValueStr = "";  //用来记录需要传入到server端的信息
+      var fieldId = document.all['fieldId'].value;
+      var fieldLabel = document.all['fieldId'].options[document.all['fieldId'].selectedIndex].text;
+      if(fieldLabel.Trim()==""){
+        alert(flow_condition_selfiel);
+        document.all['fieldId'].focus();
+        return;
+      }
+      if(document.all['valueTypeHidden'].value==""){
+         alert(flow_condition_selvaltype);
+         return;
+      };
+      
+      insertValueStr = insertValueStr + fieldId + "||";
+      
+      var compareTypeId = document.all['compareType'].value;
+      var compareTypeLabel = document.all['compareType'].options[document.all['compareType'].selectedIndex].text;
+      insertValueStr = insertValueStr + compareTypeId + "||";
+      
+      var type = document.all['valueTypeHidden'].value;
+
+      if(type=="1"){
+         var valueType = document.getElementById('fieldsValue').tagName;
+         valueType = valueType.toUpperCase();
+
+         var valueId =  "";
+         if(valueType=="SELECT"){
+            valueId = document.all['fieldsValue'].options[document.all['fieldsValue'].selectedIndex].text;
+         }else{
+            valueId = document.all['fieldsValue'].value;
+         }
+         if(valueId.Trim()==""){
+           alert(flow_condition_fillvalue);
+           document.all['fieldsValue'].focus();
+           return;
+         }
+         insertValueStr = insertValueStr + document.all['fieldsValue'].value + "||";
+      }else if(type=="3"){
+    	valueId = document.all['fieldsOnRight'].options[document.all['fieldsOnRight'].selectedIndex].text
+		insertValueStr = insertValueStr + document.all['fieldsOnRight'].value+ "||";
+      }else{
+        valueId = document.all['functionName'].options[document.all['functionName'].selectedIndex].text;
+        insertValueStr = insertValueStr + document.all['functionName'].value + "||";
+      }
+      
+      
+      var logicValue = document.all['logicFlag'].value;
+      //alert(logicValue)
+      var logicLabel = document.all['logicFlag'].options[document.all['logicFlag'].selectedIndex].text;
+      insertValueStr = insertValueStr + logicValue + "||";
+    
+      insertValueStr = insertValueStr + fieldLabel + "||" + valueId + "||"+type;
+ 
+      var objTable = document.getElementById('conditionTable');
+      var oTR = objTable.insertRow(objTable.rows.length);
+       var oTD0 = oTR.insertCell();
+       insertValueStr = formatStringAllChar(insertValueStr);
+       insertValueStr = insertValueStr.replace(/\'/g,"&#39;");
+       oTD0.innerHTML = "<input type='checkbox' name='conditionId'>"+"<input type='hidden' name='conditionStr' value='"+insertValueStr+"'>";
+       
+       var oTD1 = oTR.insertCell();
+       oTD1.innerHTML = fieldLabel;
+       var oTD2 = oTR.insertCell();
+       oTD2.innerHTML = compareTypeLabel;
+       var oTD3 = oTR.insertCell();
+       oTD3.innerHTML = valueId;
+       var oTD4 = oTR.insertCell();
+       oTD4.innerHTML = logicLabel;
+    }
+    
+   function getFieldValueList(fieldId){
+      
+      var url = "<%=request.getContextPath()%>/formManageAction.it?method=getFormFieldValue&formSystemId="+document.all['formSystemId'].value
+                +"&fieldId="+fieldId;
+      xmlhttp.open("GET", url, true);
+      xmlhttp.onreadystatechange=handleFieldChange;
+      xmlhttp.setRequestHeader("If-Modified-Since","0");
+      xmlhttp.send(null);	    
+   }
+   
+   function handleFieldChange(){
+      if(xmlhttp.readyState == 4) {
+        if(xmlhttp.status == 200) {
+          var select;
+          select = document.getElementById("fieldValueDisplay");
+          select.innerHTML = xmlhttp.responseText;
+        }
+     }
+  }
+  
+  function changeValueType(obj){
+    if(obj.value=="1"){
+      document.all['fieldsValue'].disabled = "";
+      document.all['fieldsOnRight'].disabled = "true";
+      document.all['functionName'].disabled = "true";
+    }else if(obj.value=="3"){
+      document.all['fieldsValue'].disabled = "true";
+      document.all['fieldsOnRight'].disabled = "";
+      document.all['functionName'].disabled = "true";
+    }else{
+	  document.all['fieldsValue'].disabled = "true";
+	  document.all['fieldsOnRight'].disabled = "true";
+	  document.all['functionName'].disabled = "";
+    }
+    document.all['valueTypeHidden'].value = obj.value;
+  }
+  
+  </script>
+  <body>
+  <base target='_self'/>
+   <form id="Form1" method="post">
+     <input type="hidden" name="formSystemId" value="<%=formSystemId%>">
+     <input type="hidden" name="saveType" value="<%=(conditionList==null?"add":"edit")%>">
+     <table width="100%"  border="1" cellpadding="3" cellspacing="0" bordercolor="#6595D6" style="border-collapse:collapse;" >
+        <tr>
+          <td style="WIDTH:30%" align='right' class='tr3'>
+             <i18n:message key="flow_condition.beginnode"/> :
+          </td>
+          <td style="WIDTH:70%">   
+             <input type="text" name="bNode" disabled value="<%=beginNodeName%>">
+              <input type="hidden" name="beginNodeId" value="<%=beginNodeId%>">
+          </td>
+        </tr>
+        <tr>
+          <td style="WIDTH:30%" align='right' class='tr3'>
+            <i18n:message key="flow_condition.endnode"/> :
+          </td>
+          <td style="WIDTH:70%">  
+            <input type="text" name="eNode" disabled value="<%=endNodeName%>">
+            <input type="hidden" name="endNodeId" value="<%=endNodeId%>">
+          </td>
+        </tr>
+        <tr>
+          <td style="WIDTH:30%" align='right' class='tr3'>
+            <i18n:message key="flow_condition.frmname"/> :
+          </td>
+          <td style="WIDTH:70%">  
+            <input type="text" name="formName" disabled value="<%=form.getFormName()%>" size="50">
+          </td>
+        </tr>
+       </table>
+       <table width="100%"  border="1" cellpadding="3" cellspacing="0" bordercolor="#6595D6" style="border-collapse:collapse;" >
+        <tr class='tr3'>
+          <td align='right' style="WIDTH:10%"><i18n:message key="flow_condition.field"/> :</td>
+          <td style="WIDTH:30%" align='left'>
+           <select id="fieldId" onchange="getFieldValueList(this.value)">
+            <option value=""></option>
+                               <%
+                                Collection sectionList = form.getSectionList();
+                                Iterator sectionIt = sectionList.iterator();
+                                 while(sectionIt.hasNext()){
+                                	FormSectionVO section = (FormSectionVO)sectionIt.next();
+                                	if("00".equals(section.getSectionType())){ //attachment is not to display
+                                		continue;
+                                	}
+                                	Collection fieldList = section.getFieldList();
+                                	Iterator fieldIt = fieldList.iterator();
+                                	while(fieldIt.hasNext()){
+                                	  FormSectionFieldVO field = (FormSectionFieldVO)fieldIt.next();
+                               %>
+                                 <option value="<%=field.getSectionId()%>||<%=field.getFieldId()%>"><%=section.getSectionRemark()%>.<%=field.getFieldLabel()%></option>
+                               <%
+                                	}
+                                }
+                               %>
+                              </select>
+          </td>
+          <td align='right' style="WIDTH:10%"><i18n:message key="flow_condition.comptype"/> :</td>
+          <td style="WIDTH:10%" align='left'>
+          <select name="compareType">
+			<option value="like">like</option>
+			<option value="not like">not like</option>
+			<option value="=" selected>=</option>
+			<option value=">">></option>
+			<option value=">=">>=</option>
+			<option value="<"><</option>
+			<option value="<="><=</option>
+			<option value="<>"><></option>
+		   </select>
+          </td>
+          <td align='right' style="WIDTH:10%"><i18n:message key="flow_condition.value"/> :</td>
+          <td style="WIDTH:30%" align='left'>
+            <input type="hidden" name="valueTypeHidden">
+            <input type="radio" name="valueType" value="1" onclick="changeValueType(this)">
+            <div id="fieldValueDisplay">
+		    <input type="text" name="fieldsValue" size='20'>
+		    </div><br>
+            <input type="radio" name="valueType" value="3" onclick="changeValueType(this)">
+            <div id="fieldDisplay">
+		    <select id="fieldsOnRight">
+            <option value=""></option>
+	                            <%
+	                            sectionIt = null;
+	                            sectionIt = sectionList.iterator();
+	                             while(sectionIt.hasNext()){
+	                             	FormSectionVO section = (FormSectionVO)sectionIt.next();
+	                             	if("00".equals(section.getSectionType())||"01".equals(section.getSectionType())){ //omit attachment and table-type
+	                             		continue;
+	                             	}
+	                             	Collection fieldList = section.getFieldList();
+	                             	Iterator fieldIt = fieldList.iterator();
+	                             	while(fieldIt.hasNext()){
+	                             	  FormSectionFieldVO field = (FormSectionFieldVO)fieldIt.next();
+	                            %>
+	                              <option value="<%="teflow_"+field.getFormSystemId()+"_"+field.getSectionId()+"."+field.getFieldId()%>"><%=section.getSectionRemark()%>.<%=field.getFieldLabel()%></option>
+	                            <%
+	                             	}
+	                             }
+	                            %>
+            </select>
+		    </div><br>
+		    <input type="radio" name="valueType" value="2" onclick="changeValueType(this)"><select name="functionName">
+		      <option value="01">GetAmountByTitle()</option>
+		    </select>
+          </td>
+          <td align='right' style="WIDTH:10%"><i18n:message key="flow_condition.logic"/> :</td>
+          <TD width=10%>
+		    <select name="logicFlag">
+		      <option value="01">And</option>
+		      <option value="02">Or</option>
+		    </select>
+		  </TD>
+        </tr>
+        <tr>
+          <td style="WIDTH:20%" align='center' colspan='8'>
+            <input type="button" value='<i18n:message key="flow_condition.addcon"/>' name="addBtn" onclick="addRow()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+            <input type="button" value='<i18n:message key="flow_condition.remcon"/>' name="delBtn" onclick="delRow1('conditionTable','conditionId')" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+          </td>
+        </tr>
+       </table>
+       <table width="100%" id="conditionTable"  border="1" cellpadding="3" cellspacing="0" bordercolor="#6595D6" style="border-collapse:collapse;" >
+        <tr>
+          <td colspan='5' class='tr3' align='center'><i18n:message key="flow_condition.nodeconlist"/></td>
+        </tr>
+        <tr class='tr3'>
+          <td align="center" style="WIDTH:4%"><input type="checkbox" name="allBtn" onclick="selectAll(this,'conditionId')"></td>
+          <td align="center" style="WIDTH:40%"><b><i18n:message key="flow_condition.field"/></b></td>
+          <td align="center" style="WIDTH:9%"><b><i18n:message key="flow_condition.comptype"/></b></td>
+          <td align="center" style="WIDTH:40%"><b><i18n:message key="flow_condition.value"/></b></td>
+          <td align="center" style="WIDTH:7%"><b><i18n:message key="flow_condition.logic"/></b></td>
+        </tr>
+        <!-- 
+        <tr>
+          <td align="center">&nbsp;&nbsp;</td>
+          <td align="center">&nbsp;&nbsp;</td>
+          <td align="center">&nbsp;&nbsp;</td>
+          <td align="center">&nbsp;&nbsp;</td>
+        </tr>
+         -->
+         <%
+           if(conditionList!=null && conditionList.size()>0){
+        	   Iterator conditionIt = conditionList.iterator();
+        	   String logicLabel = "and";
+        	   String tempStr = "";
+        	   while(conditionIt.hasNext()){
+        		   out.println("<tr>");
+        		   NodeConditionVO vo = (NodeConditionVO)conditionIt.next();
+                   if("01".equals(vo.getLogicType())){
+                	   logicLabel = "and";
+                   }else if ("02".equals(vo.getLogicType())){
+                	   logicLabel = "or";
+                   }
+        		   out.println("<td align='center'><input type='checkbox' name='conditionId'></td>");
+        		   out.println("<td align='left'>"+vo.getFieldLabel()+"</td>");
+        		   out.println("<td align='left'>"+vo.getCompareType()+"</td>");
+        		   out.println("<td align='left'>"+vo.getCompareLabel()+"</td>");
+        		   tempStr = vo.getSectionId()+"||"
+				    +vo.getFieldId()+"||"+vo.getCompareType()+"||"+vo.getCompareValue()+"||"+vo.getLogicType()
+				    +"||"+vo.getFieldLabel()+"||"+vo.getCompareLabel()+"||"+vo.getIsFunction();
+        		   tempStr = StringUtil.replaceInString(tempStr,"'","&#39;");
+        		   out.println("<td align='left'>"+logicLabel+"<input type='hidden' name='conditionStr' value='"+tempStr+"'></td>");
+        		   //System.out.println(tempStr);
+        		   tempStr = "";
+        		   out.println("</tr>");
+        	   }
+           }
+         %>
+        </table>
+        <table width="100%">
+        <tr>
+          <td align='center' colspan='2'>
+            <input type="button" value='<i18n:message key="button.submit"/>' name="subBtn" onclick="submitForm()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+            <input type="button" value='<i18n:message key="button.close"/>' name="cBtn" onclick="javascript:window.close()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+          </td>
+        </tr>
+     </table>
+   </form>   
+  </body>
+
+</html>

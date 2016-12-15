@@ -1,0 +1,28 @@
+.loading-indicator {
+    font-size: 8pt;
+    background-image: url(loading.gif);
+    background-repeat: no-repeat;
+    background-position: top left;
+    padding-left: 20px;
+    height: 18px;
+    text-align: left;
+}
+
+#loading {
+    position: absolute;
+    /*left: 45%;*/
+    left: 40%;
+    top: 40%;
+    /*border:3px solid #B2D0F7;*/
+    /*background:white url(block-bg.gif) repeat-x;*/
+    padding: 10px;
+    font: bold 14px verdana, tahoma, helvetica;
+    color: #FF0000;
+    /*width: 180px;*/
+    width: 280px;
+    text-align: center;
+    z-index:1001;
+}
+
+.mask{height:100%; width:100%; position:fixed; _position:absolute; top:0; z-index:1000; } 
+.opacity{ opacity:0.5; filter: alpha(opacity=50); background-color:#000; } 

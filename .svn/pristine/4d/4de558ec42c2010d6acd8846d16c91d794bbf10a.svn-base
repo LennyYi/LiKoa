@@ -1,0 +1,89 @@
+package com.aiait.eflow.wkf.util;
+
+import com.aiait.eflow.common.CommonName;
+
+public class DataMapUtil {
+
+    public static String covertNodeStatus(String statusId) {
+        if (CommonName.STATUS_DRAFT.equals(statusId)) {
+            return "Drafted";
+        } else if (CommonName.STATUS_SUBMITTED.equals(statusId)) {
+            return "Submitted";
+        } else if (CommonName.STATUS_INPROGRESS.equals(statusId)) {
+            return "In progress";
+        } else if (CommonName.STATUS_REJECTED.equals(statusId)) {
+            return "Rejected";
+        } else if (CommonName.STATUS_COMPLETED.equals(statusId)) {
+            return "Completed";
+        } else {
+            return "Unknown";
+        }
+    }
+
+    public static String convertHandleType(String handleTypeId) {
+        if (CommonName.HANDLE_TYPE_DRAFT.equals(handleTypeId)) {
+            return "Draft";
+        } else if (CommonName.HANDLE_TYPE_SUBMITT.equals(handleTypeId)) {
+            return "Submit";
+        } else if (CommonName.HANDLE_TYPE_WITHDRAW.equals(handleTypeId)) {
+            return "Withdraw";
+        } else if (CommonName.HANDLE_TYPE_APPROVE.equals(handleTypeId)) {
+            return "Approve";
+        } else if (CommonName.HANDLE_TYPE_REJECT.equals(handleTypeId)) {
+            return "Reject";
+        } else if (CommonName.HANDLE_TYPE_COMPLETE.equals(handleTypeId)) {
+            return "Complete";
+        } else if (CommonName.HANDLE_TYPE_INVITED_EXPERT.equals(handleTypeId)) {
+            return "Invite advisers";
+        } else if (CommonName.HANDLE_TYPE_EXPERT_ADVISE.equals(handleTypeId)) {
+            return "Advise";
+        } else if (CommonName.HANDLE_TYPE_WAITING_REJECT.equals(handleTypeId)) {
+            return "Waiting Reject";
+        } else if (CommonName.HANDLE_TYPE_WAITING_REMINDER.equals(handleTypeId)) {
+            return "Waiting Reminder";
+        } else if (CommonName.HANDLE_TYPE_DH_REJECT.equals(handleTypeId)) {
+            return "DH Reject";
+        } else if (CommonName.HANDLE_TYPE_PAYMENT.equals(handleTypeId)) {
+            return "Payment";
+        } else if (CommonName.ACTION_OVERDUE_NOTIFICATION.equals(handleTypeId)) {
+            return "Overdue Notification";
+        } else if (CommonName.HANDLE_INVOICE_REMINDER.equals(handleTypeId)) {
+            return "Invoice Reminder";
+        } else if (CommonName.HANDLE_CA_REMINDER.equals(handleTypeId)) {
+            return "CA Reminder";
+        } else if (CommonName.HANDLE_SUFFIX.equals(handleTypeId)) {
+            return "Suffix";
+        } else if (CommonName.HANDLE_TYPE_COMPLETE_CC.equals(handleTypeId)) {
+            return "Complete CC";
+        } else {
+            return "Unknown";
+        }
+    }
+
+    public static String convertApproverGroupName(String groupType) {
+        if (CommonName.COMPANY_TYPE_SUB_BRANCH.equals(groupType)) {
+            return "Sub Branch";
+        } else if (CommonName.COMPANY_TYPE_BRANCH.equals(groupType)) {
+            return "Branch";
+        } else if (CommonName.COMPANY_TYPE_GROUP.equals(groupType)) {
+            return "Head Office";
+        } else {
+            return "Unknown";
+        }
+    }
+
+    public static String covertSectionType(String typeId) {
+        if (CommonName.FORM_SECTION_TYPE_BASIC.equals(typeId)) {
+            return "Basic";
+        } else if (CommonName.FORM_SECTION_TYPE_COMMON.equals(typeId)) {
+            return "Common";
+        } else if (CommonName.FORM_SECTION_TYPE_TABLE.equals(typeId)) {
+            return "Table";
+        } else if (CommonName.FORM_SECTION_TYPE_ATTACHMENT.equals(typeId)) {
+            return "Attachment";
+        } else {
+            return "Unknown";
+        }
+    }
+
+}

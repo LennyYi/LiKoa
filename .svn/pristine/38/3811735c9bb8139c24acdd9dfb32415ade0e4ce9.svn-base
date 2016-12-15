@@ -1,0 +1,31 @@
+
+function SelTitleItem(obj){
+	jQuery(".titleitem").each(function(){
+		this.style.background="none";
+	});	
+	obj.style.background="#D31145";
+}
+
+function ShowFrame(FrameID){
+	jQuery(".SearchFrame").each(function(){
+		this.style.display="none";
+	});	
+	jQuery("#div4iframe").css("display","none");
+	if (FrameID!=""){
+		jQuery("#div4iframe").css("display","");
+		jQuery("#"+FrameID).css("display","");
+	}
+}
+
+$("#divborder").one("click", function(){
+});
+
+document.write("<div style='position:absolute;left:2px;top:2px;border:0px;z-index:200;background:rgb(118,118,118);height:43px;font-size:15px;width:100%;line-height:43px;'>");//width:1019px;
+document.write("<span class=titleitem style='text-align:center;display:inline-block;width:230px;padding-left:15px;padding-right:15px;color:white;cursor:pointer;background:#D31145;border-right:1px solid #949494;' onclick='SelTitleItem(this);ShowFrame(\"\");'>"+document.all("requestedForm").value+"</span>");
+document.write("<span class=titleitem style='text-align:center;display:inline-block;width:200px;padding-left:15px;padding-right:15px;color:white;cursor:pointer;border-right:1px solid #949494;' onclick='SelTitleItem(this);ShowFrame(\"f1\");'>"+document.all("form_inquiry").value+"</span>");
+document.write("<span class=titleitem style='text-align:center;display:inline-block;width:200px;padding-left:15px;padding-right:15px;color:white;cursor:pointer;border-right:1px solid #949494;' onclick='SelTitleItem(this);ShowFrame(\"f2\");'>"+document.all("advancy_query").value+"</span>");
+document.write("</div>");
+document.write("<div ID=div4iframe style='display:none;position:absolute;left:2px;top:2px;border:1px solid #CCCCCC;z-index:101;width:1036px;height:714px;padding:0px;margin:0px;'>");//</div>");
+document.write("<iframe class=SearchFrame frameborder='no' id=f1 style='display:none;position:absolute;left:0px;top:0px;z-index:100;width:1036px;height:714px;' src='"+document.all("requestUrl").value+"/wkfProcessAction.it?method=listInquiryForm&needquery=false'></iframe>");
+document.write("<iframe class=SearchFrame frameborder='no' id=f2 style='display:none;position:absolute;left:0px;top:0px;z-index:100;width:1036px;height:714px;' src='"+document.all("requestUrl").value+"/workflow/commonQueryForm.jsp'></iframe>");
+document.write("</div>");

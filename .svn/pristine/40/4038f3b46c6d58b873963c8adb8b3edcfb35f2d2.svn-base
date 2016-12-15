@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">
+
+<%@ include file="/common/head.jsp"%>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n"%>
+<%@page
+	import="java.util.*,java.text.SimpleDateFormat,com.aiait.eflow.util.StringUtil,com.aiait.eflow.wkf.vo.*,com.aiait.eflow.wkf.util.DataMapUtil,com.aiait.eflow.common.helper.*"%>
+<%@page
+	import="com.aiait.eflow.housekeeping.vo.FormTypeVO,com.aiait.eflow.common.CommonName,com.aiait.eflow.common.helper.FormTypeHelper,com.aiait.eflow.formmanage.vo.FormManageVO,com.aiait.eflow.housekeeping.vo.StaffVO"%>
+<%@page import="com.aiait.framework.i18n.*,com.aiait.eflow.common.*"%>
+<%@ include file="/common/loading.jsp"%>
+
+<html>
+<i18n:jsmessage jsRelativePath="js" prefixName="message" />
+<head>
+<title>Insert title here</title>
+
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/js/NovaJS/jqGrid/CSS/jquery-ui-custom.css" media="screen">
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/js/NovaJS/jqGrid/CSS/ui.jqgrid.css" media="screen">
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/js/NovaJS/jqGrid/CSS/ui.multiselect.css" media="screen">
+
+<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+
+<script type=text/javascript src="<%=request.getContextPath()%>/js/jquery.min.js"></script>
+
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/jquery-ui-custom.min.js"></script>
+
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/jquery.layout.js"></script>
+
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/grid.locale-cn.js"></script>
+
+
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/ui.multiselect.js"></script>
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/jquery.jqGrid.js"></script>
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/jquery.tablednd.js"></script>
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/jquery.contextmenu.js"></script>
+
+<script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/sorttable.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/resizeCol.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/BubbleTooltips.js"></script>
+</head>
+<body class="noimage" scroll="no" style="overflow:hidden;">
+	<div>
+		<input type='hidden' name='requestUrl' id='requestUrl' value='<%=request.getContextPath()%>'>
+		<%StaffVO currentStaff = (StaffVO)request.getSession().getAttribute(CommonName.CURRENT_STAFF_INFOR);%>
+		<input type='hidden' name='currentStaffCode' value='<%=currentStaff.getStaffCode()%>'>
+		
+		<span id="CompanyID"></span>
+<!--		<table width="100%"  border="0" cellpadding="0" cellspacing="1"  style="border:1px #505050 solid;height:50px;background-color:#505050">-->
+<!--		    <tr>-->
+<!--		      <td class="liebiao_nr2" width="5%" align='center'><image src='<%=request.getContextPath()%>/images/new1.gif' alt="New"></td>-->
+<!--		      <td class="liebiao_nr5" width="8%"><i18n:message key="form.status_new"/></td>-->
+<!--		      <td class="liebiao_nr2" width="5%" align='center'><image src='<%=request.getContextPath()%>/images/lock.gif' alt="Locked"></td>-->
+<!--		      <td class="liebiao_nr5" width="8%"><i18n:message key="form.status_locked"/></td>   -->
+<!--		      <td class="liebiao_nr2" width="5%" align='center'><image src='<%=request.getContextPath()%>/images/urgent.gif' alt="Urgent"></td>-->
+<!--		      <td class="liebiao_nr5" width="8%"><i18n:message key="form.status_urgent"/></td>-->
+<!--		      <td class="liebiao_nr2" width="5%" align='center'><image src='<%=request.getContextPath()%>/images/deputy.gif' alt="Deputy"></td>-->
+<!--		      <td class="liebiao_nr5" width="8%"><i18n:message key="form.status_deputy"/></td>    -->
+<!--		      <td class="liebiao_nr2" width="5%" align='center'><image src='<%=request.getContextPath()%>/images/expert_advise.gif' alt="Advise"></td>-->
+<!--		      <td class="liebiao_nr5" width="8%"><i18n:message key="form.status_for_advice"/></td>-->
+<!--		      <td class="liebiao_nr2" width="5%" align='center'><image src='<%=request.getContextPath()%>/images/invite_expert.gif' alt="Invited"></td>-->
+<!--		      <td class="liebiao_nr5" width="8%"><i18n:message key="form.status_invited_adviser"/></td>-->
+<!--			  <td class="liebiao_nr2" width="5%" align='center'><image src='<%=request.getContextPath()%>/images/expert_replied.gif' alt="Advised"></td>-->
+<!--		      <td class="liebiao_nr5" width="8%"><i18n:message key="form.status_expert_replied"/></td>        -->
+<!--		    </tr>-->
+<!--		    <tr>-->
+<!--		    </tr>-->
+<!--		 </table>-->
+		<table id="list451" ></table>
+		<div id="pager451"></div>
+	</div>
+	<input type=hidden id=requestedForm value="<i18n:message key='menu.workspace.requested_form'/>">
+	<input type=hidden id=form_inquiry value="<i18n:message key='menu.monitor.form_inquiry'/>">
+	<input type=hidden id=advancy_query value="<i18n:message key='menu.monitor.advancy_query'/>">
+</body>
+<script type="text/javascript" language="javascript" src="<%=request.getContextPath()%>/js/NovaJS/loadingList.js"></script>
+
+<%
+if (request.getParameter("combin")!=null) { 
+	if (request.getParameter("combin").equals("true")) {
+	out.print("<script type='text/javascript' language='javascript' src='"+request.getContextPath() + "/js/NovaJS/SearchMerge.js'></script>");
+	}
+}
+%>
+
+</html>

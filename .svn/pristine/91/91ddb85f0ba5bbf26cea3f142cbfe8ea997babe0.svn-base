@@ -1,0 +1,979 @@
+//编码参数值
+function encodeString(paramValue){
+  if(paramValue=="") return paramValue;
+  return encodeURI(encodeURI(encodeURIComponent(paramValue)));
+}
+
+
+//计算字符串长度,除了ASCII代码其他算两次的,（一个双字节字符长度计2，ASCII字符计1）
+String.prototype.len= function()
+{
+   return this.replace(/[^\x00-\xff]/g,"aa").length;
+}
+
+//去掉字符串左右空格
+//Trim() , Ltrim() , RTrim()
+String.prototype.Trim = function() 
+{ 
+   return this.replace(/(^\s*)|(\s*$)/g, ""); 
+} 
+
+String.prototype.LTrim = function() 
+{ 
+   return this.replace(/(^\s*)/g, ""); 
+} 
+
+String.prototype.RTrim = function() 
+{ 
+  return this.replace(/(\s*$)/g, ""); 
+} 
+
+Date.prototype.Format = function(fmt) 
+{
+	//author: meizz 
+	var o =
+	{ 
+	"M+" : this.getMonth() + 1, //月份 
+	"d+" : this.getDate(), //日 
+	"h+" : this.getHours(), //小时 
+	"m+" : this.getMinutes(), //分 
+	"s+" : this.getSeconds(), //秒 
+	"q+" : Math.floor((this.getMonth() + 3) / 3), //季度 
+	"S" : this.getMilliseconds() //毫秒 
+	}; 
+	if (/(y+)/.test(fmt)) 
+		fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+	for (var k in o) 
+	{
+		if (new RegExp("(" + k + ")").test(fmt)) 
+			fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+	}
+	return fmt; 
+}
+
+
+function getStrLength(obj){
+  return obj.replace(/[^\x00-\xff]/g,"aa").length;
+}
+
+//alert(navigator.browserLanguage)
+//navigator.userLanguage = "en";
+//alert(navigator.userLanguage)
+
+/**
+* 该函数一般提供给控件textear(该控件用来模拟text控件)的onkeydown事件调用
+* 计算指定域的输入不能超过指定的长度，当超过时自动截掉
+* 当按下回车键时，不换行
+* field:输入的控件
+* maxlimit:最大的长度
+* e:event
+**/
+function textCounterForInput(field, maxlimit, e) {
+    /*var kc = window.event ? event.keyCode : e.which;
+    if (kc == 13) {
+        // 如果是回车键，则不理会按键
+        e.returnValue = false;
+    }
+    var count = 0;
+    for (var i = 0; i < field.value.length; i++) {
+        if (field.value.charCodeAt(i) < 256) {
+            count++;
+        } else {
+            count += 2;
+        }
+        if (count > maxlimit) {
+            field.value = field.value.substring(0, i);
+            return;
+        }
+    }*/
+}
+
+function textCheckOnLostFocus(field, maxlimit) {
+    var count = 0;
+    for (var i = 0; i < field.value.length; i++) {
+        if (field.value.charCodeAt(i) < 256) {
+            count++;
+        } else {
+            count += 2;
+        }
+        if (count > maxlimit) {
+            field.value = field.value.substring(0, i);
+            return;
+        }
+    }
+}
+
+/**
+重新调整窗口大小。
+w---窗口的宽度
+**/
+function resize(w){
+	  var h = document.body.scrollHeight + 45; //弹窗高度将根据页面内容高度自动调整
+	  window.resizeTo(w, h);
+}
+
+function formatString(str){
+  str = str.replace(/\%/g,"%25");
+  return str;
+}
+
+function formatStringAllChar(str){
+  str = str.replace(/\%/g,"%25");
+  str = str.replace(/\&/g,"%26");
+  str = str.replace(/\?/g,"%3F");
+  str = str.replace(/\#/g,"%23");
+ // str = str.replace(/\'/g,"&#39;");
+  return str;
+}
+
+function formatXML(str) {
+    str = str.replace(/&/g, "&amp;");
+    str = str.replace(/</g, "&lt;");
+    str = str.replace(/>/g, "&gt;");
+    str = str.replace(/'/g, "&apos;");
+    str = str.replace(/"/g, "&quot;");
+    return str;
+}
+
+function formatXML2(str) {
+    str = str.replace(/&/g, "");
+    str = str.replace(/</g, "");
+    str = str.replace(/>/g, "");
+    str = str.replace(/'/g, "");
+    str = str.replace(/"/g, "");
+    return str;
+}
+
+function compareDate(beginDate,endDate){
+   if(new Date(beginDate)>new Date(endDate)){
+     return false;
+   }
+   return true;
+}
+
+function formValidate(objForm){
+    var frm = objForm;
+    for (i=0; i<frm.length; i++) {
+       //checkbox
+      if (frm[i].type.toUpperCase()=="CHECKBOX" && frm[i].required=="true") {
+          if (GetValueChoose(frm[i])=="") {
+            alert(frm[i].title+must_select);
+            return false;
+          }
+          continue;
+      }
+      if (frm[i].tagName.toUpperCase()=="INPUT" &&frm[i].type.toUpperCase()=="TEXT") {
+         if ((frm[i].required=="true") && frm[i].value.Trim()=="") {
+           str_warn1 = please_input + frm[i].title;
+           alert(str_warn1);
+           frm[i].focus();
+           return false;    
+         }
+         if (frm[i].isNumber=='true') {
+            if (isNaN(frm[i].value)) {
+                str_warn1=frm[i].title+be_number;
+                alert(str_warn1);
+                frm[i].focus();
+                return false;
+            }
+         }
+         if (frm[i].isDate=='true' && frm[i].value!="") {
+            if (isValidDate(frm[i].value)==false) {
+                str_warn1=frm[i].title+be_date;
+                alert(str_warn1);
+                frm[i].focus();
+                return false;
+            }
+         }
+         continue;
+      }
+      if (frm[i].tagName.toUpperCase()=="SELECT") {
+    	  if ((frm[i].required=="true") && frm[i].value.Trim()=="") {
+              str_warn1 = please_select + frm[i].title;
+              alert(str_warn1);
+              frm[i].focus();
+              return false;    
+          }
+          continue;
+      }
+    }
+    return true;
+}
+
+function isRequired(obj,title){
+  if(obj.value.Trim()==""){
+    alert(please_input + title);
+    obj.focus();
+    return false;
+  }else{
+    return true;
+  }
+}
+
+function isNumber(obj,title){
+ if(obj.value.Trim()=="") return true;
+   if(isNaN(obj.value.Trim())){
+                str_warn1=title+be_number;
+                alert(str_warn1);
+                obj.focus();
+                return false;
+    }
+    return true;
+}
+
+function isDate(obj,title){
+ if(obj.value.Trim()=="") return true;
+              if(isValidDate(obj.value.Trim())==false){
+                str_warn1=title+be_date;
+                alert(str_warn1);
+                obj.focus();
+                return false;              
+            }
+            return true;
+}
+
+function checkSelect(itemObjName){
+	 var iCount = 0;
+	 var headings = document.getElementsByName(itemObjName);
+    for(var i = 0; i < headings.length; i++) {  // Loop through the returned tags
+       var h = headings[i];
+       if(h.checked==true){
+         iCount++;
+       }
+   }
+	 return iCount;
+}
+
+ function selectAll(srcObj,itemObjName){
+     var headings = document.getElementsByTagName("input");
+     for(var i = 0; i < headings.length; i++) {  // Loop through the returned tags
+       var h = headings[i];
+       if(h.name==itemObjName && h.disabled!=true){
+         h.checked = srcObj.checked;
+       }
+     }
+}
+  function isValidDate(objStr)  
+  {   
+	  objStr = formatDate1(objStr,dateFormat,'dd/MM/yyyy');
+      var  r = objStr.Trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{1,4})$/);  
+      var  r1 = objStr.Trim().match(/^(\d{1,4})\/(\d{1,2})\/(\d{1,2})$/);
+      if(r==null && r1==null)return  false;   
+   
+      return true;   
+  }   
+  
+  function getSelectValue(objName){
+     var headings = document.getElementsByName(objName);
+     for(var i = 0; i < headings.length; i++) {  // Loop through the returned tags
+       var h = headings[i];
+       if(h.checked==true){
+         return h.value;
+       }
+     }
+     return "";
+  }
+ /**
+ * enter key
+ **/ 
+ function keyvalue(){
+   if(event.keyCode=="13")event.keyCode="9";
+ }
+  
+  function getTableSelectRecordStr(objName,fieldName){
+     var headings = document.getElementsByName(objName);
+     var rStr = "";
+     for(var i = 0; i < headings.length; i++) {  // Loop through the returned tags
+       var h = headings[i];
+       if(h.checked==true){
+          rStr = rStr + "&"+fieldName+"="+h.value;
+       }
+     }
+     if(rStr!=""){
+       rStr = rStr.substring(1,rStr.length);
+     }
+     return rStr;
+  }
+  
+  function openCenterWindow(openPath, width, height, name) {
+		var screenWidth = screen.availWidth;
+	var screenHeitht = screen.availHeight;
+	var left = Math.ceil((screenWidth - width)/2);
+	var top = Math.ceil((screenHeitht - height)/2);
+	name = name == null ? "" : name;
+    var newWindow = (window.open("",name,"width="+width+"px, height="+height+"px,  status=no,toolbar=no,menubar=no,location=no,scrollbars=yes,resizable=yes,left="+left+",top="+top));
+    newWindow.location = openPath;
+  }
+  
+  function openCenterWindow2(name, width, height) {
+      var screenWidth = screen.availWidth;
+      var screenHeitht = screen.availHeight;
+      var left = Math.ceil((screenWidth - width) / 2);
+      var top = Math.ceil((screenHeitht - height) / 2);
+      var newWindow = (window.open("",name,"width="+width+"px, height="+height+"px, status=no,toolbar=no,menubar=no,location=no,scrollbars=yes,resizable=yes,left="+left+",top="+top));
+  }
+  
+  function openWindow(url,width,height){
+    openWindow(url,width,heigth,300,200)     
+  }
+  
+    function openWindow(url,width,height,moveX,moveY){
+      var newWindow = window.open("","newwindow","height=1, width=1, top=0, left=0,toolbar =no, menubar=no, scrollbars=yes, resizable=no, location=no, status=no");
+	  if(document.all){     
+       newWindow.moveTo(moveX,moveY)     
+       newWindow.resizeTo(width,height)     
+      }     
+      newWindow.location=url  
+  }
+  
+ function getObjectValue(objId){
+    var objValue = document.getElementById(objId).value;
+    if(objValue==""){
+      alert(have_no_select)
+      return "";
+    }
+    return objValue;
+  }
+  function changeObjValue(objId,objValue){
+     document.getElementById(objId).value = objValue;
+  }
+  
+  function textCounter(field, countfield, maxlimit) {
+	  if (field.value.length > maxlimit) field.value = field.value.substring(0, maxlimit);
+	   else countfield.value = maxlimit - field.value.length;
+  }
+  
+  function openFile(url){
+    window.open(url);
+  }
+  
+  
+//控制表格 变色 的js系列函数 （Begin）
+function tableColorChangeDefault(str_tableId){
+ tableColorChange(str_tableId,1,"#e8f3fe","#F3F9FF","#6699cc","#429DE3");
+}
+
+function tableColorChange(
+ str_tableid,       // table id 
+ num_header_offset, // 表头行数 
+ str_odd_color,     // 奇数行的颜色 
+ str_even_color,    // 偶数行的颜色 
+ str_mover_color,   // 鼠标经过行的颜色 
+ str_onclick_color  // 选中行的颜色 
+)
+{
+  if(!str_tableid) return alert(table_not_exist+" "+str_tableid);
+  var obj_tables=(document.all ? document.all[str_tableid]:document.getElementById(str_tableid));
+  if(!obj_tables) return alert(table_not_exist+" "+str_tableid);
+  
+  // 设置个参数的缺省值
+  var col_config=[];
+  col_config.header_offset=(num_header_offset?num_header_offset:0 );
+  col_config.odd_color=(str_odd_color?str_odd_color:'#e8f3fe');
+  col_config.even_color=(str_even_color?str_even_color:'#F3F9FF');
+  col_config.mover_color=(str_mover_color?str_mover_color:'#6699cc');
+  col_config.onclick_color=(str_onclick_color?str_onclick_color:'#4C7DAB');
+  
+  //初始化表格（可能多个表格用同一个ID）
+  if(obj_tables.length)
+    for(var i=0;i<obj_tables.length;i++ )
+     tt_init_table(obj_tables[i],col_config);
+  else 
+    tt_init_table(obj_tables,col_config);
+}
+
+function tt_init_table(obj_table,col_config)  {
+  var col_lconfig=[],
+  col_trs=obj_table.rows;
+  if(!col_trs) return ;
+  
+  for(var i=col_config.header_offset;i<col_trs.length;i++)  { // i 从 表头以下开始 
+    col_trs[i].config=col_config;
+    col_trs[i].lconfig=col_lconfig;
+    col_trs[i].set_color=tt_set_color;
+    col_trs[i].onmouseover=tt_mover; 
+    col_trs[i].onmouseout=tt_mout;
+    col_trs[i].onmousedown=tt_onclick;
+    col_trs[i].order=(i-col_config.header_offset)%2 ;
+    col_trs[i].onmouseout();
+ } 
+}
+
+function tt_set_color(str_color) {
+  this.style.backgroundColor=str_color;
+} 
+
+//事件操作 
+function tt_mover() {
+  if(this.lconfig.clicked!=this )
+   this.set_color(this.config.mover_color);
+} 
+ 
+function tt_mout() {
+  if(this.lconfig.clicked!=this )
+   this.set_color(this.order?this.config.odd_color:this.config.even_color);
+} 
+
+function tt_onclick(){
+  if( this.lconfig.clicked==this) {
+    this.lconfig.clicked=null;
+    this.onmouseover();
+  }else{
+     var last_clicked=this.lconfig.clicked;
+     this.lconfig.clicked=this ;
+     if(last_clicked) last_clicked.onmouseout();
+     this.set_color(this.config.onclick_color);
+  } 
+} 
+//控制表格 变色 的js系列函数 （End）
+
+
+ function GetValueChoose(el)
+    {
+        var sValue = "";
+        //取得第一个元素的name,搜索这个元素组
+        var tmpels = document.getElementsByName(el.name);
+        for(var i=0;i<tmpels.length;i++)
+        {
+            if(tmpels[i].checked)
+            {
+                sValue += "0";
+            }
+        }
+        return sValue;
+    }
+    
+ /**
+ *Iframe自适应高度
+ **/   
+ function setCwinHeight(obj)
+  {
+   var cwin=obj;
+  if (document.getElementById)
+  {
+    if (cwin && !window.opera)
+    {
+      if (cwin.contentDocument && cwin.contentDocument.body.offsetHeight)
+        cwin.height = cwin.contentDocument.body.offsetHeight; 
+      else if(cwin.Document && cwin.Document.body.scrollHeight)
+        cwin.height = cwin.Document.body.scrollHeight;
+    }
+  }
+}
+
+/**
+*checkEmail 函数校验此框输入的是否为email型的数据,返回的值为真和假,true和false;
+*Object目标对象,Desc中文的描述.
+*/
+function checkEmail(Object,Desc){
+  var pattern = /[a-zA-Z0-9_.]{1,}@[a-zA-Z0-9_]{1,}.[a-zA-Z0-9_]{1,}/;
+  var strValue=Object.value;
+  if (strValue.length==0)
+    return true;
+  if (strValue.match(pattern) == null) {
+    alert(Desc + format_illegal);
+    Object.focus();
+    return false;
+  }else{
+    return true;
+  }
+} 
+
+
+function iframeHeightAutoAdjust(divName,iframeName){
+       var frameWin = document.all[iframeName];
+       var frameBox = document.all[divName];
+       var newHeight;
+       //if (frameWin.Document){
+       //       newHeight = frameWin.Document.body.scrollHeight + 20 + "px";
+       //}else{
+       //       newHeight = frameWin.contentDocument.body.scrollHeight+ 20 + "px";
+       //}
+       newHeight = frameWin.contentWindow.document.body.scrollHeight + 20 + "px";
+       //alert(frameBox)
+       //alert(frameBox.style.height)
+       frameWin.style.height = newHeight;
+       frameBox.style.height = newHeight;
+}
+
+ /**
+ *调用该函数，在当前页面打开url，同时如果该页面有'loading2',则显示其（用来显示正在加载提示）
+ **/
+ function openFormWithLayer(url){
+	 
+    if(document.getElementById("loading2")){
+       document.getElementById("loading2").style.display="block";
+     }
+    
+     if(parent.window.parent.frames["main"] != undefined){
+    	 parent.window.parent.frames["main"].location = url;
+     }
+    	 
+     
+     if(parent.window.parent.window.parent.frames["main"] != undefined){
+    	 parent.window.parent.window.parent.frames["main"].location = url;
+     }
+     
+     if(parent.window.parent.window.parent.window.parent.frames["main"] != undefined){
+    	 parent.window.parent.window.parent.window.parent.frames["main"].location = url;
+     }
+    	 
+                
+    /* if(window.frames["main"] != undefined)
+    	 window.frames["main"].location = url;*/
+     //window.frames["main"].location.href = url;
+    
+     //window.location = url;
+  }
+
+function selectFromSQL(sql, type) {
+    if (type == 1) {
+        return selectSimpleDataFromSQL(sql);
+    } else if (type == 2) {
+        return selectDataListFromSQL(sql);
+    }
+}
+
+function selectSimpleDataFromSQL(sql){
+    var url = "/formSectionAction.it?method=getXmlTextDataBySQL";
+    if(document.all['requestUrl']){
+     url = document.all['requestUrl'].value + url;
+    }
+    var param = "dataSQL="+sql;
+    param = encodeURI(encodeURI(param)); //
+    var result="";
+    var myAjax = new Ajax.Request(
+         url,
+        {
+            method:"post",       //
+            parameters:param,   //
+            asynchronous:false,  //同步
+            setRequestHeader:{"If-Modified-Since":"0"},     //
+            onComplete:function(x){    //
+               result = x.responseXML
+            },
+            onError:function(x){          //
+                    alert(x.responseText);
+            } 
+        } 
+       ); 
+     return result;
+}
+
+function selectDataListFromSQL(sql) {
+    var url = "/formSectionAction.it?method=getXmlDataListBySQL";
+    if (document.all['requestUrl']) {
+        url = document.all['requestUrl'].value + url;
+    }
+    var param = "dataSQL=" + sql;
+    param = encodeURI(encodeURI(param));
+    var result = "";
+    var myAjax = new Ajax.Request (
+        url,
+        {
+            method:"post",
+            parameters:param,
+            asynchronous:false,  // 同步
+            setRequestHeader:{"If-Modified-Since":"0"},
+            onComplete:function(x) {
+                result = x.responseXML;
+            },
+            onError:function(x) {
+                alert(x.responseText);
+            }
+        }
+    );
+    return result;
+}
+
+
+function selectFromSQLJson(connectName, sql){
+	var url = "/formSectionAction.it?method=getJSONListBySQL";
+	
+    if(document.all['requestUrl'])
+    	url = document.all['requestUrl'].value + url;
+    else if(parent.document.all['requestUrl'].value)
+    	url = parent.document.all['requestUrl'].value + url;
+    
+    var param;
+    param = 'dataSQL='+encodeURI(encodeURI(sql)) + '&dataConnectName=' + encodeURI(encodeURI(connectName)); 
+    
+    var result;
+    
+    jQuery.ajax({
+    	  type: "GET", 
+          url: url, 
+          dataType: "json",
+          contentType: "application/json",
+          data: param,
+          async: false,
+          success: function (data) { 
+    			if(data&&data!=null)
+    				result = data; 
+    			}, 
+          error: function (XMLHttpRequest, textStatus, errorThrown) { 
+    				result = "";
+          } 
+    });
+    
+    return result;
+}
+
+function selectFromSPJson(connectName,spName,sParameter){
+	var url = "/formSectionAction.it?method=getJSONListBySP";
+	
+    if(document.all['requestUrl'])
+    	url = document.all['requestUrl'].value + url;
+    else if(parent.document.all['requestUrl'].value)
+    	url = parent.document.all['requestUrl'].value + url;
+    
+    var param ;
+    if(sParameter=="")
+    	param = 'SPName='+encodeURI(encodeURI(spName)) + '&dataConnectName='+encodeURI(encodeURI(connectName)); 
+    else
+    	param = 'SPName='+encodeURI(encodeURI(spName)) + '&SPParameter=' + encodeURI(encodeURI(sParameter)) + '&dataConnectName=' + encodeURI(encodeURI(connectName)); 
+    
+    var result;
+    
+    jQuery.ajax({
+    	  type: "GET", 
+          url: url, 
+          dataType: "json",
+          contentType: "application/json",
+          data: param,
+          async: false,
+          success: function (data) { 
+		    	if(data&&data!=null)
+					result = data;  
+		    	}, 
+          error: function (XMLHttpRequest, textStatus, errorThrown) { 
+		    		result = "";  
+          } 
+    });
+    
+    return result;
+}
+ 
+ //计算多个指定字段的数学相加后的和
+ function addition(){
+    if(!arguments[0]){return 0;}
+    var result = 0;
+    for (var i = 0; i < arguments.length; i++) { 
+      if($(arguments[i]).value=="") continue;
+      //if(isNaN($(arguments[i]).value)==false) continue;
+      result = parseFloat($(arguments[i]).value) + parseFloat(result);
+    }
+    return result;
+ }
+ 
+ //将originalValue返回保留指定小数位数n的数字
+ function getNum(originalValue,n){
+    var t = Math.pow(10, n);
+    return Math.round(originalValue * t) / t;
+ }
+ 
+ //获取指定日期中的月份数字，日期格式固定为：mm/dd/yyyy
+ function getMonth(vDate){
+   if(vDate=="") return 0;
+   var temp = vDate.substring(0,2);
+   return parseInt(temp.replace(/^0*/,""));
+ }
+ 
+ /**
+ *格式化数字
+  alert(formatNumber(0,''));
+  alert(formatNumber(12432.67,'#,###'));
+  alert(formatNumber(12432.21,'#,###.000#'));
+  alert(formatNumber(12432,'#,###.00'));
+  alert(formatNumber('12432.415','#,###.0#'));
+ **/
+ function formatNumber(number,pattern){
+    var str            = number.toString();
+    var strInt;
+    var strFloat;
+    var formatInt;
+    var formatFloat;
+    var minusSign="";
+    
+    if(str.substring(0,1)=="-"){
+    	number      = 0.0-number;
+    	str			= str.substring(1,str.length);
+    	minusSign	= "-";
+    }
+
+    if(/\./g.test(pattern)){
+        formatInt        = pattern.split('.')[0];
+        formatFloat        = pattern.split('.')[1];
+    }else{
+        formatInt        = pattern;
+        formatFloat        = null;
+    }
+
+    if(/\./g.test(str)){
+        if(formatFloat!=null){
+            var tempFloat    = Math.round(parseFloat('0.'+str.split('.')[1])*Math.pow(10,formatFloat.length))/Math.pow(10,formatFloat.length);
+            strInt        = (Math.floor(number)+Math.floor(tempFloat)).toString();                
+            strFloat    = /\./g.test(tempFloat.toString())?tempFloat.toString().split('.')[1]:'0';            
+        }else{
+            strInt        = Math.round(number).toString();
+            strFloat    = '0';
+        }
+    }else{
+        strInt        = str;
+        strFloat    = '0';
+    }
+    if(formatInt!=null){
+        var outputInt    = '';
+        var zero        = formatInt.match(/0*$/)[0].length;
+        var comma        = null;
+        if(/,/g.test(formatInt)){
+            comma        = formatInt.match(/,[^,]*/)[0].length-1;
+        }
+        var newReg        = new RegExp('(\\d{'+comma+'})','g');
+
+        if(strInt.length<zero){
+            outputInt        = new Array(zero+1).join('0')+strInt;
+            outputInt        = outputInt.substr(outputInt.length-zero,zero)
+        }else{
+            outputInt        = strInt;
+        }
+
+        var 
+        outputInt            = outputInt.substr(0,outputInt.length%comma)+outputInt.substring(outputInt.length%comma).replace(newReg,(comma!=null?',':'')+'$1')
+        outputInt            = outputInt.replace(/^,/,'');
+
+        strInt    = outputInt;
+    }
+
+    if(formatFloat!=null){
+        var outputFloat    = '';
+        var zero        = formatFloat.match(/^0*/)[0].length;
+
+        if(strFloat.length<zero){
+            outputFloat        = strFloat+new Array(zero+1).join('0');
+            //outputFloat        = outputFloat.substring(0,formatFloat.length);
+            var outputFloat1    = outputFloat.substring(0,zero);
+            var outputFloat2    = outputFloat.substring(zero,formatFloat.length);
+            outputFloat        = outputFloat1+outputFloat2.replace(/0*$/,'');
+        }else{
+            outputFloat        = strFloat.substring(0,formatFloat.length);
+        }
+
+        strFloat    = outputFloat;
+    }else{
+        if(pattern!='' || (pattern=='' && strFloat=='0')){
+            strFloat    = '';
+        }
+    }
+
+    return minusSign+strInt+(strFloat==''?'':'.'+strFloat);
+}
+
+//用户按下esc键时作警告
+function checkesc(event){
+  if(event.keyCode==27){ //esc
+  	if(!confirm(confirm_esc)){
+  	  event.returnValue=false;
+  	  return;
+  	}
+  }
+}
+
+
+function disp(num) {
+
+	 if (document.getElementById("div"+num).style.display == "none") {
+		  //document.getElementById("div"+num).style.display = "block";
+		 
+		  jQuery("#div"+num).stop().fadeOut();
+		  jQuery("#div"+num).fadeIn(300);
+
+		  document.getElementById("imgcon"+num).src = "images/Rminus.png";
+		  
+		 
+	 } else {
+		  //document.getElementById("div"+num).style.display = "none";
+		  if(num==2&&jQuery("div[id^=qtip]").length>0)
+		  {
+			  jQuery("#field_02_17_ProcessLoading").qtip('hide');
+		  }
+		 
+		  jQuery("#div"+num).stop().fadeIn();
+		  jQuery("#div"+num).fadeOut(300);
+		  document.getElementById("imgcon"+num).src = "images/Rplus.png";
+	 }
+	}
+
+function clickPDF(div){
+
+   var refForms = document.getElementsByName(div)[0].innerText;
+   var paramStr = "";
+   if(refForms==""){
+	 alert("No reference form");
+     return;
+   }
+   var arr = refForms.split(",");
+
+   for(var i=0; i<arr.length; i++){
+     paramStr += "&requestNos="+arr[i].Trim();
+   }
+
+   openCenterWindow2("Export_all_to_PDF", 800, 600);
+   var url = "wkfProcessAction.it?method=exportPDF"+paramStr;
+   document.forms[0].action = url;
+   document.forms[0].target = "Export_all_to_PDF";
+   document.forms[0].submit();
+}  
+
+
+///全角空格为12288，半角空格为32 
+///其他字符半角(33-126)与全角(65281-65374)的对应关系是：均相差65248 
+//半角转换为全角函数 
+function ToDBC(txtstring) 
+{ 
+	var tmp = ""; 
+	for(var i=0;i<txtstring.length;i++) 
+	{ 
+		if(txtstring.charCodeAt(i)==32) 
+			tmp += String.fromCharCode(12288); 
+		else if(txtstring.charCodeAt(i)<127) 
+			tmp += String.fromCharCode(txtstring.charCodeAt(i)+65248); 
+		else
+			tmp += String.fromCharCode(txtstring.charCodeAt(i)); 
+	} 
+	return tmp; 
+}
+
+//全角转换为半角函数 
+function ToCDB(str) 
+{ 
+	var tmp = ""; 
+	for(var i=0;i<str.length;i++) 
+	{ 
+		if(str.charCodeAt(i)>65248&&str.charCodeAt(i)<65375)  
+			tmp += String.fromCharCode(str.charCodeAt(i)-65248); 
+		else 
+			tmp += String.fromCharCode(str.charCodeAt(i)); 
+	} 
+	return tmp;
+}
+
+var common = {
+	isEmpty : function (value){
+		if(value == null || value == '' || value == 'undefined' || value == 'null'|| value == 'NaN'){
+			return true;
+		}
+		return false;
+	},
+	
+	isNotEmpty : function  (value){
+		return !this.isEmpty(value);
+	}
+}
+
+function ShopConfirm(ShowText){ 
+
+	var bHeightS=parseInt(document.documentElement.scrollHeight);
+	var bWidth=parseInt(document.body.scrollWidth);
+	var bHeight=parseInt(document.body.scrollHeight);
+	
+	var CenterItem = document.getElementById("formTable9");
+	var FexliHeigh = getElementTop(CenterItem);
+
+	
+	var ShopConfirmLayer=document.createElement("div");
+	ShopConfirmLayer.id="ShopConfirmLayer";
+	ShopConfirmLayer.onclick = "closeWindow2()";
+	
+	ShopConfirmLayer.innerHTML=  "<div id='ShopConfirmLayer'>"+ "</div>";
+	var styleStr1="top:0px;left:0px;position:absolute;background:#666;width:"+bWidth+"px;height:"+bHeight+"px;";
+	styleStr1 = styleStr1 + "filter:alpha(opacity=20);text-align:center; align=center;"
+	ShopConfirmLayer.style.cssText=styleStr1;
+
+	document.body.appendChild(ShopConfirmLayer);
+
+	 var webBgLayer=document.createElement("div");
+	 webBgLayer.id="webBgLayer";
+
+	 webBgLayer.innerHTML = "<table class=MsoTableGrid border=0 cellspacing=0 cellpadding=0 >"+
+	 "<TR>&nbsp</TR><TR width=150 valign=top ><image src = 'images/Checking/Loading10.gif'/></TR>"+
+	 "<TR>&nbsp</TR>"+
+	 "<TR width=100 valign=top><strong>" + ShowText + "</strong></TR>"+
+	 "</table>"
+ 
+     var styleStr2="top:"+ (FexliHeigh) +"px;left:"+(bWidth/2-150)+"px;position:absolute;"+
+	 "background:#B22222;color:white ; width:"+(bWidth/10)+"px;height:"+(bHeightS/10)+"px;"+
+	 "border: 1px solid rgb(229, 26, 69); color: rgb(255, 255, 255); text-decoration: none; background-color: rgb(229, 26, 69);" +
+	 "text-align:center; align=center;";
+ 
+	 webBgLayer.style.cssText=styleStr2;
+	 document.body.appendChild(webBgLayer);
+		 
+	webBgLayer.focus();
+	//alert (document.body.scroll);
+	document.body.scroll = 'no'; 
+	//document.body.style=="overflow:hidden;"; 
+} 
+
+function closeWindow2(){
+	
+	if(document.getElementById('ShopConfirmLayer')!=null)
+		document.getElementById('ShopConfirmLayer').parentNode.removeChild(document.getElementById('ShopConfirmLayer'));
+	
+	if(document.getElementById('webBgLayer')!=null)
+		document.getElementById('webBgLayer').parentNode.removeChild(document.getElementById('webBgLayer'));
+
+	document.body.scroll = 'yes'
+}
+
+function getElementTop(element){
+	var actualTop = element.offsetTop;
+	var current = element.offsetParent;
+
+	while (current !== null){
+		actualTop += current.offsetTop;
+		current = current.offsetParent;
+	}
+
+	return actualTop;
+}
+
+
+//use for generate reprot button(field type = 15); Add by Colin Wang 	
+//hinson begin: support the cross form report
+function generateReport(fieldId,reportSystemId, reportNo,sourceSql){
+	var requestNo = document.getElementsByName("requestNo")[0].value;
+	generateReport1(requestNo,fieldId,reportSystemId, reportNo,sourceSql);
+}
+//hinson end
+function generateReport1(requestNo,fieldId,reportSystemId, reportNo,sourceSql){
+	  var formSystemId = document.getElementsByName("formSystemId")[0].value;
+	  var requestUrl = jQuery('input[name="requestUrl"]').val();
+	  if(common.isEmpty(reportNo) || document.getElementById(fieldId+"_checkBox").checked){
+		  
+		  var triggerURL = requestUrl + '/reportManageAction.it?method=triggerGenerateReport&reportSystemId='+reportSystemId+'&fieldId='+fieldId+'&requestNo='+requestNo+'&sourceSql='+sourceSql+'&formSystemId='+formSystemId;
+		  var url = "";
+		  var dataReturn = function(data){
+			  var returnData = eval("("+data.responseText+")");
+			  if("success" == returnData.status){
+				  url = requestUrl + '/reportManageAction.it?method=displayReportContent&reportSystemId='+reportSystemId+'&requestNo='+requestNo+'&reportNo='+returnData.reportNo;
+				  openCenterWindow(url,1024,768,'report_'+reportSystemId);
+				  document.getElementById(fieldId+"_checkBox").checked = false;
+				  document.getElementById(fieldId+"_button").onclick = function(){generateReport1(requestNo,fieldId,reportSystemId,returnData.reportNo,sourceSql)};
+				  document.getElementById(fieldId).value = returnData.reportNo;
+			  }
+		  }
+		jQuery.ajax({
+		 	  type: "POST", 
+		       url: triggerURL, 
+		       contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+		       async: false,
+		       success: dataReturn,
+		       error:dataReturn
+		});
+	  }else{
+		  var url = requestUrl + '/reportManageAction.it?method=displayReportContent&reportSystemId='+reportSystemId+'&requestNo='+requestNo+'&reportNo='+reportNo;
+//		  alert(url);
+	 	 openCenterWindow(url,1024,768,'report_'+reportSystemId);
+	  }
+}

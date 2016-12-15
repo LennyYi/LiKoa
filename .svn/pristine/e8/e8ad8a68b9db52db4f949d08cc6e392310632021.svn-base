@@ -1,0 +1,193 @@
+var CompassDB = "";
+var CommonCompanyCode = "";
+
+var localObj = window.location;
+
+var contextPath = localObj.pathname.split("/")[1];
+
+var basePath = localObj.protocol+"//"+localObj.host+"/"+contextPath;
+
+var server_context=basePath;
+
+jQuery(document).ready(function() {
+	maxLengthControl();
+	listenInputFocus();
+	
+	jQuery('input[isDate="true"]').each(function() { 
+		jQuery(this).blur(function() { _NOVA.until.changeDateFormat(this); });	
+	});
+	
+	triggerBasicAction();
+	triggerTableAction();
+});
+
+function triggerBasicAction(){
+	jQuery("#div5").find("input[name='addRowBtn']").hide();
+	jQuery("#div5").find("input[name='deleteRowBtn']").hide();
+	jQuery("#div5").find("br").hide();
+	
+	jQuery("td:eq(0)",jQuery("#formTableMemberList tr")).hide(); 
+	
+	jQuery('textarea[name="field_PolicyInfo_3"]').blur(function(){searchPolMem()});
+	jQuery('input[name="field_PolicyInfo_4"]').blur(function(){searchPolMem()});
+}
+
+function triggerTableAction(){
+	bindTableNewRowAction("formTablePlanList", 1);
+}
+
+function bindTableNewRowAction(tableId, type){
+	//var formSystemId = jQuery("input[name='formSystemId'][type='hidden']").val();
+	
+	switch (tableId) {
+		case "formTable9": {
+			bindTableTRAction(tableId,'textarea[name="field_9_7"]','blur','searchMemExist(this);',type);
+			break;
+		}
+	}
+	
+	if(type==0)
+	{
+		jQuery("#"+tableId+" tr:last").find('textarea').each(function(){
+	    	jQuery(this).focus(function(){ jQuery(this).css("background-color","#F8FEC3");});
+	    	jQuery(this).blur(function(){ jQuery(this).css("background-color","#FFFFFF");});
+	    });
+	    
+		jQuery("#"+tableId+" tr:last").find('input[type="text"]').each(function(){
+	    	jQuery(this).focus(function(){jQuery(this).css("background-color","#F8FEC3");});
+	    	jQuery(this).blur(function(){jQuery(this).css("background-color","#FFFFFF");});
+	    });
+	    
+		jQuery("#"+tableId+" tr:last").find('input[type="checkbox"]').each(function(){
+	    	jQuery(this).focus(function(){jQuery(this).parent().css("background-color","#F8FEC3");});
+	    	jQuery(this).blur(function(){jQuery(this).parent().css("background-color","rgb(239, 239, 239)");});
+	    });
+	}
+}
+
+function bindTableTRAction(tableId, fieldId, action, func, type){
+	if(type == 1)
+	{
+		if(jQuery("#"+tableId +" tr").length>1){
+			jQuery("#"+tableId +" tr " + fieldId).each(function(){
+				jQuery(this).bind(action,function(){eval(func);} );
+			});
+		}
+	}
+	else
+		jQuery("#"+tableId+" tr:last " + fieldId).bind(action,function(){eval(func);} );
+}
+
+function searchPolMem(){
+	var polno = jQuery('textarea[name="field_PolicyInfo_3"]').text();
+	var date = jQuery('input[name="field_PolicyInfo_4"]').val();
+	
+	if(polno!="" && date!="")
+	{
+		var data = selectFromSPJson("compnwJNDI","dbo.UspGNOVAGetMemPolByPolAndEffDate", polno + "," + date );
+		
+		jQuery("#formTableMemberList tr:gt(0)").each(function(){jQuery(this).remove();});
+		
+		if(data!="" && data!=null && data.length>0)
+		{
+			var tr = "";
+			jQuery.each(data,function(i,item) {
+				
+				tr = '<tr>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=分支编号 readOnly name=field_MemberList_1 required="false" maxLength="3" rowIndex="0" type="text">'+item.SUBOFFCODE+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=被保人编号 readOnly name=field_MemberList_2 required="false" maxLength="5" rowIndex="0" type="text">'+item.CERTNO+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=被保险人姓名 readOnly name=field_MemberList_3 required="false" maxLength="60" rowIndex="0" type="text">'+item.MEMNAME+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 60px;"  class="input" title=被保险人家属姓名 readOnly name=field_MemberList_4 required="false" maxLength="60" rowIndex="0" type="text" >'+item.DEPNAME+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=关系 readOnly name=field_MemberList_16 required="false" maxLength="2" rowIndex="0" type="text" >'+item.DEPDES+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=居住地址 readOnly name=field_MemberList_6 required="false" maxLength="10" rowIndex="0" type="text" >'+item.ADDR+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=国籍 readOnly name=field_MemberList_17 required="false" maxLength="20" rowIndex="0" type="text" >'+item.CNTYCODE+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 140px;" class="input" title=身份证/护照号码 readOnly name=field_MemberList_8 required="false" maxLength="18" rowIndex="0" type="text" >'+item.MEMIDNO+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=性别 readOnly name=field_MemberList_18 required="false" maxLength="5" rowIndex="0" type="text" >'+item.SEX+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=出生日期 readOnly name=field_MemberList_19 required="false" maxLength="15" rowIndex="0" type="text" >'+item.DOB+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=职位/职务 readOnly name=field_MemberList_15 required="false" maxLength="5" rowIndex="0" type="text" >'+item.OCCUPATION+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=保险产品 readOnly name=field_MemberList_22 required="false" maxLength="20" rowIndex="0" type="text" >'+item.PRODCODE+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=保险计划 readOnly name=field_MemberList_14 required="false" maxLength="5" rowIndex="0" type="text" >'+item.BENPLNCD+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=月薪 readOnly name=field_MemberList_13 required="false" maxLength="5" rowIndex="0" type="text" >'+item.SALARY+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=劳动合同生效日期 readOnly name=field_MemberList_20 required="false" maxLength="15" rowIndex="0" type="text" >'+item.EMPDT+'</span></td>';
+				tr = tr + '<td style="WORD-BREAK: break-all" align=left><span style="WIDTH: 100px;" class="input" title=是否拥有当地医保 readOnly name=field_MemberList_21 required="false" maxLength="2" rowIndex="0" type="text" >'+item.SHIP+'</span></td>';
+				tr = tr + '</tr>';
+				
+				jQuery("#formTableMemberList").append(tr);
+			});
+		}
+	}
+}
+
+function searchMemExist(obj){
+	var currentTR = jQuery(obj).closest('tr');
+	
+	var index = jQuery(obj).closest('tr').index();
+	var newImg = jQuery('<img id="imgShowDup_'+index+'" width="16" height="16" style="width: 16px; height: 16px; border-width: 0px; cursor: pointer;" src="images/Checking/Plus2.png" />');
+	
+	var memIDNo = jQuery(obj).closest('tr').find('textarea[name="field_9_7"]').text();
+	var clntcode = jQuery('textarea[name="field_PolicyInfo_13"]').text();
+	var date = jQuery('input[name="field_PolicyInfo_4"]').val();
+	var name = jQuery(obj).closest('tr').find('textarea[name="field_9_2"]').text();
+	var tr =jQuery(obj).closest('tr');
+	
+	if(jQuery("#imgShowDup_"+index).length>0)
+	{
+		jQuery("div.qtip").remove();
+		jQuery("#imgShowDup_"+index).remove();
+		jQuery("#imgShowDup_"+index).qtip('destroy');
+	}
+	
+	var data = selectFromSPJson("compnwJNDI","dbo.UspGNOVAGetMemByUserNameMemIDNo", clntcode + "," + date + "," + memIDNo + " ," +name+" ");
+	
+	if(data!="" && data!=null && data.length>0)
+	{
+		newImg.appendTo(jQuery("td:eq(0)",currentTR));
+		bindQtipClntPol(jQuery("#imgShowDup_"+index),data, index);
+	}
+}
+
+function bindQtipClntPol(obj, data, index){
+	obj.css("cursor","pointer");
+	
+	obj.qtip({
+			content: {
+			    text: '<table id="tbTitleDup_'+index+'"><tr><td></td><td>客户编号</td><td>分支编号</td><td>被保人编号</td><td>被保险人姓名</td><td>居住地址</td><td>身份证/护照号码</td></tr></table>',
+			    title: { text: '<label>已存在投保人信息: </label>'}
+		    },
+		    position: {
+		    	my: 'top left',
+		    	at: 'bottom right'
+		    },
+		    show: {
+		    	event: 'click',
+		    	effect: function() {
+		    		jQuery(obj).attr("src","images/Checking/Minus2.png");
+	    			jQuery(this).fadeTo(500, 1);
+	    			}
+		    },
+		    hide: {
+		    	event: 'click',
+		        effect: function() {
+		    		jQuery(obj).attr("src","images/Checking/Plus2.png");
+		    		jQuery(this).slideUp();
+		    		}
+		    },
+		    style:{ 
+		    	classes: 'qtip-tipped',
+		    	width: '500px'
+		    }
+	});
+	
+	var tr = "";
+
+	obj.qtip('show');
+	
+	jQuery.each(data,function(i,item) {
+		tr = '<tr><td><input type="radio" name="tr_'+index+'"/></td><td>'+item.CLNTCODE+'</td><td>'+item.SUBOFFCODE+'</td><td>'+item.CERTNO+'</td><td>'+item.NAMELAST+'</td><td>'+item.ADDR+'</td><td>'+item.MEMIDNO+'</td></tr>';
+		jQuery("table#tbTitleDup_"+index).append(tr);
+	});
+	
+	obj.qtip('hide');
+}
+
+

@@ -1,0 +1,65 @@
+/* CSS Document */
+body  {
+	margin:0px;
+	SCROLLBAR-FACE-COLOR: #799AE1;
+	SCROLLBAR-HIGHLIGHT-COLOR: #799AE1;
+	SCROLLBAR-SHADOW-COLOR: #799AE1;
+	SCROLLBAR-DARKSHADOW-COLOR: #799AE1;
+	SCROLLBAR-3DLIGHT-COLOR: #799AE1;
+	SCROLLBAR-ARROW-COLOR: #FFFFFF;
+	SCROLLBAR-TRACK-COLOR: #AABFEC;
+	font-size: 12px;
+	color: #333333;
+	margin-top: 10px;
+	margin-right: 10px;
+	margin-bottom: 10px;
+}
+a:link {
+	color: #0000FF;
+	text-decoration: none;
+}
+a:visited {
+	text-decoration: none;
+	color: #0000FF;
+}
+a:hover {
+	text-decoration: none;
+	color: #FF9900;
+}
+a:active {
+	text-decoration: none;
+	color: #FF9900;}
+	
+tr {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size: 12px;}
+INPUT {
+	FONT-SIZE: 12px;
+	border: 1px solid #CCCCCC;
+}
+select {font-size: 12px;}
+
+.text {font-size:12px;}
+.table {
+	border-collapse: collapse;
+	cellpadding: 3px;
+	cellspacing: 1px;
+	border: 0 solid #6595D6;}
+.tr1 {
+	font-weight: bold;
+	color: #FFFFFF;
+	background-image: url(bg1.gif);
+	height: 25px;
+}
+.tr2 {
+	background-color: #FFFFFF;
+	background-image: url(bg2.GIF);
+	background-color: #F3F4FA;
+	background-repeat:repeat-x;
+	background-position:bottom;
+	height:23PX;
+}
+.tr3 {
+	background-color: #EFEFEF;
+}
+/*style="border-collapse: collapse;"*/

@@ -1,0 +1,357 @@
+<!-- Task_ID	Author	Modify_Date	Description------------------------------------------->
+<!-- IT0958		Young	 10/18/2007 DS011 Form Design can authorized for every form type-->
+<%@ include file="/common/head.jsp" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page import="com.aiait.eflow.housekeeping.vo.StaffVO,com.aiait.eflow.formmanage.vo.*,com.aiait.eflow.common.helper.*,com.aiait.eflow.common.*,java.util.*" %>
+<%@page import="com.aiait.eflow.housekeeping.vo.FormTypeVO,com.aiait.eflow.common.helper.FormTypeHelper"%>
+<%@page import="com.aiait.eflow.common.helper.CompanyHelper,com.aiait.eflow.housekeeping.vo.CompanyVO" %>
+<%@page import="com.aiait.eflow.util.*" %>
+<% 
+  String type = (String)request.getParameter("type");
+  if(type==null){
+	  type = "new";
+  }
+  FormManageVO form = (FormManageVO)request.getAttribute("wholeForm");
+  if(form==null){
+	  form = new FormManageVO();
+  }
+  String formType = (String)request.getParameter("formType");
+  if(formType==null || "".equals(formType)){
+	  formType = form.getFormType();
+  }
+  
+  // For field of tip and highlight
+  Collection fieldList = (Collection) request.getAttribute("fieldList");
+  if (fieldList == null) {
+	  fieldList = new ArrayList();
+  }
+  SpecialFieldVo tipField = (SpecialFieldVo) request.getAttribute("tipField");
+  SpecialFieldVo highlightField = (SpecialFieldVo) request.getAttribute("highlightField");
+  SpecialFieldVo highlightField2 = (SpecialFieldVo) request.getAttribute("highlightField2");
+  SpecialFieldVo highlightField3 = (SpecialFieldVo) request.getAttribute("highlightField3");
+  
+  StaffVO currentStaff = (StaffVO)request.getSession().getAttribute(CommonName.CURRENT_STAFF_INFOR);
+  AuthorityHelper authority = AuthorityHelper.getInstance();
+%>
+<html>
+<head>
+ <title><i18n:message key="form_design.form_edit_title"/></title>
+ <link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+ <i18n:jsmessage jsRelativePath="js" prefixName="message"/>
+ <script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+ <script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+ <script language="javascript" src="<%=request.getContextPath()%>/js/aiaitjsframe.js"></script>
+ <script language="javascript">
+     var obj = "<%=type%>";
+    function initForm(){
+      if(obj=="edit"){
+        document.myForm.saveType = "edit";
+      }else{
+        document.myForm.saveType = "new";
+      }
+    }
+    function submitForm(){
+       var frm = document.forms[0];
+       document.all['btnSubmit'].disabled = "true";
+       if(formValidate(frm)==false){
+         document.all['btnSubmit'].disabled = "";
+         return;
+       }
+	   var validationstr = document.all["Validation"].value;
+	   validationstr = formatStringAllChar(validationstr);
+       var param = "&formId="+frm.formId.value
+                 +"&formName="+frm.formName.value+"&formDescription="+encodeURIComponent(frm.formDescription.value)+"&saveType=<%=type%>"
+                 +"&formType="+frm.formType.value+"&formSystemId="+frm.formSystemId.value + "&tipField=" + frm.tipField.value
+                 +"&highlightField=" + frm.highlightField.value + "&highlightField2=" + frm.highlightField2.value + "&highlightField3=" + frm.highlightField3.value
+                 +"&actionType="+frm.actionType.value+"&validation="+validationstr+"&actionMessage="+frm.actionMessage.value+"&orgId="
+                 +frm.orgId.value+"&afterSaveUrl="+frm.afterSaveUrl.value;
+       var url = "<%=request.getContextPath()%>/formManageAction.it?method=saveBaseForm";
+       //param = encodeURI(encodeURI(param));    
+      // param = encodeURI(param);   
+      // url = url + param;    
+       
+       
+       	//var param = $.Form("userForm").serialize({ regTime:new Date().toGMTString()}); //???????????
+      	//var url = '<%=request.getContextPath()%>/userManageAction.it?method=saveUser';
+      	param = encodeURI(encodeURI(param)); //
+        var myAjax = new Ajax.Request(
+         url,
+        {
+            method:"post",       //
+            parameters:param,   //
+            setRequestHeader:{"If-Modified-Since":"0"},     //
+            onComplete:function(x){    //
+                  alert(save_success);
+                 window.opener.document.forms[0].submit();
+                 window.close();
+            },
+            onError:function(x){          //
+                 alert(save_unsuccess);
+                   document.all['btnSubmit'].disabled = "";
+            } 
+        } 
+       ); 
+       
+       
+       //var  xmlhttp = createXMLHttpRequest();
+      // var result;
+      // if(xmlhttp){
+      //     xmlhttp.open('POST',url,false);
+      //     xmlhttp.onreadystatechange = function()
+       //    {
+      //       if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+     //            result = xmlhttp.responseText;
+      //       }
+      //     }
+      //     xmlhttp.setRequestHeader("If-Modified-Since","0");
+           
+     //      xmlhttp.send(null);
+     //  }
+    //   if(result.Trim()=="successfully"){
+   //      alert(save_success);
+    //   }else{
+     //    alert(save_unsuccess);
+    //     document.all['btnSubmit'].disabled = "";
+    //     return;
+    //   }
+    //   window.opener.document.forms[0].submit();
+     //   window.close();
+    }
+    window.onload=function(){resize(420);}
+ </script>
+</head>
+<body>
+<form name="myForm" method='Post'>
+   <input type="hidden" name="saveType" value="<%=type%>"> 
+   <input type="hidden" name="formSystemId" value="<%=form.getFormSystemId()%>">
+   <table width="100%"  border="1" cellpadding="3" cellspacing="0" bordercolor="#6595D6" style="border-collapse:collapse;" >
+     <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="form_design.form_id"/> : 
+       </td>
+       <td style="WIDTH:70%">  
+         <input type='text' name='formId' size='20' maxlength='50' title='<i18n:message key="form_design.form_id"/>' required="true" value='<%=(form.getFormId()!=null && !"".equals(form.getFormId()))?form.getFormId():""%>'>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="common.form"/> : 
+       </td>
+       <td style="WIDTH:70%">
+         <input type='text' name='formName' size='30' maxlength='100' title='<i18n:message key="common.form"/>' required="true" value='<%=(form.getFormName()!=null && !"".equals(form.getFormName()))?form.getFormName():""%>'>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="common.form_type"/> : 
+       </td>
+       <td style="WIDTH:70%">
+       <select name="formType">
+         <% 
+            Collection typeList = FormTypeHelper.getInstance().getFormTypeList();
+            if(typeList!=null && typeList.size()>0){
+  		      Iterator it = typeList.iterator();
+  		      while(it.hasNext()){
+  			    FormTypeVO typeVo = (FormTypeVO)it.next();
+  			    if(authority.checkAuthorityByFormType(currentStaff.getCurrentRoleId(),ModuleOperateName.MODULE_FORM_MANAGE,typeVo.getFormTypeId())){
+  			    %>
+  			    <option value="<%=typeVo.getFormTypeId()%>" <%=(formType!=null && (typeVo.getFormTypeId()).equals(formType))?"selected" : ""%>><%=typeVo.getFormTypeName()%></option>
+  			    <% 	
+  			    }
+              }
+          }
+          %>
+       </select>
+       </td>
+     </tr>
+     <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="common.company"/> :
+       </td>
+       <td style="WIDTH:70%">
+         <select name="orgId">
+           <%
+            Collection companyList = currentStaff.getOwnCompanyList();  //CompanyHelper.getInstance().getOwnCompanyList(currentStaff.getOrgId());
+            if(companyList!=null && companyList.size()>0){
+            	Iterator it = companyList.iterator();
+            	while(it.hasNext()){
+            	   CompanyVO vo = (CompanyVO)it.next();
+            	   if(vo.getOrgId().equals(form.getOrgId())){
+            		   out.print("<option value='"+vo.getOrgId()+"' selected>" + vo.getOrgName()+"</option>");   
+            	   }else{
+            	     out.print("<option value='"+vo.getOrgId()+"'>" + vo.getOrgName()+"</option>");
+            	   }
+            	}
+            }
+           %>
+         </select>
+       </td>
+    </tr>
+    <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="form_design.action"/> :
+       </td>
+       <td style="WIDTH:70%">
+         <select name="actionType">
+           <option value=""></option>
+           <option value="01" <%=(form.getActionType()!=null && "01".equals(form.getActionType()))?"selected":""%>>Save</option>
+           <option value="02" <%=(form.getActionType()!=null && "02".equals(form.getActionType()))?"selected":""%>>Submit</option>
+         </select>
+       </td>
+    </tr>
+    <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="form_design.action"/> :
+       </td>
+       <td style="WIDTH:70%">
+         <textarea rows='4' cols='40' name="actionMessage"><%=(form.getActionMessage()!=null && !"".equals(form.getActionMessage()))?form.getActionMessage():""%></textarea>
+       </td>
+     </tr>
+    <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="form_design.before_validate"/> :
+       </td>
+       <td style="WIDTH:70%">
+         <textarea rows='3' cols='40' name="Validation"><%=(form.getPre_validation_url()!=null && !"".equals(form.getPre_validation_url()))?form.getPre_validation_url():""%></textarea>
+       </td>
+    </tr>
+    <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="form_design.after_handle"/> :
+       </td>
+       <td style="WIDTH:70%">
+         <textarea rows='3' cols='40' name="afterSaveUrl"><%=(form.getAfterSaveUrl()!=null && !"".equals(form.getAfterSaveUrl()))?form.getAfterSaveUrl():""%></textarea>
+       </td>
+    </tr>
+    <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="common.description"/> :
+       </td>
+       <td style="WIDTH:70%">
+         <textarea rows='5' cols='40' name="formDescription"><%=(form.getDescription()!=null && !"".equals(form.getDescription()))?form.getDescription():""%></textarea>
+       </td>
+     </tr>
+     <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="form_design.tip_field"/> :
+       </td>
+       <td style="WIDTH:70%">
+         <select name="tipField">
+           <option value=""></option>
+           <%
+           Iterator it = fieldList.iterator();
+           String fieldOptions = "";
+           while (it.hasNext()) {
+        	   FormSectionFieldVO field = (FormSectionFieldVO) it.next();
+        	   if (tipField != null && 
+        			   field.getSectionId().equals(tipField.getSectionId()) &&
+        			   field.getFieldId().equals(tipField.getFieldId())) {
+        		   fieldOptions += "<option value='" + field.getSectionId() + "$#*" + field.getFieldId() + "' selected>";
+        	   } else {
+        		   fieldOptions += "<option value='" + field.getSectionId() + "$#*" + field.getFieldId() + "'>";
+        	   }
+        	   fieldOptions += field.getSectionId() + "." + StringUtil.htmlEncoder(field.getFieldLabel());
+        	   fieldOptions += "</option>\n";
+           }
+           %>
+           <%=fieldOptions %>
+         </select>
+       </td>
+     </tr>
+     <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="form_design.highlight_field"/> :
+       </td>
+       <td style="WIDTH:70%">
+         <select name="highlightField">
+           <option value=""></option>
+           <%
+           it = fieldList.iterator();
+           fieldOptions = "";
+           while (it.hasNext()) {
+        	   FormSectionFieldVO field = (FormSectionFieldVO) it.next();
+        	   if (highlightField != null && 
+        			   field.getSectionId().equals(highlightField.getSectionId()) &&
+        			   field.getFieldId().equals(highlightField.getFieldId())) {
+        		   fieldOptions += "<option value='" + field.getSectionId() + "$#*" + field.getFieldId() + "' selected>";
+        	   } else {
+        		   fieldOptions += "<option value='" + field.getSectionId() + "$#*" + field.getFieldId() + "'>";
+        	   }
+        	   fieldOptions += field.getSectionId() + "." + StringUtil.htmlEncoder(field.getFieldLabel());
+        	   fieldOptions += "</option>\n";
+           }
+           %>
+           <%=fieldOptions %>
+         </select>
+       </td>
+     </tr>
+     <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="form_design.highlight_field_2"/> :
+       </td>
+       <td style="WIDTH:70%">
+         <select name="highlightField2">
+           <option value=""></option>
+           <%
+           it = fieldList.iterator();
+           fieldOptions = "";
+           while (it.hasNext()) {
+               FormSectionFieldVO field = (FormSectionFieldVO) it.next();
+               if (highlightField2 != null && 
+                       field.getSectionId().equals(highlightField2.getSectionId()) &&
+                       field.getFieldId().equals(highlightField2.getFieldId())) {
+                   fieldOptions += "<option value='" + field.getSectionId() + "$#*" + field.getFieldId() + "' selected>";
+               } else {
+                   fieldOptions += "<option value='" + field.getSectionId() + "$#*" + field.getFieldId() + "'>";
+               }
+               fieldOptions += field.getSectionId() + "." + StringUtil.htmlEncoder(field.getFieldLabel());
+               fieldOptions += "</option>\n";
+           }
+           %>
+           <%=fieldOptions %>
+         </select>
+       </td>
+     </tr>
+     <tr>
+       <td style="WIDTH:30%" align='right' class="tr3">
+         <i18n:message key="form_design.highlight_field_3"/> :
+       </td>
+       <td style="WIDTH:70%">
+         <select name="highlightField3">
+           <option value=""></option>
+           <%
+           it = fieldList.iterator();
+           fieldOptions = "";
+           while (it.hasNext()) {
+               FormSectionFieldVO field = (FormSectionFieldVO) it.next();
+               if (highlightField3 != null && 
+                       field.getSectionId().equals(highlightField3.getSectionId()) &&
+                       field.getFieldId().equals(highlightField3.getFieldId())) {
+                   fieldOptions += "<option value='" + field.getSectionId() + "$#*" + field.getFieldId() + "' selected>";
+               } else {
+                   fieldOptions += "<option value='" + field.getSectionId() + "$#*" + field.getFieldId() + "'>";
+               }
+               fieldOptions += field.getSectionId() + "." + StringUtil.htmlEncoder(field.getFieldLabel());
+               fieldOptions += "</option>\n";
+           }
+           %>
+           <%=fieldOptions %>
+         </select>
+       </td>
+     </tr>
+     <tr>
+       <td align='center' colspan='2'>
+         <input type='button' name='btnSubmit' value='<i18n:message key="button.submit"/>' onclick='submitForm()' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+         <input type='Reset' name='reset1' value='<i18n:message key="button.reset"/>' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+         <input type='button' name='close1' value='<i18n:message key="button.close"/>' onclick='window.close()' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+       </td>
+     </tr>
+   </table>
+  </form>
+</body>
+</html>

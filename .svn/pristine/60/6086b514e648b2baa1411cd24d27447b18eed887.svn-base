@@ -1,0 +1,246 @@
+<%@taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n"%>
+<%@page import="com.aiait.eflow.housekeeping.vo.StaffVO,com.aiait.eflow.common.*,com.aiait.eflow.common.helper.*"%>
+<%@page import="java.util.*,java.text.SimpleDateFormat,com.aiait.eflow.util.StringUtil,com.aiait.eflow.wkf.vo.*,com.aiait.eflow.wkf.util.DataMapUtil,com.aiait.eflow.common.helper.*" %>
+<%@page import="com.aiait.eflow.housekeeping.vo.FormTypeVO,com.aiait.eflow.common.CommonName,com.aiait.eflow.common.helper.FormTypeHelper,com.aiait.eflow.formmanage.vo.FormManageVO,com.aiait.eflow.housekeeping.vo.StaffVO"%>
+<%@page import="com.aiait.framework.i18n.*"%>
+<%@page contentType="text/html; charset=gb2312" %>
+<html>1234567 21212rtrtrtrtr
+<head>123123
+<title>eFlow personal work index</title>
+<link href="<%=request.getContextPath()%>/css/style.css"
+	rel="stylesheet" type="text/css">
+<style>
+body {
+	margin: 0;
+	_height: 100%;
+}
+
+.out {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	display: table-cell;
+	text-align: center;
+}
+
+.Pic {
+	background: #D2D3D5;
+	width: 100%;
+	height: 281px;
+	float: right;
+}
+
+.verticalAlign {
+	vertical-align: middle;
+	display: inline-block;
+	position: absolute;
+	height: 100%;
+	width: 1px;
+	margin-left: -1px;
+}
+
+.divAlign {
+	display: inline-block;
+	vertical-align: middle;
+}
+</style>
+</head>
+<body style="overflow-y: hidden; margin: none;">
+<div class="out"><span class="verticalAlign"></span>
+<div class="divAlign">
+<div style="margin-top: 15px; margin-left: 10px;">
+<table border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td
+			style="background-image: url(images/Novahtml._08.jpg); width: 453px; height: 174px;"></td>
+		<td>
+		<table border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td
+					style="background-color: #83A8C3; width: 123px; height: 87px; border: 2px solid #fff;">
+				<p style="color: white; padding: 5px; text-align: center;">
+					<a class="top-link"
+					href='<%=request.getContextPath()%>/formManageAction.it?method=displayFormFill&formSystemId=232'>友邦保险团体保险计划(组合)投保单</a></p>
+				</td>	
+				<td
+					style="background-color: #2EB0BD; width: 250px; height: 87px; border: 2px solid #fff;"
+					colspan="2"></td>
+				<td
+					style="background-color: #8ABA30; width: 123px; height: 87px; border: 2px solid #fff;"></td>
+				<td
+					style="background-color: #EF3A5B; width: 123px; height: 87px; border: 2px solid #fff;"></td>
+
+			</tr>
+			<tr>
+				<td
+					style="background-color: #C0A77E; width: 123px; height: 87px; border: 2px solid #fff;"></td>
+				<td
+					style="background-color: #F2854C; width: 123px; height: 87px; border: 2px solid #fff;"></td>
+				<td
+					style="background-color: #EBB741; width: 123px; height: 87px; border: 2px solid #fff;"></td>
+				<td
+					style="background-color: #375D81; width: 250px; height: 87px; border: 2px solid #fff;"
+					colspan="2"></td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+</table>
+</div>
+<div style="margin-left: 10px;">
+<table style="height: 62px;">
+	<tr>
+		<td class="search-button1"><a href="#" class="top-link"
+			style="width: 100%; text-align: center;">保单查询</a></td>
+		<td class="search-button2"><a href="#" class="top-link"
+			style="width: 100%; text-align: center;">人员查询</a></td>
+		<td>
+		<div class="search-box"><input name="Key" id="txtSearchPolicy"
+			type="text" value="保单号码/投保人编码/投保人名称"
+			style="height: 18px; display: block; float: left; color: #888; border: 0; background: none; font-size: 12px; font-weight: bold; margin-top: 5px; margin-left: 30px; width: 300px;" />
+		</div>
+		</td>
+		<td class="search-button3"><a href="#" class="top-link"
+			style="width: 100%; text-align: center;">查 询</a></td>
+	</tr>
+</table>
+</div>
+<div style="margin-left: 10px; text-align: left; width: 1076px;">
+<table style="border: 1px solid #E2E2E2; width: 100%;">
+	<tr style="height: 40px;">
+		<td width="230px;" colspan="10">
+			<div style="background: url(images/RedTitle.jpg) no-repeat left middle; margin-left: 8px; width: 200px; height: 18px;"> 
+				<span style="font: 12px Helvetica nenu, Arial, clean, sans-serif; color: #4f4f4f; font-weight: bold; margin-left: 10px;">待处理的任务</span>
+			</div>
+		</td>
+	</tr>
+	 <tr class="liebiao_tou">
+            <td align='center' ><i18n:message key="common.request_no"/></td>
+            <td align='center' ><i18n:message key="common.request_form"/></td>
+            <td align='center' ><i18n:message key="common.highlight_content"/></td>
+            <td align='center' ><i18n:message key="common.highlight_content"/> 2</td>
+            <td align='center' ><i18n:message key="common.highlight_content"/> 3</td>  
+            <td align='center' ><i18n:message key="common.status"/></td>
+            <td align='center' ><i18n:message key="common.submit_date"/></td>            
+            <td align='center' ><i18n:message key="common.company"/></td>			
+            <td align='center' ><i18n:message key="common.request_by"/></td>
+            <td align='center' ><i18n:message key="common.processed_by"/></td>
+            <td align='center'><i18n:message key="common.remaining"/></td>
+          </tr>
+</table>
+</div>
+<div style="margin-left: 10px; text-align: left; width: 1076px; margin-top: 20px;">
+<%
+  StaffVO currentStaff = (StaffVO)request.getSession().getAttribute(CommonName.CURRENT_STAFF_INFOR);
+
+  Collection formList = (ArrayList)request.getAttribute("formList"); // search result list
+  
+  Collection formSelectList = (ArrayList)request.getAttribute("formSelectList"); // select form list
+  
+%>
+<table style="border: 1px solid #E2E2E2; width: 100%;">
+	<tr style="height: 40px;">
+		<td width="230px;" colspan="9">
+			<div style="background: url(images/RedTitle.jpg) no-repeat left middle; margin-left: 8px; width: 200px; height: 18px;"> 
+				<span style="font: 12px Helvetica nenu, Arial, clean, sans-serif; color: #4f4f4f; font-weight: bold; margin-left: 10px;">已提交的任务</span>
+			</div>
+		</td>
+	</tr>
+	<tr class="liebiao_tou">
+        <td align='center' ><i18n:message key="common.request_no"/></td>
+        <td align='center' ><i18n:message key="common.request_form"/></td>
+        <td align='center' ><i18n:message key="common.highlight_content"/></td>
+        <td align='center' ><i18n:message key="common.status"/></td>
+        <td align='center' ><i18n:message key="common.submit_draft_date"/></td>
+        <td align='center' ><i18n:message key="common.submit_by"/></td>
+        <td align='center' ><i18n:message key="common.processed_by"/></td>
+        <td align='center' ><i18n:message key="common.processing_by"/></td>
+        <td align='center' ><i18n:message key="common.operation"/><%=CommonName.CURRENT_STAFF_INFOR %><d>
+      </tr>
+	      <%
+            if(formList!=null){
+            	SimpleDateFormat   df   =new   SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            	Iterator formIt = formList.iterator();
+            	int i = 1;
+            	String tempStatus = "";
+            while(formIt.hasNext()){
+            	WorkFlowProcessVO vo = (WorkFlowProcessVO)formIt.next();
+            	Date cDate = null;
+            	if(vo.getSubmissionDateStr()!=null && !"".equals(vo.getSubmissionDateStr())){
+            	   cDate = df.parse(vo.getSubmissionDateStr());
+            	}
+            	if(!"0".equals(vo.getNodeId()) && "03".equals(vo.getStatus())){ //如果不是开始节点，并且是“拒绝”状态，则将其传入到dealForm.jsp的值修改成“02”
+            		tempStatus = "02";
+            	}else{
+            		tempStatus = vo.getStatus();
+            	}
+                String viewFlag = "";
+                if (!currentStaff.getStaffCode().equalsIgnoreCase(vo.getRequestStaffCode()) 
+                        && !currentStaff.getStaffCode().equalsIgnoreCase(vo.getSubmittedBy())) {
+                    // Can only view the form requested by others
+                    viewFlag = "&viewFlag=false";
+                }
+          %>
+            <tr class="tr_change">
+              <td ><a href="javascript:openFormWithLayer('<%=request.getContextPath()%>/formManageAction.it?method=displayFormContent<%=viewFlag%>&operateType=view&status=<%=tempStatus%>&requestNo=<%=vo.getRequestNo()%>&formSystemId=<%=vo.getFormSystemId()%>')"
+              		<%=vo.getHtmlTitleAttr()%>><%=vo.getRequestNo()%>&nbsp;&nbsp;</td>
+              <td ><%=vo.getFormName()%>&nbsp;&nbsp;</td>
+              <td ><%=vo.getHighlightContent()%></td>
+              <td ><%=DataMapUtil.covertNodeStatus(vo.getStatus())%>&nbsp;&nbsp;</td>
+              <td ><%=(vo.getSubmissionDateStr()!=null && !"".equals(vo.getSubmissionDateStr()))?StringUtil.getDateStr(cDate,"MM/dd/yyyy HH:mm:ss"):""%>&nbsp;&nbsp;</td>
+              <td ><%=StaffTeamHelper.getInstance().getStaffNameByCode(vo.getSubmittedBy())%>&nbsp;&nbsp;</td>
+              <td ><%=StaffTeamHelper.getInstance().getStaffNameByCode(vo.getPreviousProcessor())%>&nbsp;&nbsp;</td>
+              <td >
+              <%
+              String processing_by = null;
+              if (CommonName.NODE_TYPE_WAITING.equals(vo.getNodeType())) {
+                  processing_by = vo.getNodeName();
+              } else {
+                  processing_by = (!"-1".equals(vo.getNodeId()) && vo.getIsDeputy()!=null && "1".equals(vo.getIsDeputy()) && vo.getOriginProcessor()!=null && vo.getOriginProcessor().indexOf(",")==-1 && (!"".equals(vo.getCurrentProcessor())))?"<a href='#' title=\"It is "+StaffTeamHelper.getInstance().getStaffNameByCode(vo.getOriginProcessor()).trim()+"'s deputy.\"><img  border=0 src='"+request.getContextPath()+"/images/deputy.gif'></a>":"";
+                  processing_by += StaffTeamHelper.getInstance().getStaffNameByCode(vo.getCurrentProcessor());
+              }
+              %>
+               <%=processing_by%>&nbsp;&nbsp;
+              </td>
+              <td>
+              <%
+               if(viewFlag.equals("") && ("00".equals(vo.getStatus()) || ("0".equals(vo.getNodeId()) && "03".equals(vo.getStatus())))){ //如果是Draft状态 或者 （是Reject状态并且当前节点是开始节点），则用户可以删除该form
+              %>
+              <a href="javascript:deleteForm('<%=vo.getRequestNo()%>')"><i18n:message key="button.delete"/></a>
+              <%}else{%>
+               <i18n:message key="button.delete"/>
+              <%}%>
+              &nbsp;&nbsp;
+              <a href="javascript:copyRequestedForm('<%=vo.getRequestNo()%>')"><i18n:message key="button.copy"/></a>
+			<%if (CompanyHelper.getInstance().getEFlowCompany().equals(
+			            CompanyHelper.EFlow_AIA_CHINA) && "04".equals(vo.getStatus())) {%>
+              &nbsp;&nbsp;
+              <a
+				href="javascript:openCenterWindow('<%=request.getContextPath()%>/formManageAction.it?method=supplementAttachFile&requestNo=<%=vo.getRequestNo()%>&formSystemId=<%=vo.getFormSystemId()%>','800','600')"
+				> <i18n:message key="button.upload" /> </a> <%}%>
+              </td>
+            </tr>
+          <%
+           i++; }
+          }else{
+          %>
+            <tr class="liebiao_nr2">
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+            </tr>
+          <%}%>
+        </table>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,618 @@
+package com.aiait.eflow.wkf.dao;
+
+import java.sql.*;
+import java.util.*;
+
+import com.aiait.eflow.common.CommonName;
+import com.aiait.eflow.util.*;
+import com.aiait.eflow.wkf.vo.*;
+import com.aiait.framework.common.DataType;
+import com.aiait.framework.db.*;
+import com.aiait.framework.exception.DAOException;
+import com.aiait.framework.vo.BaseVO;
+
+public class WorkFlowNodeDAO extends BaseDAOImpl {
+
+    public WorkFlowNodeDAO(IDBManager dbManager) {
+        super(dbManager);
+    }
+
+    public void updateNodeOpenFlag(String requestNo, String flag) throws DAOException {
+        String sql = "update teflow_wkf_process set open_flag='" + flag + "' where request_no='" + requestNo + "'";
+        dbManager.executeUpdate(sql);
+    }
+
+    /**
+     * 获取某个流程的所有定义的流转规则（以HASHMAP的形式返回）
+     * 
+     * @param flowId
+     * @return
+     * @throws DAOException
+     */
+    public HashMap getConditionByFlow(int flowId) throws DAOException {
+
+        String sql = "select a.flow_id,a.begin_node_id,a.end_node_id, "
+                + "(select section_remark from teflow_form_section where section_id=a.section_id AND form_system_id = (SELECT form_system_id from teflow_wkf_define where flow_id="
+                + flowId
+                + ")) section_name,"
+                + "(select field_label from teflow_form_section_field where field_id=a.field_id and section_id = a.section_id and form_system_id = (SELECT form_system_id from teflow_wkf_define where flow_id="
+                + flowId
+                + ")) field_name,"
+                + "a.compare_type"
+                + ",a.compare_value,a.compare_label,a.logic_type,a.field_id from teflow_wkf_detail_rule a where flow_id="
+                + flowId;
+
+        Collection list = dbManager.query(sql);
+        if (list == null || list.size() == 0)
+            return null;
+        HashMap map = new HashMap();
+        Iterator it = list.iterator();
+        String logicType = " and ";
+        while (it.hasNext()) {
+            HashMap tmp = (HashMap) it.next();
+            if (tmp.get("LOGIC_TYPE") != null) {
+                if ("01".equals(((String) tmp.get("LOGIC_TYPE")).trim())) {
+                    logicType = " and ";
+                } else if ("02".equals(((String) tmp.get("LOGIC_TYPE")).trim())) {
+                    logicType = " or ";
+                }
+            }
+            if (tmp.get("FIELD_NAME") == null) {
+                if (map.get(tmp.get("BEGIN_NODE_ID") + "&" + tmp.get("END_NODE_ID")) != null) {
+                    map.put(tmp.get("BEGIN_NODE_ID") + "&" + tmp.get("END_NODE_ID"),
+                            (String) map.get(tmp.get("BEGIN_NODE_ID") + "&" + tmp.get("END_NODE_ID"))
+                                    + DataConvertUtil.convertISOToGBK((String) tmp.get("SECTION_NAME")) + "."
+                                    + tmp.get("FIELD_ID") + tmp.get("COMPARE_TYPE")
+                                    + DataConvertUtil.convertISOToGBK((String) tmp.get("COMPARE_LABEL")) + logicType);
+                } else {
+                    map.put(tmp.get("BEGIN_NODE_ID") + "&" + tmp.get("END_NODE_ID"),
+                            DataConvertUtil.convertISOToGBK((String) tmp.get("SECTION_NAME")) + "."
+                                    + tmp.get("FIELD_ID") + tmp.get("COMPARE_TYPE")
+                                    + DataConvertUtil.convertISOToGBK((String) tmp.get("COMPARE_LABEL")) + logicType);
+                }
+            } else {
+                if (map.get(tmp.get("BEGIN_NODE_ID") + "&" + tmp.get("END_NODE_ID")) != null) {
+
+                    map.put(tmp.get("BEGIN_NODE_ID") + "&" + tmp.get("END_NODE_ID"),
+                            (String) map.get(tmp.get("BEGIN_NODE_ID") + "&" + tmp.get("END_NODE_ID"))
+                                    + DataConvertUtil.convertISOToGBK((String) tmp.get("SECTION_NAME")) + "."
+                                    + DataConvertUtil.convertISOToGBK((String) tmp.get("FIELD_NAME"))
+                                    + tmp.get("COMPARE_TYPE")
+                                    + DataConvertUtil.convertISOToGBK((String) tmp.get("COMPARE_LABEL")) + logicType);
+                } else {
+                    map.put(tmp.get("BEGIN_NODE_ID") + "&" + tmp.get("END_NODE_ID"),
+                            DataConvertUtil.convertISOToGBK((String) tmp.get("SECTION_NAME")) + "."
+                                    + DataConvertUtil.convertISOToGBK((String) tmp.get("FIELD_NAME"))
+                                    + tmp.get("COMPARE_TYPE")
+                                    + DataConvertUtil.convertISOToGBK((String) tmp.get("COMPARE_LABEL")) + logicType);
+                }
+            }
+        }
+        return map;
+
+        // return new HashMap();
+    }
+
+    public Collection getConditionVo(int flowId, String beginNodeId, String endNodeId) throws DAOException {
+        StringBuffer selSQL = new StringBuffer("select * from teflow_wkf_detail_rule where 1=1 ");
+        selSQL.append(" and flow_id=").append(flowId).append(" and begin_node_id='").append(beginNodeId).append("'")
+                .append(" and end_node_id='").append(endNodeId).append("'");
+        Collection list = dbManager.query(selSQL.toString());
+        // System.out.println(selSQL.toString());
+        if (list == null || list.size() == 0)
+            return new ArrayList();
+        Collection resultList = new ArrayList();
+        Iterator it = list.iterator();
+        while (it.hasNext()) {
+            HashMap map = (HashMap) it.next();
+            NodeConditionVO vo = new NodeConditionVO();
+            vo.setFlowId((new Integer((String) map.get("FLOW_ID"))).intValue());
+            vo.setSectionId(FieldUtil.convertSafeString(map, "SECTION_ID"));
+            vo.setFieldId(FieldUtil.convertSafeString(map, "FIELD_ID"));
+            vo.setBeginNodeId(beginNodeId);
+            vo.setEndNodeId(endNodeId);
+            vo.setCompareType(FieldUtil.convertSafeString(map, "COMPARE_TYPE"));
+            vo.setCompareValue(FieldUtil.convertSafeString(map, "COMPARE_VALUE"));
+            vo.setLogicType(FieldUtil.convertSafeString(map, "LOGIC_TYPE"));
+            vo.setFieldLabel(DataConvertUtil.convertISOToGBK(FieldUtil.convertSafeString(map, "FIELD_LABEL")));
+            vo.setCompareLabel(DataConvertUtil.convertISOToGBK(FieldUtil.convertSafeString(map, "COMPARE_LABEL")));
+            vo.setIsFunction(FieldUtil.convertSafeString(map, "IS_FUNCTION", "1"));
+            resultList.add(vo);
+        }
+        return resultList;
+    }
+
+    public void updateConditionSubSQL(String subSql, NodeConditionVO vo) throws DAOException {
+        // String sql =
+        StringBuffer sql = new StringBuffer(
+                "update teflow_wkf_detail_rule set sub_sql=?,condition_type=? where flow_id=? and begin_node_id=? and end_node_id=? ");
+        Object[] obj = new Object[5];
+        obj[0] = "" + subSql;
+        obj[1] = vo.getConditionType();
+        obj[2] = "" + vo.getFlowId();
+        obj[3] = vo.getBeginNodeId();
+        obj[4] = vo.getEndNodeId();
+        int[] dataType = {DataType.VARCHAR, DataType.VARCHAR, DataType.INT, DataType.VARCHAR, DataType.VARCHAR};
+        dbManager.executeUpdate(sql.toString(), obj, dataType);
+    }
+
+    public void saveConditionVo(NodeConditionVO vo, String saveType) throws DAOException {
+        StringBuffer sql = new StringBuffer("");
+        Object[] obj = new Object[11];
+        /**
+         * if ("edit".equals(saveType)) { sql .append(
+         * "update teflow_wkf_detail_rule set section_id=?,field_id=?,compare_type=?,compare_value=? where ")
+         * .append(" flow_id=? and begin_node_id=? and end_node_id=?"); obj[0] = vo.getSectionId(); obj[1] =
+         * vo.getFieldId(); obj[2] = vo.getCompareType(); obj[3] = vo.getCompareValue(); obj[4] = "" + vo.getFlowId();
+         * obj[5] = vo.getBeginNodeId(); obj[6] = vo.getEndNodeId(); int[] dataType = { DataType.VARCHAR,
+         * DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR, DataType.INT, DataType.VARCHAR, DataType.VARCHAR };
+         * dbManager.executeUpdate(sql.toString(), obj, dataType); } else {
+         **/
+        sql.append(
+                "insert into teflow_wkf_detail_rule(flow_id,begin_node_id,end_node_id,section_id,field_id,compare_type,compare_value,logic_type,field_label,compare_label,is_function)  ")
+                .append(" values(?,?,?,?,?,?,?,?,?,?,?)");
+        obj[0] = "" + vo.getFlowId();
+        obj[1] = vo.getBeginNodeId();
+        obj[2] = vo.getEndNodeId();
+        obj[3] = vo.getSectionId();
+        obj[4] = vo.getFieldId();
+        obj[5] = vo.getCompareType();
+        obj[6] = vo.getCompareValue();
+        obj[7] = vo.getLogicType();
+        obj[8] = vo.getFieldLabel();
+        obj[9] = vo.getCompareLabel();
+        obj[10] = vo.getIsFunction();
+
+        int[] dataType = {DataType.INT, DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR,
+                DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR,
+                DataType.VARCHAR};
+        dbManager.executeUpdate(sql.toString(), obj, dataType);
+
+    }
+
+    /**
+     * 获取指定的节点
+     * 
+     * @param flowId
+     * @param nodeId
+     * @return
+     * @throws DAOException
+     */
+    public WorkFlowItemVO getNodeById(int flowId, String nodeId) throws DAOException {
+        String sql = "select a.*, b.processor_field, d.company_field, e.delaytime_field, c.approve_handle, c.reject_handle from teflow_wkf_detail a left join ("
+                + "select flow_id, node_id, section_id + '.' + field_id as processor_field from teflow_wkf_special_field where field_type = 1) b "
+                + "on (a.flow_id = b.flow_id) and (a.node_id = b.node_id) left join ("
+                + "select flow_id, node_id, section_id + '.' + field_id as company_field from teflow_wkf_special_field where field_type = 2) d "
+                + "on (a.flow_id = d.flow_id) and (a.node_id = d.node_id) left join ("
+                + "select flow_id, node_id, section_id + '.' + field_id as delaytime_field from teflow_wkf_special_field where field_type = 3) e "
+                + "on (a.flow_id = e.flow_id) and (a.node_id = e.node_id) "
+                + "left join teflow_wkf_handle c on (a.flow_id = c.flow_id) and (a.node_id = c.node_id) "
+                + "where a.flow_id = " + flowId + " and a.node_id = " + nodeId;
+        Collection list = dbManager.query(sql);
+
+        if (list == null || list.size() == 0)
+            return null;
+        HashMap map = (HashMap) list.iterator().next();
+        WorkFlowItemVO node = convertRecord(map);
+        node.setProcessorField(FieldUtil.convertSafeString(map, "PROCESSOR_FIELD"));
+        node.setCompanyField(FieldUtil.convertSafeString(map, "COMPANY_FIELD"));
+        node.setDelaytimeField(FieldUtil.convertSafeString(map, "DELAYTIME_FIELD"));
+        node.setApproveHandle(FieldUtil.convertSafeString(map, "APPROVE_HANDLE"));
+        node.setRejectHandle(FieldUtil.convertSafeString(map, "REJECT_HANDLE"));
+        return node;
+    }
+
+    /**
+     * 获取指定的节点 DS-006 增加 对新字段“FILL_SECTION_FIELDS”的处理
+     * 
+     * @param flowId
+     * @param nodeId
+     * @return
+     * @throws DAOException
+     */
+    public WorkFlowItemVO getNodeByFormId(int formSystemId, String nodeId) throws DAOException {
+        StringBuffer selectSQL = new StringBuffer("select * from teflow_wkf_detail");
+        selectSQL.append(" where flow_id= (select flow_id from teflow_wkf_define where form_system_id=")
+                .append(formSystemId).append(") and node_id='").append(nodeId).append("'");
+        Collection list = dbManager.query(selectSQL.toString());
+        if (list == null || list.size() == 0)
+            return null;
+        HashMap map = (HashMap) list.iterator().next();
+        WorkFlowItemVO node = convertRecord(map);
+        return node;
+    }
+
+    /**
+     * 获取指定节点的下一个节点
+     * 
+     * @param flowId
+     * @param nodeId
+     * @return
+     * @throws DAOException
+     */
+    public WorkFlowItemVO getNextNodeById(int formSystemId, String nodeId, String requestNo, String processor)
+            throws DAOException {
+        Collection paramList = new ArrayList();
+
+        paramList.add("" + formSystemId);
+        paramList.add(nodeId);
+        paramList.add(requestNo);
+        paramList.add(processor);
+        paramList.add("");
+        paramList.add("");
+        paramList.add("");
+        // 2010-08-03 增加参数@deputyOriginStaff IT1161 by Mario
+        paramList.add("");
+
+        int[] parameterPosition = {5};
+        int[] returnType = {dbManager.DATA_TYPE_VARCHAR};
+
+        String[] result = dbManager.prepareCall4("poef_wkf_getNextNode", paramList, parameterPosition, returnType);
+
+        String nextNodeId = "";
+
+        if (result != null) {
+            nextNodeId = result[0];
+        }
+        if ("".equals(nextNodeId) || "-999".equals(nextNodeId)) {
+            return new WorkFlowItemVO();
+        }
+
+        StringBuffer selectSQL = new StringBuffer("select * from teflow_wkf_detail");
+        /**
+         * selectSQL .append( " where flow_id in (select flow_id from teflow_wkf_define where form_system_id=")
+         * .append(formSystemId).append(") and (pre_node_id='").append(
+         * nodeId).append("' or pre_node_id like '%,"+nodeId
+         * +"' or pre_node_id like '"+nodeId+",%' or pre_node_id like '%,"+nodeId+",%') ");
+         **/
+        selectSQL.append(" where flow_id in (select flow_id from teflow_wkf_define where form_system_id=")
+                .append(formSystemId).append(") and node_id='" + nextNodeId + "' ");
+        Collection list = dbManager.query(selectSQL.toString());
+        if (list == null || list.size() == 0)
+            return null;
+        HashMap map = (HashMap) list.iterator().next();
+        WorkFlowItemVO node = convertRecord(map);
+        return node;
+    }
+
+    public int getMaxNodeIdByFlow(int flowId) throws DAOException {
+        String maxSQL = "select max(convert(int,node_id)) max_node_id from teflow_wkf_detail where flow_id=" + flowId;
+        Collection list = dbManager.query(maxSQL);
+        if (list == null || list.size() == 0)
+            return 0;
+        HashMap map = (HashMap) list.iterator().next();
+        if ((String) map.get("MAX_NODE_ID") != null && !"".equals((String) map.get("MAX_NODE_ID"))) {
+            return (new Integer((String) map.get("MAX_NODE_ID"))).intValue();
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * 删除指定flow的指定节点的所有条件
+     * 
+     * @param flowId
+     * @throws DAOException
+     */
+    public void deleteNodeConditionByFlow(int flowId, String beginNodeId, String endNodeId) throws DAOException {
+        String delSQL = "delete from teflow_wkf_detail_rule where flow_id=" + flowId + " and begin_node_id='"
+                + beginNodeId + "' and end_node_id='" + endNodeId + "'";
+        dbManager.executeUpdate(delSQL);
+    }
+
+    /**
+     * 删除指定flow的所有节点
+     * 
+     * @param flowId
+     * @throws DAOException
+     */
+    public void deleteNodesByFlow(int flowId) throws DAOException {
+        StringBuffer sql = new StringBuffer("delete from teflow_wkf_detail where flow_id = ").append(flowId);
+        dbManager.executeUpdate(sql.toString());
+    }
+
+    /**
+     * 删除节点间已经不存在关系的节点条件记录
+     * 
+     * @param flowId
+     * @throws DAOException
+     */
+    public void deleteNodeConditionsByFlow(int flowId) throws DAOException {
+        StringBuffer sql = new StringBuffer("delete from teflow_wkf_detail_rule where flow_id not in (");
+        sql.append(
+                "select a.flow_id from teflow_wkf_detail_rule a INNER JOIN teflow_wkf_detail b ON a.flow_id = b.flow_id AND a.end_node_id = b.node_id AND b.pre_node_id LIKE '%' + a.begin_node_id + '%' ")
+                .append(" where a.flow_id=").append(flowId);
+        sql.append(")");
+        dbManager.executeUpdate(sql.toString());
+    }
+
+    /**
+     * 获取指定flow的所有节点数据
+     * 
+     * @param flowId
+     * @return
+     * @throws DAOException
+     */
+    public Collection getNodeListByFlow(int flowId) throws DAOException {
+        String sql = "select a.*, b.processor_field, d.company_field, e.delaytime_field, c.approve_handle, c.reject_handle from teflow_wkf_detail a left join ("
+                + "select flow_id, node_id, section_id + '.' + field_id as processor_field from teflow_wkf_special_field where field_type = 1) b "
+                + "on (a.flow_id = b.flow_id) and (a.node_id = b.node_id) left join ("
+                + "select flow_id, node_id, section_id + '.' + field_id as company_field from teflow_wkf_special_field where field_type = 2) d "
+                + "on (a.flow_id = d.flow_id) and (a.node_id = d.node_id) left join ("
+                + "select flow_id, node_id, section_id + '.' + field_id as delaytime_field from teflow_wkf_special_field where field_type = 3) e "
+                + "on (a.flow_id = e.flow_id) and (a.node_id = e.node_id) "
+                + "left join teflow_wkf_handle c on (a.flow_id = c.flow_id) and (a.node_id = c.node_id) "
+                + "where a.flow_id = " + flowId;
+
+        Collection list = dbManager.query(sql);
+        if (list == null || list.size() == 0)
+            return null;
+        Iterator it = list.iterator();
+        Collection resultList = new ArrayList();
+        while (it.hasNext()) {
+            HashMap map = (HashMap) it.next();
+            WorkFlowItemVO node = convertRecord(map);
+            node.setProcessorField(FieldUtil.convertSafeString(map, "PROCESSOR_FIELD"));
+            node.setCompanyField(FieldUtil.convertSafeString(map, "COMPANY_FIELD"));
+            node.setDelaytimeField(FieldUtil.convertSafeString(map, "DELAYTIME_FIELD"));
+            node.setApproveHandle(FieldUtil.convertSafeString(map, "APPROVE_HANDLE"));
+            node.setRejectHandle(FieldUtil.convertSafeString(map, "REJECT_HANDLE"));
+            resultList.add(node);
+        }
+        return resultList;
+    }
+
+    private WorkFlowItemVO convertRecord(HashMap map) {
+        WorkFlowItemVO node = new WorkFlowItemVO();
+        node.setFlowId(FieldUtil.convertSafeString(map, "FLOW_ID"));
+        node.setItemId(FieldUtil.convertSafeString(map, "NODE_ID"));
+        node.setName(DataConvertUtil.convertISOToGBK(FieldUtil.convertSafeString(map, "NODE_NAME")));
+        node.setNodeAlias(DataConvertUtil.convertISOToGBK(FieldUtil.convertSafeString(map, "NODE_ALIAS")));
+        node.setItemType(FieldUtil.convertSafeString(map, "NODE_TYPE"));
+        node.setPriDepId(FieldUtil.convertSafeString(map, "PRE_NODE_ID"));
+        if (map.get("LIMITED_HOURS") != null) {
+            node.setLimiteDate((String) map.get("LIMITED_HOURS"));
+        }
+        node.setHasRule(FieldUtil.convertSafeString(map, "HAS_RULE", "0"));
+        if ("1".equals((String) map.get("HAS_RULE"))) {
+            node.setRuleId(Integer.parseInt((String) map.get("RULE_ID")));
+        }
+        node.setPosX(FieldUtil.convertSafeString(map, "POSITION_X"));
+        node.setPosY(FieldUtil.convertSafeString(map, "POSITION_Y"));
+        node.setApproveGroupId(FieldUtil.convertSafeString(map, "APPROVER_GROUP_ID"));
+        node.setApprovestaffCode(FieldUtil.convertSafeString(map, "APPROVER_STAFF_CODE"));
+        node.setUpdateSections(FieldUtil.convertSafeString(map, "UPDATE_SECTION_FIELDS"));
+        node.setFillSectionFields(FieldUtil.convertSafeString(map, "FILL_SECTION_FIELDS"));
+        if (map.get("APPROVE_ALIAS") != null) {
+            node.setApproveAlias((String) map.get("APPROVE_ALIAS"));
+        }
+        if (map.get("REJECT_ALIAS") != null) {
+            node.setRejectAlias((String) map.get("REJECT_ALIAS"));
+        }
+        return node;
+    }
+
+    public int delete(BaseVO arg0) throws DAOException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public int save(BaseVO vo) throws DAOException {
+        WorkFlowItemVO node = (WorkFlowItemVO) vo;
+
+        StringBuffer insertSQL = new StringBuffer(
+                "insert into teflow_wkf_detail(flow_id,node_id,node_type,pre_node_id,node_name,");
+        insertSQL.append(
+                "limited_hours,has_rule,rule_id,approver_group_id,approver_staff_code,position_x,position_y,"
+                        + "update_section_fields,node_alias,fill_section_fields,approve_alias,reject_alias)").append(
+                " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        Object[] obj = new Object[17];
+        obj[0] = node.getFlowId();
+        obj[1] = node.getItemId();
+        obj[2] = node.getItemType();
+        obj[3] = node.getPriDepId();
+        obj[4] = node.getName();
+        obj[5] = node.getLimiteDate();
+        obj[6] = node.getHasRule();
+        obj[7] = "" + node.getRuleId();
+        obj[8] = node.getApproveGroupId();
+        obj[9] = node.getApprovestaffCode();
+        obj[10] = node.getPosX();
+        obj[11] = node.getPosY();
+        obj[12] = node.getUpdateSections();
+        obj[13] = node.getNodeAlias();
+        obj[14] = node.getFillSectionFields();
+        obj[15] = node.getApproveAlias();
+        obj[16] = node.getRejectAlias();
+
+        int[] dataType = {DataType.INT, DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR,
+                DataType.DOUBLE, DataType.VARCHAR, DataType.INT, DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR,
+                DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR, DataType.VARCHAR,
+                DataType.VARCHAR};
+        dbManager.executeUpdate(insertSQL.toString(), obj, dataType);
+
+        // For special fields
+        this.saveSpecialField(node);
+
+        // For handle fields
+        this.saveHandle(node);
+
+        return 0;
+    }
+
+    public int update(BaseVO arg0) throws DAOException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public void saveSpecialField(WorkFlowItemVO node) throws DAOException {
+        String SQL_INS = "insert into teflow_wkf_special_field(flow_id, node_id, field_type, section_id, field_id) values(?, ?, ?, ?, ?)";
+        String SQL_DEL = "delete from teflow_wkf_special_field where (flow_id = ?) and (node_id = ?)";
+
+        Connection conn = dbManager.getJDBCConnection();
+        PreparedStatement stm = null;
+
+        try {
+            stm = conn.prepareStatement(SQL_DEL);
+            int i = 1;
+            stm.setInt(i++, Integer.parseInt(node.getFlowId()));
+            stm.setString(i++, node.getItemId());
+            stm.executeUpdate();
+
+            // For processor field
+            String processorField = node.getProcessorField();
+            if (processorField != null && !processorField.equals("")) {
+                String[] _processorField = processorField.split("\\.");
+                String sectionId = _processorField[0];
+                String fieldId = _processorField[1];
+
+                stm.close();
+                stm = conn.prepareStatement(SQL_INS);
+                i = 1;
+                stm.setInt(i++, Integer.parseInt(node.getFlowId()));
+                stm.setString(i++, node.getItemId());
+                stm.setInt(i++, CommonName.NODE_SPECIAL_FIELD_TYPE_PROCESSOR);
+                stm.setString(i++, sectionId);
+                stm.setString(i++, fieldId);
+                stm.executeUpdate();
+            }
+
+            // For company field
+            String companyField = node.getCompanyField();
+            if (companyField != null && !companyField.equals("")) {
+                String[] _companyField = companyField.split("\\.");
+                String sectionId = _companyField[0];
+                String fieldId = _companyField[1];
+
+                stm.close();
+                stm = conn.prepareStatement(SQL_INS);
+                i = 1;
+                stm.setInt(i++, Integer.parseInt(node.getFlowId()));
+                stm.setString(i++, node.getItemId());
+                stm.setInt(i++, CommonName.NODE_SPECIAL_FIELD_TYPE_COMPANY);
+                stm.setString(i++, sectionId);
+                stm.setString(i++, fieldId);
+                stm.executeUpdate();
+            }
+
+            // For delay time field
+            String delaytimeField = node.getDelaytimeField();
+            if (delaytimeField != null && !delaytimeField.equals("")) {
+                String[] _delaytimeField = delaytimeField.split("\\.");
+                String sectionId = _delaytimeField[0];
+                String fieldId = _delaytimeField[1];
+
+                stm.close();
+                stm = conn.prepareStatement(SQL_INS);
+                i = 1;
+                stm.setInt(i++, Integer.parseInt(node.getFlowId()));
+                stm.setString(i++, node.getItemId());
+                stm.setInt(i++, CommonName.NODE_SPECIAL_FIELD_TYPE_DELAYED);
+                stm.setString(i++, sectionId);
+                stm.setString(i++, fieldId);
+                stm.executeUpdate();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new DAOException(ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void saveSpecialField(WorkFlowSpecialFieldVO specField) throws DAOException {
+        String SQL_INS = "insert into teflow_wkf_special_field(flow_id, node_id, field_type, section_id, field_id) values(?, ?, ?, ?, ?)";
+        String SQL_DEL = "delete from teflow_wkf_special_field where (flow_id = ?) and (node_id = ?) and (field_type = ?)";
+
+        Connection conn = dbManager.getJDBCConnection();
+        PreparedStatement stm = null;
+
+        try {
+            stm = conn.prepareStatement(SQL_DEL);
+            int i = 1;
+            stm.setInt(i++, specField.getFlowId());
+            stm.setString(i++, specField.getNodeId());
+            stm.setInt(i++, specField.getFieldType());
+            stm.executeUpdate();
+
+            if (specField.getFieldId() == null || "".equals(specField.getFieldId())) {
+                return;
+            }
+
+            stm.close();
+            stm = conn.prepareStatement(SQL_INS);
+            i = 1;
+            stm.setInt(i++, specField.getFlowId());
+            stm.setString(i++, specField.getNodeId());
+            stm.setInt(i++, specField.getFieldType());
+            stm.setString(i++, specField.getSectionId());
+            stm.setString(i++, specField.getFieldId());
+            stm.executeUpdate();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new DAOException(ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void saveHandle(WorkFlowItemVO node) throws DAOException {
+        String SQL_INS = "insert into teflow_wkf_handle(flow_id, node_id, approve_handle, reject_handle) values(?, ?, ?, ?)";
+        String SQL_DEL = "delete from teflow_wkf_handle where (flow_id = ?) and (node_id = ?)";
+
+        Connection conn = dbManager.getJDBCConnection();
+        PreparedStatement stm = null;
+
+        try {
+            stm = conn.prepareStatement(SQL_DEL);
+            int i = 1;
+            stm.setInt(i++, Integer.parseInt(node.getFlowId()));
+            stm.setString(i++, node.getItemId());
+            stm.executeUpdate();
+
+            if (node.getApproveHandle() == null) {
+                node.setApproveHandle("");
+            }
+            if (node.getRejectHandle() == null) {
+                node.setRejectHandle("");
+            }
+
+            if ("".equals(node.getApproveHandle().trim()) && "".equals(node.getRejectHandle().trim())) {
+                return;
+            }
+
+            stm.close();
+            stm = conn.prepareStatement(SQL_INS);
+            i = 1;
+            stm.setInt(i++, Integer.parseInt(node.getFlowId()));
+            stm.setString(i++, node.getItemId());
+            stm.setString(i++, node.getApproveHandle().trim());
+            stm.setString(i++, node.getRejectHandle().trim());
+            stm.executeUpdate();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new DAOException(ex);
+        } finally {
+            if (stm != null) {
+                try {
+                    stm.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+}

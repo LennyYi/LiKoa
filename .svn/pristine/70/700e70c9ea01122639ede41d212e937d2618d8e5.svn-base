@@ -1,0 +1,151 @@
+<%@ include file="/common/head.jsp" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page import="java.util.*,com.aiait.eflow.util.StringUtil,com.aiait.eflow.wkf.util.DataMapUtil,com.aiait.eflow.common.helper.*,com.aiait.eflow.report.vo.MedicalVO" %>
+<%@page import="com.aiait.eflow.housekeeping.vo.TeamVO,com.aiait.eflow.formmanage.vo.DictionaryDataVO" %>
+<%@ include file="/common/loading.jsp" %>
+<html>
+<script type=text/javascript src="<%=request.getContextPath()%>/common/message.jsp"></script>
+<head>
+<title>Export Medical Summary Report to Excel</title>
+<meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=GBK">
+<meta Content-Disposition="attachment; filename=a.xls">
+<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+<script type=text/javascript src="<%=request.getContextPath()%>/common/message.jsp"></script>
+
+<script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+<script language="javascript">
+
+function monthName(yearMonth){ 
+
+	var month=new Array(12);
+	month[0]="Jan";
+	month[1]="Feb";
+	month[2]="Mar";
+	month[3]="Apr";
+	month[4]="May";
+	month[5]="Jun";
+	month[6]="Jul";
+	month[7]="Aug";
+	month[8]="Sept";
+	month[9]="Oct";
+	month[10]="Nov";
+	month[11]="Dec";
+
+	if(yearMonth ==""){
+		document.write("Enquiry Month");
+	}
+	else{
+	  var monthNum = yearMonth.substring(5);  
+	  document.write(month[parseInt(monthNum)-1]);		
+	}
+ }
+ 
+</script>
+<%
+  String yearMonth = (String)request.getParameter("yearMonth");
+  yearMonth = yearMonth == null ? "" : yearMonth;
+
+  Collection medicalSummaryList = (Collection)request.getAttribute("medicalSummaryList");
+  response.setContentType("application/vnd.ms-excel;charset=GBK");
+%>
+</head>
+<body style="font-family: Arial, Helvetica, sans-serif;">
+
+<table width="100%" border="1" cellpadding="0" cellspacing="1" class=sortable id=mytable style="border: 1px #8899cc solid;">
+    <tr>
+        <td align='center' colspan="29" style="font-family: Arial; font-size: 12px; font-weight: bold; height: 30px;">
+        	Medical Summary Report (<%=yearMonth%>)
+        </td>
+    </tr>
+	<tr class="liebiao_tou">
+		<td align='center' rowspan="2" ><i18n:message key="housekeeping_user.staffcode" /></td>
+		<td align='center' rowspan="2"><i18n:message key="housekeeping_user.staffname"/></td>
+		<td align='center' rowspan="2"><i18n:message key="housekeeping_leavebalance.grade"/></td>
+		<td align='center' rowspan="2" style="border-right: #8899cc solid 1px"><i18n:message key="housekeeping_user.team" /></td>
+		
+		<td align='center' colspan="3" ><i18n:message key="report_medicalsummaryreport.staff" /><i18n:message key="report_medicalsummaryreport.clinic" /></td>
+		<td align='center' colspan="3" style="border-right: #8899cc solid 1px"><i18n:message key="report_medicalsummaryreport.staff" /><i18n:message key="report_medicalsummaryreport.hospitalization" /></td>
+		<td align='center' rowspan="2"><i18n:message key="housekeeping_medicalbalance.connubialName"/></td>
+		<td align='center' colspan="3" ><i18n:message key="report_medicalsummaryreport.connubial" /><i18n:message key="report_medicalsummaryreport.clinic" /></td>
+		<td align='center' colspan="3" style="border-right: #8899cc solid 1px"><i18n:message key="report_medicalsummaryreport.connubial" /><i18n:message key="report_medicalsummaryreport.hospitalization" /></td>
+		<td align='center' rowspan="2"><i18n:message key="housekeeping_medicalbalance.childName"/></td>
+		<td align='center' colspan="3"><i18n:message key="report_medicalsummaryreport.child" /><i18n:message key="report_medicalsummaryreport.clinic" /></td>
+		<td align='center' colspan="3" style="border-right: #8899cc solid 1px"><i18n:message key="report_medicalsummaryreport.child" /><i18n:message key="report_medicalsummaryreport.hospitalization" /></td>
+		<td align='center' colspan="5"><i18n:message key="report_medicalsummaryreport.total" /></td>
+		
+
+	</tr>
+	
+	<tr class="liebiao_tou">
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthBegin" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthSpent" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthEnd" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthBegin" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthSpent" /></td>
+		<td align='center' style="border-right: #8899cc solid 1px"><i18n:message key="report_medicalsummaryreport.monthEnd" /></td>		
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthBegin" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthSpent" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthEnd" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthBegin" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthSpent" /></td>
+		<td align='center' style="border-right: #8899cc solid 1px"><i18n:message key="report_medicalsummaryreport.monthEnd" /></td>	
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthBegin" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthSpent" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthEnd" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthBegin" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthSpent" /></td>
+		<td align='center' style="border-right: #8899cc solid 1px"><i18n:message key="report_medicalsummaryreport.monthEnd" /></td>	
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthBegin" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthSpent" /><i18n:message key="report_medicalsummaryreport.aftax" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthEnd" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthSpent" /><i18n:message key="report_medicalsummaryreport.bftax" /></td>
+		<td align='center'><i18n:message key="report_medicalsummaryreport.monthSpent" /></td>
+	</tr>
+	<%
+            if(medicalSummaryList!=null){
+            	int i=1;
+            	Iterator it = medicalSummaryList.iterator();
+            	
+             while(it.hasNext()){
+            	 MedicalVO vo = (MedicalVO)it.next(); 
+          %>
+	<tr class="tr_change">
+		<td><%=vo.getStaffCode()%></td>
+		<td><%=StaffTeamHelper.getInstance().getStaffNameByCode(vo.getStaffCode())%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:0.0'><%=vo.getGrade()%></td>
+		<td style="border-right: #8899cc solid 1px"><%=StaffTeamHelper.getInstance().getTeamNameByCode(vo.getTeamCode())%></td>
+		
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getStaffCMonthBegin()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getStaffCMonthSpent()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getStaffCMonthEnd()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getStaffHMonthBegin()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getStaffHMonthSpent()%></td>
+		<td align='right' style="border-right: #8899cc solid 1px; vnd.ms-excel.numberformat:#,##0.00"><%=vo.getStaffHMonthEnd()%></td>
+		<td><%=vo.getConnubialName()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getConnubialCMonthBegin()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getConnubialCMonthSpent()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getConnubialCMonthEnd()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getConnubialHMonthBegin()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getConnubialHMonthSpent()%></td>
+		<td align='right' style="border-right: #8899cc solid 1px; vnd.ms-excel.numberformat:#,##0.00"><%=vo.getConnubialHMonthEnd()%></td>	
+		<td><%=vo.getChildName()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getChildCMonthBegin()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getChildCMonthSpent()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getChildCMonthEnd()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getChildHMonthBegin()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getChildHMonthSpent()%></td>
+		<td align='right' style="border-right: #8899cc solid 1px; vnd.ms-excel.numberformat:#,##0.00"><%=vo.getChildHMonthEnd()%></td>		
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getTotalMonthBegin()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getTotalMonthAfterTax()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getTotalMonthEnd()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getTotalMonthBeforeTax()%></td>
+		<td align='right' style='vnd.ms-excel.numberformat:#,##0.00'><%=vo.getTotalMonthSpent()%></td>
+	</tr>
+	<%             	
+           i++; }
+          }
+   %>
+ </table>
+</body>
+</html>
+

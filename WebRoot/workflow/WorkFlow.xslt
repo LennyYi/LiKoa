@@ -1,0 +1,120 @@
+<!--Task_ID	    Author	 Modify_Date	Description  -->
+<!--IT0958		Young	 10/16/2007     DS-012 Assign node type to workflow node  -->
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:v="urn:schemas-microsoft-com:vml"
+	version="1.0" > 
+	<xsl:template match="WorkFlow">
+		<xsl:apply-templates select="WorkFlowItem" />
+		<xsl:apply-templates select="Relation" />
+	</xsl:template>
+	<xsl:template match="WorkFlowItem">
+		<xsl:element name="v:Group">
+			<xsl:attribute name="id">WorkFlowItemGroup</xsl:attribute>
+			<xsl:attribute name="Style">WIDTH: 1000px; POSITION: absolute; HEIGHT: 500px;Left:<xsl:value-of select="PosX" />;Top:<xsl:value-of select="PosY" />;Z-Index:9000</xsl:attribute>
+			<xsl:attribute name="coordsize">1000,500</xsl:attribute>
+			<xsl:element name="v:roundrect">
+				<xsl:attribute name="id">
+					<xsl:value-of select="ItemID" />
+				</xsl:attribute>
+				<xsl:attribute name="class">WorkFlowItem</xsl:attribute>
+				<xsl:attribute name="style">position:absolute;WIDTH:1000px;HEIGHT:500px;</xsl:attribute>
+				<!--<xsl:attribute name="Title"><xsl:value-of select="NodeAlias" />:<xsl:value-of select="LimiteDate" />(hours)</xsl:attribute>
+				-->
+				<xsl:attribute name="DepName"><xsl:value-of select="Name" /></xsl:attribute>
+				<xsl:attribute name="NodeAlias"><xsl:value-of select="NodeAlias" /></xsl:attribute>
+				<xsl:attribute name="NodeType"><xsl:value-of select="NodeType" /></xsl:attribute>
+                <xsl:attribute name="processorField"><xsl:value-of select="processorField" /></xsl:attribute>
+                <xsl:attribute name="companyField"><xsl:value-of select="companyField" /></xsl:attribute>
+                <xsl:attribute name="delaytimeField"><xsl:value-of select="delaytimeField" /></xsl:attribute>
+                <xsl:attribute name="approveHandle"><xsl:value-of select="approveHandle" /></xsl:attribute>
+                <xsl:attribute name="rejectHandle"><xsl:value-of select="rejectHandle" /></xsl:attribute>
+                <xsl:attribute name="approveAlias"><xsl:value-of select="approveAlias" /></xsl:attribute>
+                <xsl:attribute name="rejectAlias"><xsl:value-of select="rejectAlias" /></xsl:attribute>
+				<xsl:attribute name="LimiteDate"><xsl:value-of select="LimiteDate" /></xsl:attribute>
+				<xsl:attribute name="ApproverList"><xsl:value-of select="ApproverList"/></xsl:attribute>
+				<xsl:attribute name="UpdateSections"><xsl:value-of select="UpdateSections"/></xsl:attribute>
+				<xsl:attribute name="NewSectionFields"><xsl:value-of select="NewSectionFields"/></xsl:attribute>
+				
+				<xsl:element name="v:fill">
+				<xsl:attribute name="type">Gradient</xsl:attribute>
+				<xsl:attribute name="color">
+				  <xsl:choose>
+				       <xsl:when test="CurrentItem='true'">
+                          green
+                       </xsl:when>
+				       <xsl:otherwise>
+                           red
+                       </xsl:otherwise>
+				   </xsl:choose>
+				</xsl:attribute>
+				<xsl:attribute name="color2">yellow</xsl:attribute>
+				<xsl:attribute name="angle">0</xsl:attribute>
+				<xsl:attribute name="method">sigma</xsl:attribute>
+				</xsl:element>
+				<xsl:element name="v:shadow">
+					<xsl:attribute name="on">t</xsl:attribute>
+					<xsl:attribute name="color">black</xsl:attribute>
+					<xsl:attribute name="type">perspective</xsl:attribute>
+					<xsl:attribute name="opacity">0.3</xsl:attribute>
+					<xsl:attribute name="offset">2pt,3pt"</xsl:attribute>
+				</xsl:element>
+				<xsl:element name="v:TextBox">
+					<xsl:attribute name="style">text-align:center;top:10px;font-weight:bold;font-family:Arial;font-size:12px;word-wrap:break-all;</xsl:attribute>
+          			<xsl:value-of select="Name" />
+				</xsl:element>	
+				<xsl:element name="v:stroke">
+					<xsl:attribute name="color">#5082B9</xsl:attribute>
+				</xsl:element>
+			
+			</xsl:element>
+				
+				<xsl:element name="v:line">
+					<xsl:attribute name="Refid"><xsl:value-of select="ItemID" /></xsl:attribute>
+					<xsl:attribute name="class">EndLine</xsl:attribute>
+						<xsl:attribute name="on">false</xsl:attribute>
+					<xsl:attribute name="strokeweight">4px</xsl:attribute>
+					<xsl:attribute name="Style">cursor:hand</xsl:attribute>
+					<xsl:attribute name="from">1000,250</xsl:attribute>
+					<xsl:attribute name="to">1150,250</xsl:attribute>
+					<xsl:element name="v:stroke">
+						<xsl:attribute name="color">black</xsl:attribute>
+						<xsl:attribute name="EndArrow">classic</xsl:attribute>
+					</xsl:element>
+				</xsl:element>
+				<xsl:element name="v:line">
+					<xsl:attribute name="Refid"><xsl:value-of select="ItemID" /></xsl:attribute>
+					<xsl:attribute name="class">StartLine</xsl:attribute>
+					<xsl:attribute name="strokeweight">3px</xsl:attribute>
+					<xsl:attribute name="Style">Cursor:cross</xsl:attribute>
+					<xsl:attribute name="from">-100,250</xsl:attribute>
+					<xsl:attribute name="to">0,250</xsl:attribute>
+					<xsl:element name="v:stroke">
+						<xsl:attribute name="color">black</xsl:attribute>
+						<xsl:attribute name="StartArrow">oval</xsl:attribute>
+					</xsl:element>
+				</xsl:element>
+					
+			</xsl:element>
+	</xsl:template>
+	<xsl:template match="Relation">
+		<xsl:element name="v:polyline">
+			<xsl:attribute name="id">ConnectLine</xsl:attribute>
+			<xsl:attribute name="strokeweight">4px</xsl:attribute>
+			<xsl:attribute name="class">NormalLine</xsl:attribute>
+			<xsl:attribute name="style">Z-Index:-1</xsl:attribute>
+			<xsl:attribute name="title"><xsl:value-of select="Title" /></xsl:attribute>
+			<xsl:attribute name="BeginShape">
+				<xsl:value-of select="MasterItem" />
+			</xsl:attribute>
+			<xsl:attribute name="EndShape">
+				<xsl:value-of select="SecondItem" />
+			</xsl:attribute>
+			<xsl:attribute name="points">0,0,10,10</xsl:attribute>
+			<xsl:element name="v:stroke">
+				<xsl:attribute name="color">blue</xsl:attribute>
+				<xsl:attribute name="EndArrow">classic</xsl:attribute>
+				<xsl:attribute name="DashStyle">Solid</xsl:attribute>
+      			<xsl:attribute name="LineStyle">Single</xsl:attribute>
+			</xsl:element>
+		</xsl:element>
+	</xsl:template>
+</xsl:stylesheet>

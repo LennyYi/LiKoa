@@ -1,0 +1,235 @@
+<!-- Task_ID	Author	Modify_Date		Description -->
+<!-- IT0958 	Young	11/01/2007		add query condition and authority to FormType -->
+<%@ include file="/common/head.jsp" %>
+<%@ include file="/common/loading.jsp" %>
+<%@ taglib uri="/WEB-INF/purview.tld" prefix="purview" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page import="java.util.*,com.aiait.eflow.housekeeping.vo.StaffVO,com.aiait.eflow.housekeeping.vo.FormTypeVO,com.aiait.eflow.wkf.vo.*,com.aiait.eflow.common.helper.*,com.aiait.eflow.common.*" %>
+<%@page import="com.aiait.eflow.common.helper.CompanyHelper,com.aiait.eflow.housekeeping.vo.CompanyVO" %>
+<html>
+<head>
+<title>Manage WorkFlow</title>
+<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+<script type=text/javascript src="<%=request.getContextPath()%>/common/message.jsp"></script>
+<script src="<%=request.getContextPath()%>/js/webtools.js" language="JavaScript"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+<SCRIPT language="javascript" src="<%=request.getContextPath()%>/js/sorttable.js"></SCRIPT>
+<script language="javascript" src="<%=request.getContextPath()%>/js/resizeCol.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+<script language="javascript">
+   function addFlow(url){
+      openCenterWindow(url,400,300);
+   }
+   function copyFlow(url){
+     if(confirm("Are you sure to copy current flow")==false){
+       return;
+     }
+     var xmlhttp = createXMLHttpRequest();
+     var result;
+     if(xmlhttp){
+         xmlhttp.open('POST',url,false);
+         xmlhttp.onreadystatechange = function()
+         {
+             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                 result = xmlhttp.responseText;
+              }
+         }
+         xmlhttp.setRequestHeader("If-Modified-Since","0");
+         xmlhttp.send(null);
+     }   
+     if(result.Trim()=="success"){
+       window.location.reload();
+     }else{
+       alert("Fail to Copy WorkFlow");
+     }
+   }
+   function delFlow(){
+     if(checkSelect("flowId")==0){
+       alert("You have not selected any records to delete!");
+       return;
+     }
+     if(confirm("Are you sure to delete the selected records")){
+       var flowIdStr = getTableSelectRecordStr("flowId","flowId");
+       var url = "<%=request.getContextPath()%>/wkfDesignAction.it?method=deleteWorkFlow&" + flowIdStr;
+       var xmlhttp = createXMLHttpRequest();
+       var result;
+       if(xmlhttp){
+           xmlhttp.open('POST',url,false);
+           xmlhttp.onreadystatechange = function()
+           {
+             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                 result = xmlhttp.responseText;
+             }
+           }
+           xmlhttp.setRequestHeader("If-Modified-Since","0");
+           xmlhttp.send(null);
+       } 
+       if(result.Trim()=="success"){
+          window.location.reload();
+          alert("Delete WorkFlow records successfully");
+       }else{
+          alert(result);
+       }
+     }
+   }
+   //IT0958 New begin
+   function searchFlow(){
+    document.forms[0].action = "<%=request.getContextPath()%>/wkfDesignAction.it?method=listFlow";
+    document.forms[0].submit();
+  }
+  //IT0958 end
+</script>
+
+<%
+    String orgId = (String)request.getParameter("orgId");
+	Collection flowList = (ArrayList)request.getAttribute("flowList");
+	//IT0958 new begin
+	String flowName = (String)request.getParameter("flowName");
+	String formType = (String)request.getParameter("formType");	
+	StaffVO currentStaff = (StaffVO)request.getSession().getAttribute(CommonName.CURRENT_STAFF_INFOR); 
+  	AuthorityHelper authority = AuthorityHelper.getInstance();
+  	if(orgId==null || "".equals(orgId)){
+  	  orgId = currentStaff.getOrgId();
+    }
+	//IT0958 end
+%>
+
+<body>
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+ <tr>
+ 	<td height="10"></td>
+ </tr>
+ <!--<tr>
+ 	<td>
+ 	  <strong><font color='#5980BB' family='Times New Roman'><i18n:message key="flow_design.location"/></font></strong>
+ 	 </td>
+ </tr>
+--></table>
+<form name="myFlow" method="post">
+   <table WIDTH=100% bordercolor="#6595D6" style="border-collapse:collapse;"  BORDER=1 CELLPADDING=3 CELLSPACING=0 class="tr0">   
+     <tr class="tr1">
+       <td align='center' colspan='4'><B><i18n:message key="flow_design.flowdesign"/></B></td>
+     </tr>
+     <!-- IT0958 New begin -->
+     <TR> 
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="flow_design.flowname"/></span></div></TD>
+      <TD width=35% height="20" > 
+        <input type="text"  value="<%=flowName==null?"":flowName%>" name="flowName">
+      </TD>
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="flow_design.formtype"/></span></div></TD>
+      <TD width=30% height="20">
+         <select name="formType">
+          <option value="">All</option>
+         <% 
+            Collection typeList = FormTypeHelper.getInstance().getFormTypeList();
+            if(typeList!=null && typeList.size()>0){
+  		      Iterator it = typeList.iterator();
+  		      while(it.hasNext()){
+  			    FormTypeVO typeVo = (FormTypeVO)it.next();
+  			    if(authority.checkAuthorityByFormType(currentStaff.getCurrentRoleId(),ModuleOperateName.MODULE_FORM_MANAGE,typeVo.getFormTypeId())){
+  			    %>
+  			    <option value="<%=typeVo.getFormTypeId()%>" <%=(formType!=null && (typeVo.getFormTypeId()).equals(formType))?"selected" : ""%>><%=typeVo.getFormTypeName()%></option>
+  			    <% 	
+  			    }
+              }
+          }
+          %>
+        </select>
+      </TD>
+    </TR>
+     <tr>
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="common.company"/></span></div></TD>
+      <TD width=35% height="20" colspan='3'> 
+         <select name="orgId">
+           <%
+            Collection companyList = currentStaff.getOwnCompanyList(); //CompanyHelper.getInstance().getOwnCompanyList(currentStaff.getOrgId());
+            if(companyList!=null && companyList.size()>0){
+            	Iterator it = companyList.iterator();
+            	while(it.hasNext()){
+            	   CompanyVO vo = (CompanyVO)it.next();
+            	   if(vo.getOrgId().equals(orgId)){
+            		   out.print("<option value='"+vo.getOrgId()+"' selected>" + vo.getOrgName()+"</option>");   
+            	   }else{
+            	     out.print("<option value='"+vo.getOrgId()+"'>" + vo.getOrgName()+"</option>");
+            	   }
+            	}
+            }
+           %>
+         </select>
+      </TD>
+     </tr>
+    <!-- IT0958 end -->
+     <tr>
+       <td align='center' colspan='4'>
+       <!-- IT0958 New begin -->
+       <input type="button" name="searchBtn" value='<i18n:message key="button.search"/>' onclick="searchFlow()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+         <input type="Reset" name="resetBtn" value='<i18n:message key="button.reset"/>' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+       <!-- IT0958 end -->
+       <purview:purview moduleId='<%=ModuleOperateName.MODULE_FLOW_MANAGE%>' operateId='<%=ModuleOperateName.OPER_FLOW_ADD%>' isButton='true' labelValue='Add' buttonWidth="60px">
+        <input type="button" name="addBtn" value='<i18n:message key="button.add"/>' onclick="addFlow('<%=request.getContextPath()%>/wkfDesignAction.it?method=editFlowBaseInfor&saveType=add')" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;
+       </purview:purview>
+       <purview:purview moduleId='<%=ModuleOperateName.MODULE_FLOW_MANAGE%>' operateId='<%=ModuleOperateName.OPER_FLOW_DELETE%>' isButton='true' labelValue='Delete' buttonWidth="60px">
+        <input type="button" name="deleteBtn" value='<i18n:message key="button.delete"/>' onclick="delFlow()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+        </purview:purview>
+       </td>
+     </tr>
+     </table>
+    </form>  
+    <table width="100%"  border="0" cellpadding="0" cellspacing="1" class=sortable id=mytable style="border:1px #8899cc solid;">
+          <tr class="liebiao_tou">
+            <td align='center' ><input type="checkbox" name="allBtn" onclick="selectAll(this,'flowId')"></td>
+            <td align='center' ><i18n:message key="flow_design.flowname"/></td>
+            <td align='center' ><i18n:message key="flow_design.description"/></td>
+            <td align='center' ><i18n:message key="common.company"/></td>
+            <td align='center' ><i18n:message key="flow_design.associatedform"/></td>
+            <td align='center' ><i18n:message key="flow_design.action"/></td>
+          </tr>
+          <%
+            if(flowList!=null){
+            	int i = 1;
+            	Iterator flowIt = flowList.iterator();
+            while(flowIt.hasNext()){
+            	WorkFlowVO flow = (WorkFlowVO)flowIt.next();
+          %>
+            <tr class="tr_change">
+              <td align='center' ><input type="checkbox" name="flowId" value="<%=flow.getFlowBaseId()%>"></td>
+              <td ><%=flow.getFlowName()%>&nbsp;&nbsp;</td>
+              <td ><%=flow.getDescription()%>&nbsp;&nbsp;</td>
+              <td ><%=CompanyHelper.getInstance().getOrgName(flow.getOrgId()) %>&nbsp;&nbsp;</td>
+              <td ><a href="javascript:openCenterWindow('<%=request.getContextPath()%>/formManageAction.it?method=displayFormFill&formSystemId=<%=flow.getFormSystemId()%>&type=preview','800','600')"><%=flow.getFormId()%></a>&nbsp;&nbsp;</td>
+              <td >
+              <purview:purview moduleId='<%=ModuleOperateName.MODULE_FLOW_MANAGE%>' operateId='<%=ModuleOperateName.OPER_FLOW_DESIGN%>' isButton='false' labelValue='Design'>
+              <a href="<%=request.getContextPath()%>/wkfDesignAction.it?method=showDesign&flowId=<%=flow.getFlowBaseId()%>&formSystemId=<%=flow.getFormSystemId()%>"><i18n:message key="flow_design.design"/></a>
+              </purview:purview>
+              &nbsp;/&nbsp;
+              <purview:purview moduleId='<%=ModuleOperateName.MODULE_FLOW_MANAGE%>' operateId='<%=ModuleOperateName.OPER_FLOW_UPDATE%>' isButton='false' labelValue='Edit'>
+              <a href="javascript:addFlow('<%=request.getContextPath()%>/wkfDesignAction.it?method=editFlowBaseInfor&flowId=<%=flow.getFlowBaseId()%>&saveType=edit')"><i18n:message key="flow_design.edit"/></a>
+              </purview:purview>
+              &nbsp;/&nbsp;
+              <purview:purview moduleId='<%=ModuleOperateName.MODULE_FLOW_MANAGE%>' operateId='<%=ModuleOperateName.OPER_FLOW_COPY%>' isButton='false' labelValue='Copy'>
+              <a href="javascript:copyFlow('<%=request.getContextPath()%>/wkfDesignAction.it?method=copyFlow&flowId=<%=flow.getFlowBaseId()%>')"><i18n:message key="flow_design.copy"/></a>
+              </purview:purview>
+              </td>
+            </tr>
+          <%
+          i++; }
+          }else{
+          %>
+            <tr class="liebiao_nr2">
+              <td align='center'>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+            </tr>
+          <%}%>
+    </table>
+   </body>
+<script language="javascript">
+	setResizeAble(mytable);
+ </script>

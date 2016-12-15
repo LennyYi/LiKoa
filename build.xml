@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<project name="eflowchosystem" default="ear" basedir=".">
+	<property name="catalina.home" value="D:\jakarta-tomcat-5.0.25"></property>
+	
+	<target name="all" depends="init,build">
+		<echo>all in eflow system</echo>
+	</target>
+	
+	<target name="clean">
+	    <!--delete dir="X:/eFlow/webRoot/web-inf/classes"/-->
+	    <delete file="X:/Nova/Nova.war" />
+	</target>
+	
+	 <target name="jar" depends="init">
+	    <jar jarfile="${lib.dir}/${jar.name}.jar"
+	         basedir="${class.src.dir}"
+	         includes="**"/>
+	 </target>
+	
+	<target name="init" depends="clean">
+		<property file="build.properties" />
+	</target>
+	
+	<target name="build" depends="copy All">
+	</target>
+	
+<!--	<target name="copy jar">  
+		<echo>begin to copy ${jar.name}.jar to ${jar.to.dir}</echo>
+		<copy todir="${jar.to.dir}">
+			<fileset dir="${jar.src.dir}" includes="*.jar" />
+		</copy>
+		<echo>end copy jar</echo>
+	</target>-->
+	
+	<target name="copy jsp" depends="init">
+		<echo>begin to copy jsp to ${jsp.to.dir}</echo>
+		<copy todir="${jsp.to.dir}">
+			<fileset dir="${jsp.src.dir}" includes="*.*" />
+		</copy>
+		<copy todir="${jsp.to.dir}/common">
+				<fileset dir="${jsp.src.dir}/common" includes="*.*" />
+		</copy>
+			<copy todir="${jsp.to.dir}/housekeeping">
+					<fileset dir="${jsp.src.dir}/housekeeping" includes="*.*" />
+		</copy>
+		<copy todir="${jsp.to.dir}/workflow">
+				<fileset dir="${jsp.src.dir}/workflow" includes="*.*" />
+		</copy>
+	    <copy todir="${jsp.to.dir}/form">
+				<fileset dir="${jsp.src.dir}/form" includes="*.*" />
+		</copy>
+		<echo>end copy jsp</echo>
+	</target>
+	
+	<target name="copy user_manual" depends="init">
+		<echo>begin to copy jsp to ${jsp.to.dir}</echo>
+		<copy todir="${jsp.to.dir}/User-Manual-Html">
+			<fileset dir="${jsp.src.dir}/User-Manual-Html" includes="*.*" />
+		</copy>
+		<echo>end copy user_manual</echo>
+	</target>	
+	
+	<target name="copy other(include css and js)" depends="init">
+		<echo>begin to copy js to ${jsp.to.dir}/js</echo>
+		<copy todir="${jsp.to.dir}/js">
+			<fileset dir="${jsp.src.dir}/js" includes="*.js" />
+		</copy>
+		<echo>begin to copy css to ${jsp.to.dir}/css</echo>
+		<copy todir="${jsp.to.dir}/css">
+				<fileset dir="${jsp.src.dir}/css" includes="*.*" />
+		</copy>
+		<echo>begin to copy images to ${jsp.to.dir}/images</echo>
+		<copy todir="${jsp.to.dir}/images">
+				<fileset dir="${jsp.src.dir}/images" includes="*.*" />
+		</copy>		
+		<echo>end copy other</echo>
+	</target>
+
+	
+	<target name="copy WEB-INF" depends="init">
+		<echo>begin to copy WEB-INF/*.* to WEB-INF/</echo>
+		<copy todir="${jsp.to.dir}/WEB-INF">
+			<fileset dir="${jsp.src.dir}/WEB-INF" includes="*.*" />
+		</copy>
+		<echo>end copy jar</echo>
+	</target>
+	
+	<target name="copy All" depends="copy jsp,copy user_manual,copy other(include css and js),copy WEB-INF">
+		<echo>end copy All</echo>
+	</target>
+	
+	<target name="war" depends="init">
+		<!--<copy todir="${jsp.src.dir}/WEB-INF/lib">
+			<fileset dir="${jar.src.dir}" includes="*.jar" />
+		</copy>-->
+		<copy todir="${jsp.src.dir}/WEB-INF/classes">
+			<fileset dir="${class.src.dir}" includes="**/*.*" />
+			<fileset dir="${class.src.dir}" includes="*.*" />
+		</copy>
+		<war destfile="${base.src.dir}/eFlow.war" webxml="${jsp.src.dir}/WEB-INF/web.xml">
+			<fileset dir="${web.dir}">
+				<include name="**/*.*"/>
+				<exclude name="manual/**/*.*"/>
+			</fileset>
+		</war>
+		<copy todir="X:\eFlowEAR\temp">
+			<fileset dir="${jsp.src.dir}" includes="**/*.*" />
+			<fileset dir="${jsp.src.dir}" includes="*.*" />
+		</copy>
+		<copy todir="X:\eFlowEAR\temp\WEB-INF">
+			<fileset dir="${base.src.dir}" includes="*.xmi" />
+		</copy>
+		<war destfile="${base.src.dir}/Nova.war" webxml="${base.src.dir}/web.xml">
+			<fileset dir="${web.dir}">
+				<include name="**/*.*"/>
+				<exclude name="manual/**/*.*"/>				
+			</fileset>
+		</war>
+	</target>
+	
+	<target name="ear"  depends="war">
+	    <ear destfile="K:\DEVELOP\Client Server\HO Aiapt\eFlow\4_Engineering\4.03_Testing\UAT_EAR_SH\eFlow.ear"
+	    	appxml="X:\eFlowEAR\EarContent\META-INF\application.xml">
+	      <fileset dir="X:\eFlow" includes="*.jar,*.war"/>
+	    </ear>
+	</target>
+	
+	
+</project>

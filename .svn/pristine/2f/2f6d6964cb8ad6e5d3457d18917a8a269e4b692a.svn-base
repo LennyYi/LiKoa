@@ -1,0 +1,497 @@
+<aiaitmvc-config>
+	<datasource name="compnwJNDI" value="jdbc/compnwdatasource"></datasource>
+    <global-locations>
+        <location name="error" value="/common/errordisplay.jsp" redirect="false" />
+        <location name="tip" value="/common/errordisplay.jsp" redirect="false" />
+        <location name="tempsuccess" value="/common/tempSuccess.jsp" redirect="false" />
+        <location name="successTipPage" value="/common/successmessage.jsp" redirect="false" />
+        <location name="afterSavingHandle" value="/afterSaveFormAction.it?method=handleAfterSave" redirect="false" />
+        <location name="saveFormSuccess" value="/wkfProcessAction.it?method=listPersonalApplyForm" redirect="false" />
+        <location name="afterProcessingHandle" value="/wkfAfterProcessAction.it?method=otherProcess" redirect="false" />
+        <location name="selectUploadFile" value="/housekeeping/selectUploadFile.jsp" redirect="false" />
+        <location name="indexPage" value="/welcome.jsp" redirect="false" />
+    </global-locations>
+
+    <forms>
+        <form name="userForm" bean="" event="" clientValidate="yes" serverValidate="yes">
+            <property name="userName" size="20" type="java.lang.String" notNull="yes" defaultValue="test" />
+            <property name="userId" size="16" type="java.lang.String" notNull="yes" defaultValue="" />
+        </form>
+    </forms>
+
+    <actions>
+        <action path="/formManageAction" form="null" type="com.aiait.eflow.formmanage.action.FormManageAction" param="method">
+            <location name="listFormContent" value="/workflow/dealForm.jsp" redirect="false" />
+            <location name="availableFormList" value="/form/availableFormList.jsp" redirect="false" />
+            <location name="newFormPage" value="/form/createForm.jsp" redirect="false" />
+            <location name="editBaseFormPage" value="/form/editForm.jsp" redirect="false" />
+            <location name="sectionEditPage" value="/form/editFormSection.jsp" redirect="false" />
+            <location name="fieldEditPage" value="/form/editFormField.jsp" redirect="false" />
+            <location name="editWholeFormPage" value="/form/editWholeForm.jsp" redirect="false" />
+            <location name="success" value="/form/formDisplay.jsp" redirect="false" />
+            <location name="showManageForm" value="/form/manageForm.jsp" redirect="false" />
+            <location name="afterUpdateFormSection" value="/formManageAction.it?method=displayFormContent" redirect="false" />
+            <location name="saveSuccess" value="/wkfProcessAction.it?method=listPersonalApplyForm" redirect="false" />
+            <location name="adjustSectionOrderPage" value="/form/adjustSectionOrder.jsp" redirect="false" />
+            <location name="adjustFieldOrderPage" value="/form/adjustFieldOrder.jsp" redirect="false" />
+            <location name="adjustColumnWidthPage" value="/form/adjustSectionColumnWidth.jsp" redirect="false" />
+            <location name="fieldEditAssociatedFieldPage" value="/form/editFormAssociatedField.jsp" redirect="false" />
+            <location name="RefWindowPage" value="/form/addRefWindow.jsp" redirect="false" />
+            <location name="selectRefForm" value="/form/selectRefForm.jsp" redirect="false" />
+            <location name="editFormScript" value="/form/editFormScript.jsp" redirect="false" />
+            <location name="saveFormScript" value="/form/editFormScript.jsp" redirect="false" />
+            <location name="getFormScript" value="/form/formScript.jsp" redirect="false" />
+            <location name="showProcessorPicker" value="/form/formScript.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+        
+        <action path="/reportManageAction" form="null" type="com.aiait.eflow.reportmanage.action.ReportManageAction" param="method"><!--
+            
+            <location name="availableReportList" value="/report/availableReportList.jsp" redirect="false" />
+           
+            <location name="editBaseReportPage" value="/report/editReport.jsp" redirect="false" />
+            
+            
+            
+            
+            -->
+            <location name="listReportContent" value="/reportManager/dealReport.jsp" redirect="false" />
+            <location name="success" value="/reportManager/reportDisplay.jsp" redirect="false" />
+            <location name="fieldEditPage" value="/reportManager/editReportField.jsp" redirect="false" />
+            <location name="sectionEditPage" value="/reportManager/editReportSection.jsp" redirect="false" />
+            <location name="editWholeReportPage" value="/reportManager/editWholeReport.jsp" redirect="false" />
+            <location name="newReportPage" value="/reportManager/createReport.jsp" redirect="false" />
+            <location name="showManageReport" value="/reportManager/manageReport.jsp" redirect="false" />
+            <location name="getReportScript" value="/reportManager/reportScript.jsp" redirect="false" />
+            <location name="adjustSectionOrderPage" value="/reportManager/adjustSectionOrder.jsp" redirect="false" />
+            <location name="editReportScript" value="/reportManager/editReportScript.jsp" redirect="false" />
+            <location name="saveReportScript" value="/reportManager/editReportScript.jsp" redirect="false" />
+            <location name="editReportHtml" value="/reportManager/editReportHtmlCode.jsp" redirect="false" />
+            <location name="saveReportHtml" value="/reportManager/editReportHtmlCode.jsp" redirect="false" />
+            <location name="adjustColumnWidthPage" value="/reportManager/adjustSectionColumnWidth.jsp" redirect="false" />
+            <!--<location name="afterUpdateReportSection" value="/reportManageAction.it?method=displayReportContent" redirect="false" />
+            <location name="saveSuccess" value="/wkfProcessAction.it?method=listPersonalApplyReport" redirect="false" />
+            
+            <location name="adjustFieldOrderPage" value="/report/adjustFieldOrder.jsp" redirect="false" />
+            
+            <location name="fieldEditAssociatedFieldPage" value="/report/editReportAssociatedField.jsp" redirect="false" />
+            <location name="RefWindowPage" value="/report/addRefWindow.jsp" redirect="false" />
+            <location name="selectRefReport" value="/report/selectRefReport.jsp" redirect="false" />
+            
+            
+            <location name="showProcessorPicker" value="/report/reportScript.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        --></action>
+        
+        
+        
+
+        <action path="/formSectionAction" form="null" type="com.aiait.eflow.formmanage.action.FormSectionAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/afterSaveFormAction" form="null" type="com.aiait.eflow.formmanage.action.FormAfterSaveAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/otFormAction" form="null" type="com.aiait.eflow.formmanage.action.OTFormAction" param="method">
+            <location name="showWaitingStaff" value="/otform/waitingStaffList.jsp" redirect="false" />
+            <location name="showWaitingOTList" value="/otform/waitingOTList.jsp" redirect="false" />
+            <location name="rejectCommentsPage" value="/otform/rejectComments.jsp" redirect="false" />
+            <location name="showStaffCheckInout" value="/otform/listStaffCheckRecord.jsp" redirect="false" />
+            <location name="personalOTQueryPage" value="/report/personalOTQuery.jsp" redirect="false" />
+            <location name="personalOTSummaryPage" value="/report/personalOTSummary.jsp" redirect="false" />
+            <location name="exportOTSummaryPage" value="/report/exportTeamOTSummary.jsp" redirect="false" />
+            <location name="teamOTQueryPage" value="/report/teamOTQuery.jsp" redirect="false" />
+            <location name="teamOTSummaryPage" value="/report/teamOTSummary.jsp" redirect="false" />
+            <location name="companyOTSummaryPage" value="/report/companyOTSummary.jsp" redirect="false" />
+            <location name="exportCompanyOTSummaryPage" value="/report/exportCompanyOTSummary.jsp" redirect="false" />
+            <location name="excelTemplateSelectPage" value="/report/selectTemplate.jsp" redirect="false" />
+            <location name="listAdditionalOTRecord" value="/otform/listAdditionalOTRecord.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/uploadAction" form="null" type="com.aiait.eflow.formmanage.action.UploadAction" param="method">
+            <location name="showSelectFilePage" value="/upload/uploadFileSelect.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/baseDataManageAction" form="null" type="com.aiait.eflow.housekeeping.action.BaseDataManageAction" param="method">
+            <location name="listPage" value="/housekeeping/baseDataMain.jsp" redirect="false" />
+            <location name="optionLabelPage" value="/housekeeping/editOptionLabel.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/wkfDesignAction" form="null" type="com.aiait.eflow.wkf.action.WorkFlowDesignAction" param="method">
+            <location name="showCurrentFormFlow" value="/workflow/showFormFlow.jsp" redirect="false" />
+            <location name="flowBaseInforPage" value="/workflow/editFlowBase.jsp" redirect="false" />
+            <location name="nodeConditionPage" value="/workflow/editNodeCondition.jsp" redirect="false" />
+            <location name="nodePropertyPage" value="/workflow/editNode.jsp" redirect="false" />
+            <location name="flowlist" value="/workflow/workFlowList.jsp" redirect="false" />
+            <location name="loadWorkFlow" value="/wkfDesignAction.it?method=loadWorkFlow" redirect="false" />
+            <location name="designPage" value="/workflow/workFlowDesign.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/wkfProcessAction" form="null" type="com.aiait.eflow.wkf.action.WorkFlowProcessAction" param="method">
+            <location name="personalIndex" value="/workflow/personalWorkIndex.jsp" redirect="false" />
+            <location name="listClosedForm" value="/workflow/listClosedForm.jsp" redirect="false" />
+            <location name="listOvertimeForm" value="/workflow/listOvertimeForm.jsp" redirect="false" />
+            <location name="listInquiryForm" value="/workflow/listInquiryForm.jsp" redirect="false" />
+            <location name="exportInquiryForm" value="/workflow/exportQueryData.jsp" redirect="false" />
+            <location name="exportOvertimeForm" value="/workflow/exportOvertimeForm.jsp" redirect="false" />
+            <location name="commonQueryForm" value="/workflow/commonQueryForm.jsp" redirect="false" />
+            <location name="advanceQueryForm" value="/workflow/requesterAdvanceQuery.jsp" redirect="false" />
+            <location name="exportExcelSetPage" value="/workflow/exportExcelSetting.jsp" redirect="false" />
+            <location name="exportToExcelFile" value="/workflow/exportExcelFile.jsp" redirect="false" />
+            <location name="exportToAce" value="/workflow/listAceInterface.jsp" redirect="false" />
+            <location name="inviteExpertPage" value="/workflow/inviteExpertList.jsp" redirect="false" />
+            <location name="expertAdvicePage" value="/workflow/expertAdvice.jsp" redirect="false" />
+            <location name="listCommonQueryForm" value="/workflow/listCommonQueryForm.jsp" redirect="false" />
+            <location name="listRequesterAdvanceQuery" value="/workflow/requesterAdvanceQueryList.jsp" redirect="false" />
+            <location name="listMyDealedForm" value="/workflow/listMyDealedForm.jsp" redirect="false" />
+            <location name="listPersonalForm" value="/workflow/listPersonalForm.jsp" redirect="false" />
+            <location name="listForDealForm" value="/workflow/listForDealForm.jsp" redirect="false" />
+            
+            <location name="listNewRequestForm" value="/workflow/listNewRequestForm.jsp" redirect="false" />
+            
+            <location name="xlsForPersonallForm" value="/workflow/xlsForPersonallForm.jsp" redirect="false" />
+            <location name="xlsForDealForm" value="/workflow/xlsForDealForm.jsp" redirect="false" />
+            <location name="xlsForDealFormVender" value="/workflow/xlsForDealFormVender.jsp" redirect="false" />
+            <location name="xlsAdvanceQueryForm" value="/workflow/xlsAdvanceQueryForm.jsp" redirect="false" />
+            <location name="listAdjustForm" value="/workflow/listAdjustProcessingForm.jsp" redirect="false" />
+            <location name="auditPage" value="/workflow/auditProcess.jsp" redirect="false" />
+            <location name="auditPagePAD" value="/workflow/auditProcessPAD.jsp" redirect="false" />
+            <location name="inviteExpertPagePAD" value="/workflow/inviteExpertListPAD.jsp" redirect="false" />
+            <location name="expertAdvicePagePAD" value="/workflow/expertAdvicePAD.jsp" redirect="false" />
+            <location name="enterListInquiryForm" value="/wkfProcessAction.it?method=listInquiryForm" redirect="false" />
+            <location name="batchApproveSetting" value="/workflow/batchApprove.jsp" redirect="false" />
+            <location name="batchRejectSetting" value="/workflow/batchReject.jsp" redirect="false" />
+            <location name="batchPaymentSetting" value="/workflow/batchPayment.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/logonAction" form="null" type="com.aiait.eflow.formmanage.action.LogonAction" param="method">
+            <location name="showLoginPage" value="/login.jsp" redirect="false" />
+            <location name="logOnSuccess" value="/index.jsp" redirect="false" />
+            <location name="logOutSuccess" value="/welcome.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/systemOwnerAction" form="null" type="com.aiait.eflow.housekeeping.action.SystemOwnerAction" param="method">
+            <location name="listResult" value="/housekeeping/listSystemOwner.jsp" redirect="false" />
+            <location name="editPage" value="/housekeeping/editSystemOwner.jsp" redirect="false" />
+            <location name="saveSuccess" value="/systemOwnerAction.it?method=listSystemOwner" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/dbOwnerAction" form="null" type="com.aiait.eflow.housekeeping.action.DBOwnerAction" param="method">
+            <location name="listResult" value="/housekeeping/listDBOwner.jsp" redirect="false" />
+            <location name="editPage" value="/housekeeping/editDBOwner.jsp" redirect="false" />
+            <location name="saveSuccess" value="/dbOwnerAction.it?method=listDBOwner" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/holidayAction" form="null" type="com.aiait.eflow.housekeeping.action.HolidayAction" param="method">
+            <location name="listYear" form="null" value="/housekeeping/listYear.jsp" redirect="false" />
+            <location name="listResult" value="/housekeeping/listHoliday.jsp" redirect="false" />
+            <location name="editPage" value="/housekeeping/editHoliday.jsp" redirect="false" />
+            <location name="batchPage" value="/housekeeping/batchHoliday.jsp" redirect="false" />
+            <location name="saveSuccess" value="/holidayAction.it?method=listHoliday" redirect="false" />
+            <location name="listCalendar" value="/housekeeping/calendar.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/approverGroupAction" form="null" type="com.aiait.eflow.housekeeping.action.ApproverGroupAction" param="method">
+            <location name="listPage" value="/housekeeping/listApproverGroup.jsp" redirect="false" />
+            <location name="editPage" value="/housekeeping/editApproverGroup.jsp" redirect="false" />
+            <location name="saveSuccess" value="/approverGroupAction.it?method=listApproverGroup" redirect="false" />
+            <location name="listGroupMember" value="/housekeeping/listApproverGroupMember.jsp" redirect="false" />
+            <location name="memberEditPage" value="/housekeeping/editApproverGroupMember.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/emailTemplateAction" form="null" type="com.aiait.eflow.housekeeping.action.EmailTemplateAction" param="method">
+            <location name="listPage" value="/housekeeping/listEmailTemplate.jsp" redirect="false" />
+            <location name="editPage" value="/housekeeping/editEmailTemplate.jsp" redirect="false" />
+            <location name="saveSuccess" value="/emailTemplateAction.it?method=listTemplate" redirect="false" />
+            <location name="bindActionPage" value="/housekeeping/emailBindAction.jsp" redirect="false" />
+            <location name="editByFormType" value="/housekeeping/editEmailTemplateByFormType.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/dataSynchAction" form="null" type="com.aiait.eflow.housekeeping.action.DataSynchAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/reportAction" form="null" type="com.aiait.eflow.report.action.ReportAction" param="method">
+            <location name="personalSummary" value="/report/personalSummaryReport.jsp" redirect="false" />
+            <location name="statusMonitoring" value="/report/statusMonitoringReport.jsp" redirect="false" />
+            <location name="processingAmount" value="/report/processingAmountReport.jsp" redirect="false" />
+            <location name="processingProgress" value="/report/processingProgressReport.jsp" redirect="false" />
+            <location name="processingTrail" value="/report/processingTrailReport.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/overdueSummaryAction" form="null" type="com.aiait.eflow.report.action.OverdueSummaryAction" param="method">
+            <location name="overdueSummary" value="/report/overdueSummaryReport.jsp" redirect="false" />
+            <!-- <location name="graphicMode" value="/report/demo.jsp" redirect="false"/>-->
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/delegateAction" form="null" type="com.aiait.eflow.delegation.action.DelegateAction" param="method">
+            <location name="listPage" value="/delegation/listAvailable.jsp" redirect="false" />
+            <location name="listHistoryPage" value="/delegation/listHistory.jsp" redirect="false" />
+            <location name="listReassignFormPage" value="/delegation/listWaitingReassignForm.jsp" redirect="false" />
+            <location name="listDeputyHandlePage" value="/delegation/listDeputyHandle.jsp" redirect="false" />
+            <location name="editPage" value="/delegation/addDelegation.jsp" redirect="false" />
+            <location name="saveSuccess" value="/delegateAction.it?method=listAvailable" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/roleAction" form="null" type="com.aiait.eflow.housekeeping.action.RoleAction" param="method">
+            <location name="listRole" value="/housekeeping/listRole.jsp" redirect="false" />
+            <location name="rolePurview" value="/housekeeping/rolePurview.jsp" redirect="false" />
+            <location name="toShowRolePurview" value="/roleAction.it?method=listRole" redirect="false" />
+            <location name="editRoleMemberPage" value="/housekeeping/editRoleMember.jsp" redirect="false" />
+            <location name="editRolePage" value="/housekeeping/editRole.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/paramConfigAction" form="null" type="com.aiait.eflow.housekeeping.action.ParamConfigAction" param="method">
+            <location name="listResult" value="/housekeeping/listParamConfig.jsp" redirect="false" />
+            <location name="editPage" value="/housekeeping/editParamConfig.jsp" redirect="false" />
+            <location name="saveSuccess" value="/paramConfigAction.it?method=listParamConfig" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/staffAction" form="null" type="com.aiait.eflow.housekeeping.action.StaffAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/userManageAction" form="" type="com.aiait.eflow.housekeeping.action.UserManageAction" param="method">
+            <location name="listUser" value="/housekeeping/userManagement.jsp" redirect="false" />
+            <location name="exportInquiryUser" value="/housekeeping/exportInquiryUser.jsp" redirect="false" />
+            <location name="listSelectStaff" value="/housekeeping/selectStaff.jsp" redirect="false" />
+            <location name="enterListUser" value="/userManageAction.it?method=searchUser" redirect="false" />
+            <location name="newUserPage" value="/housekeeping/EditUser.jsp" redirect="false" />
+            <location name="listApproverGroupSetting" value="/housekeeping/setApproverGroupByStaff.jsp" redirect="false" />
+            <location name="listRoleSetting" value="/housekeeping/setRoleForStaff.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/leaveReportAction" form="null" type="com.aiait.eflow.report.action.LeaveReportAction" param="method">
+            <location name="leaveDetailReport" value="/report/leaveDetailReport.jsp" redirect="false" />
+            <location name="xlsLeaveDetailReport" value="/report/xlsLeaveDetailReport.jsp" redirect="false" />
+            <location name="leaveSummaryReport" value="/report/leaveSummaryReport.jsp" redirect="false" />
+            <location name="xlsLeaveSummaryReport" value="/report/xlsLeaveSummaryReport.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+        
+        <action path="/leaveBalanceAction" form="null" type="com.aiait.eflow.housekeeping.action.LeaveBalanceAction" param="method">
+            <location name="leaveBalanceSetting" value="/housekeeping/leaveBalanceSetting.jsp" redirect="false" />
+            <location name="loadMedicalBalance" value="/medicalBalanceAction.it?method=loadMedicalBalance" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+        
+        <action path="/medicalReportAction" form="null" type="com.aiait.eflow.report.action.MedicalReportAction" param="method">
+            <location name="medicalSummaryReport" value="/report/medicalSummaryReport.jsp" redirect="false" />
+            <location name="xlsMedicalSummaryReport" value="/report/xlsMedicalSummaryReport.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+        
+        <action path="/medicalBalanceAction" form="null" type="com.aiait.eflow.housekeeping.action.MedicalBalanceAction" param="method">  
+            <location name="loadMedicalBalance" value="/housekeeping/leaveBalanceSetting.jsp" redirect="false" />
+            <location name="leaveBalanceSetting" value="/leaveBalanceAction.it?method=leaveBalanceSetting" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>        
+        
+        <action path="/leaveAIASSAction" form="null" type="com.aiait.eflow.housekeeping.action.LeaveAIASSAction" param="method">
+            <location name="monthlyList" value="/housekeeping/leaveMonthlyList.jsp" redirect="false" />
+            <location name="monthlyRecords" value="/housekeeping/exportLeaveRecords.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/teamManageAction" form="null" type="com.aiait.eflow.housekeeping.action.TeamManageAction" param="method">
+            <location name="listTeam" value="/housekeeping/teamManagement.jsp" redirect="false" />
+            <location name="exportInquiryTeam" value="/housekeeping/exportInquiryTeam.jsp" redirect="false" />
+            <location name="enterListTeam" value="/teamManageAction.it?method=searchTeam" redirect="false" />
+            <location name="newTeamPage" value="/housekeeping/editTeam.jsp" redirect="false" />
+            <location name="ListConfPage" value="/housekeeping/editTeamConfig.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/projectManageAction" form="null" type="com.aiait.eflow.housekeeping.action.ProjectManageAction" param="method">
+            <location name="listProject" value="/housekeeping/projectManagement.jsp" redirect="false" />
+            <location name="newProjectPage" value="/housekeeping/editProject.jsp" redirect="false" />
+            <location name="enterListProject" value="/projectManageAction.it?method=searchProject" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/formTypeAction" form="null" type="com.aiait.eflow.housekeeping.action.FormTypeAction" param="method">
+            <location name="listResult" value="/housekeeping/listFormType.jsp" redirect="false" />
+            <location name="editPage" value="/housekeeping/editFormType.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/formValidateAction" form="null" type="com.aiait.eflow.formmanage.action.FormValidateAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/staffHolidayAction" form="null" type="com.aiait.eflow.housekeeping.action.StaffHolidayAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+            <location name="listPersonalHoliday" value="/housekeeping/listPersonalHoliday.jsp" redirect="false" />
+            <location name="listPersonalLeave" value="/housekeeping/listPersonalLeave.jsp" redirect="false" />
+            <location name="queryOtherLeave" value="/housekeeping/queryOthersLeave.jsp" redirect="false" />
+            <location name="listOthersLeave" value="/housekeeping/listOthersLeave.jsp" redirect="false" />
+        </action>
+
+        <action path="/wkfAfterProcessAction" form="null" type="com.aiait.eflow.wkf.action.WKAfterProcessAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/leaveAction" form="null" type="com.aiait.eflow.housekeeping.action.LeaveAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+            <location name="listForPosting" value="/leaveform/listForPosting.jsp" redirect="false" />
+            <location name="listForArchiving" value="/leaveform/listForArchiving.jsp" redirect="false" />
+            <location name="leaveDetailPage" value="/leaveform/queryLeaveDetailReport.jsp" redirect="false" />
+            <location name="listLeaveDetailReport" value="/leaveform/listLeaveDetailReport.jsp" redirect="false" />
+            <location name="leaveBalanceSearch" value="/leaveform/queryLeaveBalanceReport.jsp" redirect="false" />
+            <location name="listLeaveBalanceReport" value="/leaveform/listLeaveBalanceReport.jsp" redirect="false" />
+        </action>
+
+        <action path="/annualLeaveStAction" form="null" type="com.aiait.eflow.housekeeping.action.AnnualLeaveStandardAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+            <location name="listAnnualLeaveStandard" value="/housekeeping/listAnnualLeaveStandard.jsp" redirect="false" />
+            <location name="editPage" value="/housekeeping/editAnnualLeaveStandard.jsp" redirect="false" />
+            <location name="toList" value="/annualLeaveStAction.it?method=listAnnualLeaveStandard" redirect="false" />
+        </action>
+
+        <action path="/financeBudgetAction" form="" type="com.aiait.eflow.housekeeping.action.FinanceBudgetAction" param="method">
+            <location name="listPage" value="/housekeeping/listFinanceBudget.jsp" redirect="false" />
+            <location name="editPage" value="/housekeeping/editFinanceBudget.jsp" redirect="false" />
+            <location name="excelFileSelectPage" value="/housekeeping/selectTemplate.jsp" redirect="false" />
+            <location name="saveSuccess" value="/financeBudgetAction.it?method=search" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/hotelRateAction" form="null" type="com.aiait.eflow.housekeeping.action.HotelRateAction" param="method">
+            <location name="listRate" value="/housekeeping/listHotelRate.jsp" redirect="false" />
+            <location name="editRate" value="/housekeeping/editHotelRate.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/hotelRateAction2" form="null" type="com.aiait.eflow.housekeeping.action.HotelRateAction2" param="method">
+            <location name="listRate" value="/housekeeping/listHotelRate2.jsp" redirect="false" />
+            <location name="editRate" value="/housekeeping/editHotelRate2.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/perdiemRateAction" form="null" type="com.aiait.eflow.housekeeping.action.PerdiemRateAction" param="method">
+            <location name="listRate" value="/housekeeping/listPerdiemRate.jsp" redirect="false" />
+            <location name="editRate" value="/housekeeping/editPerdiemRate.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/perdiemRateAction2" form="null" type="com.aiait.eflow.housekeeping.action.PerDiemRateAction2" param="method">
+            <location name="listRate" value="/housekeeping/listPerDiemRate2.jsp" redirect="false" />
+            <location name="editRate" value="/housekeeping/editPerDiemRate2.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/financeCodeAction" form="null" type="com.aiait.eflow.housekeeping.action.T2T9CodeAction" param="method">
+            <location name="listCode" value="/housekeeping/listT2T9Code.jsp" redirect="false" />
+            <location name="editCode" value="/housekeeping/editT2T9Code.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+            <location name="excelFileSelectPage" value="/housekeeping/selectExcelUp.jsp" redirect="false" />
+        </action>
+
+        <action path="/exchangeRateAction" form="null" type="com.aiait.eflow.housekeeping.action.CurrencyExAction" param="method">
+            <location name="listRate" value="/housekeeping/listExRate.jsp" redirect="false" />
+            <location name="editRate" value="/housekeeping/editExRate.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/exchangeRateAction2" form="null" type="com.aiait.eflow.housekeeping.action.ExchangeRateAction2" param="method">
+            <location name="listRate" value="/housekeeping/listExchangeRate2.jsp" redirect="false" />
+            <location name="editRate" value="/housekeeping/editExchangeRate2.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/contractAction" form="null" type="com.aiait.eflow.housekeeping.action.ContractAction" param="method">
+            <location name="listCntr" value="/housekeeping/listContract.jsp" redirect="false" />
+            <location name="editCntr" value="/housekeeping/editContract.jsp" redirect="false" />
+            <location name="excelFileSelectPage" value="/housekeeping/selectExcelUp.jsp" redirect="false" />
+            <location name="selectContract" value="/housekeeping/selectContract.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/buildingAction" form="null" type="com.aiait.eflow.housekeeping.action.BuildingAction" param="method">
+            <location name="listBuilding" value="/housekeeping/listBuilding.jsp" redirect="false" />
+            <location name="editBuilding" value="/housekeeping/editBuilding.jsp" redirect="false" />
+            <location name="excelFileSelectPage" value="/housekeeping/selectExcelUp.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/supplierAction" form="null" type="com.aiait.eflow.housekeeping.action.SupplierAction" param="method">
+            <location name="listSupplier" value="/housekeeping/listSupplier.jsp" redirect="false" />
+            <location name="editSupplier" value="/housekeeping/editSupplier.jsp" redirect="false" />
+            <location name="excelFileSelectPage" value="/housekeeping/selectExcelUp.jsp" redirect="false" />
+            <location name="exportInquirySupplier" value="/housekeeping/exportSupplier.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/epaymentReportAction" form="null" type="com.aiait.eflow.report.action.EpaymentReportAction" param="method">
+            <location name="epaymentReport" value="/report/epaymentReport.jsp" redirect="false" />
+            <location name="listInvoiceReport" value="/report/listInvoiceReport.jsp" redirect="false" />
+            <location name="listPaymentReport" value="/report/listPaymentReport.jsp" redirect="false" />
+            <location name="listStaffPaymentReport" value="/report/listStaffPaymentReport.jsp" redirect="false" />
+            <location name="listCAReport" value="/report/listCAReport.jsp" redirect="false" />
+            <location name="paymentInquiry" value="/report/paymentInquiry.jsp" redirect="false" />
+            <location name="xlsInvoiceReport" value="/report/xlsInvoiceReport.jsp" redirect="false" />
+            <location name="xlsPaymentReport" value="/report/xlsPaymentReport.jsp" redirect="false" />
+            <location name="xlsStaffPaymentReport" value="/report/xlsStaffPaymentReport.jsp" redirect="false" />
+            <location name="xlsCAReport" value="/report/listCAReport.jsp" redirect="false" />
+            <location name="interPaymentInquiry" value="/report/interPaymentInquiry.jsp" redirect="false" />
+            <location name="interPaymentReportXls" value="/report/interPaymentReportXls.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/bankAction" form="null" type="com.aiait.eflow.housekeeping.action.BankAction" param="method">
+            <location name="listBank" value="/housekeeping/listBank.jsp" redirect="false" />
+            <location name="editBank" value="/housekeeping/editBank.jsp" redirect="false" />
+            <location name="excelFileSelectPage" value="/housekeeping/selectExcelUp.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+        
+        <action path="/costCenterAction" form="null" type="com.aiait.eflow.housekeeping.action.CostCenterAction" param="method">
+            <location name="listCode" value="/housekeeping/listCostCenter.jsp" redirect="false" />
+            <location name="editCode" value="/housekeeping/editCostCenter.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+            <location name="excelFileSelectPage" value="/housekeeping/selectExcelUp.jsp" redirect="false" />
+        </action>
+        
+        <action path="/_thailand/expenseAction" form="null" type="com.aiait.eflow._thailand.action.ExpenseAction" param="method">
+            <location name="listExpense" value="/_thailand/listExpense.jsp" redirect="false" />
+            <location name="editExpense" value="/_thailand/editExpense.jsp" redirect="false" />
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/formService" form="null" type="com.aiait.eflow.service.action.FormServiceAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+
+        <action path="/securityService" form="null" type="com.aiait.eflow.service.action.SecurityServiceAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+        
+        <action path="/searchAction" form="null" type="com.aiait.eflow.search.SearchAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+        </action>
+        
+        <action path="/searchAction" form="null" type="com.aiait.eflow.search.SearchAction" param="method">
+            <location name="fail" value="/common/errordisplay.jsp" redirect="false" />
+            <location name="searchResultDetail" value="/search/searchResultDetail.jsp" redirect="false" />
+        </action>
+    </actions>
+</aiaitmvc-config>

@@ -1,0 +1,134 @@
+package com.aiait.eflow.formmanage.action;
+
+//import java.io.PrintWriter;	
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONObject;
+
+import com.aiait.eflow.common.CommonName;
+import com.aiait.eflow.housekeeping.dao.StaffHolidayDAO;
+import com.aiait.eflow.housekeeping.vo.StaffHolidayVO;
+import com.aiait.eflow.housekeeping.vo.StaffVO;
+import com.aiait.framework.db.DBManagerFactory;
+import com.aiait.framework.db.IDBManager;
+import com.aiait.framework.exception.DAOException;
+import com.aiait.framework.mvc.action.ActionLocation;
+import com.aiait.framework.mvc.action.DispatchAction;
+import com.aiait.framework.mvc.action.ModuleMapping;
+import com.aiait.framework.util.CommonUtil;
+
+/**
+ * 使用引擎提交申请的form后，调用该类中的某个业务方法，来进行额外的具体业务操作
+ * @author asnpgj3
+ *
+ */
+
+public class FormAfterSaveAction extends DispatchAction {
+	
+	
+	public ActionLocation handleAfterSave(
+			ModuleMapping mapping,
+			HttpServletRequest request,
+			HttpServletResponse response)
+			throws Exception {
+		
+        String requestNo = (String) request.getAttribute("requestNo");
+        //String formSystemId = (String) request.getParameter("formSystemId");
+        StaffVO currentStaff = (StaffVO) request.getSession().getAttribute(CommonName.CURRENT_STAFF_INFOR);
+
+		String functionLabel = (String)request.getAttribute("functionLabel");
+		if(functionLabel!=null){
+			functionLabel = functionLabel.trim().toLowerCase();
+		}
+		String returnLabel = "saveFormSuccess";
+		if(functionLabel!=null&&functionLabel!=""){
+            IDBManager dbManager = null;
+            try {
+                dbManager = DBManagerFactory.getDBManager();
+                Collection paramList = new ArrayList();
+                paramList.add(requestNo);
+                paramList.add(currentStaff.getStaffCode());
+                System.out.println("Call Stored Procedure: " + functionLabel);
+                dbManager.prepareCall(functionLabel, paramList);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (dbManager != null)
+                    dbManager.freeConnection();
+            }
+        }
+		return mapping.findActionLocation(returnLabel);
+	}
+    
+	public ActionLocation handleAfterSaveAjax(
+			ModuleMapping mapping,
+			HttpServletRequest request,
+			HttpServletResponse response)
+			throws Exception {
+		Map params = new HashMap();
+        String requestNo = (String) request.getAttribute("requestNo");
+        //String formSystemId = (String) request.getParameter("formSystemId");
+        StaffVO currentStaff = (StaffVO) request.getSession().getAttribute(CommonName.CURRENT_STAFF_INFOR);
+
+		String functionLabel = (String)request.getAttribute("functionLabel");
+		if(functionLabel!=null){
+			functionLabel = functionLabel.trim().toLowerCase();
+		}
+		String returnURL = (String) request.getAttribute(CommonName.RETURN_URL);
+		if(null == returnURL || "".equals(returnURL)){
+			returnURL = "/workflow/listPersonalForm.jsp";
+		}
+		if(functionLabel!=null&&functionLabel!=""){
+            IDBManager dbManager = null;
+            try {
+                dbManager = DBManagerFactory.getDBManager();
+                Collection paramList = new ArrayList();
+                paramList.add(requestNo);
+                paramList.add(currentStaff.getStaffCode());
+                System.out.println("Call Stored Procedure: " + functionLabel);
+                dbManager.prepareCall(functionLabel, paramList);
+                params.put(CommonName.COMMON_MESSAGE, "success");
+                params.put("status", "success");
+                params.put(CommonName.RETURN_URL, returnURL);
+            } catch (Exception e) {
+                e.printStackTrace();
+                params.put(CommonName.COMMON_MESSAGE, "fail");
+                params.put("status", "fail");
+            } finally {
+                if (dbManager != null)
+                    dbManager.freeConnection();
+            }
+        }
+		printJson( response, params);
+		return null;
+	}
+	
+
+    private void printJson(HttpServletResponse response,Map params){
+    	PrintWriter pw = null;
+    	try {
+	    	response.setContentType("application/json;charset=GBK"); //it is very important
+			response.setHeader("Cache-Control", "no-cache");
+			response.setHeader("Pragma", "no-cache");
+	    	pw = response.getWriter();
+	    	JSONObject jsonObject = JSONObject.fromObject(params);
+	    	String jsonStr = jsonObject.toString();
+	    	pw.print(jsonStr);   
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally{
+	        if (pw != null)
+	        	pw.close();
+		}
+    	
+    }
+}

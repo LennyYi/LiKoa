@@ -1,0 +1,813 @@
+<%-- 
+NO  Task_ID    Author     Modify_Date    Description
+1.  IT0958     Robin.Hou   11/01/2007     Invite expert during processing report
+2.  IT0958     Robin.Hou   11/01/2007     Expert can give the advice during processing report
+3.  IT1002     Robin.Hou   04/16/2008    在字段显示过程中，如果改字段 在流程中某个节点修改类型被设置 成 “可修改”，
+                                               则不管是在开始节点还是该中间节点，该字段都可以修改；如果在中间节点中被设置成“新录入”，则在第一个节点（开始节点）该字段是不能录入的，在中间该节点是可以录入的。
+--%>
+<%@ page contentType="text/html;charset=GBK" pageEncoding="GBK"%>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@ include file="/common/loading.jsp" %>
+<%@page import="java.util.*,com.aiait.eflow.reportmanage.vo.*,com.aiait.eflow.common.helper.*,com.aiait.eflow.reportmanage.helper.*,com.aiait.eflow.util.FieldUtil,com.aiait.eflow.wkf.util.DataMapUtil" %>
+<%@page import="com.aiait.framework.db.*,com.aiait.eflow.wkf.vo.WorkFlowProcessTraceVO,com.aiait.eflow.housekeeping.vo.StaffVO,com.aiait.eflow.common.*" %>
+<%@page import="com.aiait.eflow.wkf.vo.WorkFlowProcessVO,com.aiait.eflow.util.StringUtil,com.aiait.eflow.reportmanage.util.DisplayReportPageUtil" %>
+<%
+  DisplayReportPageUtil pageUtil;
+  if("1".equals(request.getSession().getAttribute("nonIE"))){
+      pageUtil = new DisplayReportPageUtil(true);
+  }else{
+	  pageUtil = new DisplayReportPageUtil();
+  }
+  StaffVO currentStaff = (StaffVO)request.getSession().getAttribute(CommonName.CURRENT_STAFF_INFOR);
+  FieldControlHelper.setServerUrl(request.getContextPath());
+  FieldControlHelper.setCurrentStaffCode(currentStaff.getStaffCode());
+  ReportFieldHelper.setServerUrl(request.getContextPath());
+
+  ReportManageVO report = (ReportManageVO)request.getAttribute("listReport");
+  String css = (String) request.getAttribute("css");
+  HashMap sectionFieldMap = (HashMap)request.getAttribute("sectionFieldMap");
+  HashMap onlyFillSectionFieldMap= (HashMap)request.getAttribute("onlyFillSectionFieldMap"); //如果当前节点是“Begin”节点，则需要检查每个section是否在流程流转中可以修改，如果存在，则在“Begin”节点不能修改
+  String requestFormDate = "";
+  
+  String showCClist = ParamConfigHelper.getInstance().getParamValue(CommonName.PARAM_CONFIG_SHOW_CC_LIST_SUBMIT);
+  if(showCClist==null || "".equals(showCClist)){
+	  showCClist = "0"; // 0---Not need to show the CC Staff selecting window; 1---Need to show the CC Staff selecting window.
+  }
+  
+  //当前可以修改的sectionFields,多个sectionFieldId之间以符号“,”间隔,每个field的形式为“sectionId.fieldId”
+  String updateSections = (String)request.getAttribute("updateSectionFields");
+  if(updateSections!=null && !"".equals(updateSections)){
+	  updateSections = ","+updateSections; //example: ",02.field_02_01,03.field_03_01"
+  }else{
+	  updateSections = "";
+  }
+  //当前节点才可以输入的sectionFields,多个sectionFieldId之间以符号“,”间隔,每个field的形式为“sectionId.fieldId”
+  String newSectionFields = (String)request.getAttribute("newSectionFields");
+  if(newSectionFields!=null && !"".equals(newSectionFields)){
+	  newSectionFields = ","+newSectionFields; //example: ",02.field_02_01,03.field_03_01"
+  }else{
+	  newSectionFields = "";
+  }
+  
+  //SYSTEM FIELD: is_exceptional_case 是否存在系统字段“is_exceptional_case”的标志，默认不存在;如果存在，如果该report是特例，则“isExceptionalCase”为true,否则为false
+  boolean existIsExceptionalCase = false;
+  boolean isExceptionalCase = false;
+  
+  String operateType= (String)request.getParameter("operateType");
+  if (operateType == null) {
+      operateType = (String) request.getAttribute("operateType");
+      if (operateType == null) {
+          operateType = "view";
+      }
+  }
+  
+  String viewFlag= (String)request.getParameter("viewFlag"); //用来控制如果是查看资料的时候，只是查看，不要显示其他的按钮（如果有值的话）
+  String pop = (String) request.getParameter("pop");
+  //status: 00 ------ draft
+  //        01 ------ submitted
+  //        02 ------ in progress
+  //        03 ------ rejected
+  //        04 ------ completed
+  String ccStaffView = (String)request.getAttribute("ccStaffView"); //CC到的STAFF打开该页面进行查看
+  if(ccStaffView!=null && "true".equals(ccStaffView)){
+	  viewFlag = "false";
+  }
+    
+  String status = (String)request.getParameter("status");
+  String requestNo = (String)request.getParameter("requestNo");
+  
+
+  
+  String inProcess = "";
+  String lockStaffCode = null;//如果inProcess=1（有人锁定正在处理），则有锁定人；否则为null
+  String currentNodeId = "";
+  String requestStaffCode = "";
+  String lastNode = "true";//是否是最后一个操作节点的标志，false不是；true是最后一个操作节点
+ 
+  //进行当前处理人调整操作的标志，如果该参数存在，则表示是“需要进行调整的操作，应该显示操作按钮”
+  String adjustFlag = (String)request.getParameter("adjust");
+  
+  String printFlag = (String)request.getParameter("print");
+  
+ 
+ 
+  Collection sectionList = report.getSectionList();
+  int sectionNum = sectionList.size();
+  
+  pageUtil.setCurrentNodeId(currentNodeId);
+  pageUtil.setReport(report);
+  pageUtil.setIsExceptionalCase(false);
+  pageUtil.setNewSectionFields(newSectionFields);
+  pageUtil.setOnlyFillSectionFieldMap(onlyFillSectionFieldMap);
+  pageUtil.setPrintFlag(printFlag);
+  pageUtil.setRequestNo(requestNo);
+  pageUtil.setSectionFieldMap(sectionFieldMap);
+  pageUtil.setStaff(currentStaff);
+  pageUtil.setStatus(status);
+  pageUtil.setUpdateSections(updateSections);
+  pageUtil.setLockedStaffCode(lockStaffCode);
+  
+  boolean canReassign = false;
+  AuthorityHelper authority = AuthorityHelper.getInstance();
+  if (authority.checkAuthority(currentStaff.getCurrentRoleId(), ModuleOperateName.MODULE_FORM_INQUIRY, ModuleOperateName.OPER_FORM_INQUIRY_REASSIGN)) {
+      canReassign = true;
+  }
+  
+  long lonDateNow = new Date().getTime(); 
+  String strDateNow = Long.toString(lonDateNow);
+  
+  String handleType = (String)request.getParameter("handleType");
+  String reportSystemId = (String)request.getParameter("reportSystemId");
+  String updateSectionFields = (String)request.getParameter("updateSectionFields");
+  String contextPath = request.getContextPath();
+  
+  Collection processedNodeList = (ArrayList)request.getAttribute("processedNodeList");
+  
+  String reportReturn = request.getParameter("reportReturn");
+  reportReturn = reportReturn == null ? "" : reportReturn;
+%>
+<html>
+<head>
+	<title>E-Flow</title>
+	<META HTTP-EQUIV="pragma" CONTENT="no-cache">
+	<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate">
+	<META HTTP-EQUIV="expires" CONTENT="Wed, 26 Feb 1997 08:21:57 GMT">
+	<i18n:jsmessage jsRelativePath="js" prefixName="message"/>
+	<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet"	href="<%=request.getContextPath()%>/css/smart_wizard.css" media="screen" type="text/css">
+	<link rel="stylesheet" href="<%=request.getContextPath()%>/css/form-field-tooltip.css" media="screen" type="text/css">
+	<link rel="stylesheet" href="<%=request.getContextPath()%>/css/jquery-ui.css" media="screen" type="text/css">	
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.min.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/rounded-corners.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/form-field-tooltip.js"></script>
+	<script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+	<script language="javascript" src="<%=request.getContextPath()%>/js/formdesign.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+	<script language="javascript" src="<%=request.getContextPath()%>/js/table.js"></script>
+	<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/windowPrompt.js"></script>
+	<%if(CompanyHelper.EFlow_AIA_CHINA.equals(CompanyHelper.getInstance().getEFlowCompany())){%>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/displayform_cho.js"></script>
+	<%}else{%>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/displayform.js"></script>
+	<%}%>
+	
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery-ui.js"></script>
+	<link href="<%=request.getContextPath()%>/js/NovaJS/qtip/jquery.qtip.css" rel="stylesheet" type="text/css">
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/NovaJS/qtip/jquery.qtip.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/aiaitjsframe.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/dealform.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/selectmulti.js"></script>
+	<script type="text/javascript" charset="gb2312" src="<%=request.getContextPath()%>/js/NovaJS/base.js"></script>
+
+	<script type="text/javascript" src="<%=request.getContextPath()%>/reportManageAction.it?method=getReportScript&reportSystemId=-1"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/reportManageAction.it?method=getReportScript&reportSystemId=<%=report.getReportSystemId()%>&t=<%=strDateNow%>"></script> 
+	<script language="javascript">
+
+	
+	  var checkSubmitFlg = false; //用来标示防止重复提交多次
+	
+	 
+	   var xmlhttp = createXMLHttpRequest();
+	   
+	  
+	   
+	   //overwrite the functions in dealreport.js
+	   function updateReport(currentNodeId,needValid){
+		    var frm = document.forms[0];
+		    if (needValid == true) {
+			    if (validateReport(frm) == false) {
+		            return false;
+		        }
+		        if (typeof(validationUpdate) == "function") {
+		            if (validationUpdate(currentNodeId) == false) {
+		                return false;
+		            }
+		        }
+		    }
+		    //check the length of every fields
+		    for(var i=0;i<frm.length;i++)   
+		    {   
+		      if((frm[i].tagName.toUpperCase()=="INPUT" &&frm[i].type.toUpperCase()=="TEXT") || frm[i].tagName.toUpperCase()=="TEXTAREA"){
+		       //此时的obj为文本框   
+		       //var value = frm[i].value.Trim();
+		       var value = "";
+		       if(frm[i].isNumber=="true")
+		    	   value = frm[i].value.Trim().replace(/,/g,"");
+		       else
+		    	   value = frm[i].value.Trim();
+		       var length = value.len();
+		       if(length>frm[i].maxLength){
+		          alert(field_length_long+":"+frm[i].title);
+		          frm[i].focus();
+		          return false;
+		        }
+		      }
+		    }
+		    //if(confirm(str)){
+		    //enable all input
+		    //for(var i=0;i<frm.length;i++) frm[i].disabled = false;
+		    //***********************
+		    var url = document.all['requestUrl'].value+"/reportManageAction.it?method=updateReportFill&currentNodeId="+currentNodeId+"&checkOptionalNode=1";
+	
+		    var args = getReportStr(frm);
+	
+		    args = encodeURI(encodeURI(args)); //Very Important!
+		    var myAjax = new Ajax.Request(url,
+		       {
+		           method:"post",       //
+		           parameters:args,   //
+		           asynchronous:false,
+		           setRequestHeader:{"If-Modified-Since":"0"},     //
+		           onComplete:function(x){
+			           },
+		           onError:function(x){          //
+		               alert('Fail to update report');
+		               return false;
+		           }
+		       }
+		    ); 
+		    //}
+		    return true;
+	   }
+	  
+	</script>
+	<script language="javascript">
+	  var _integrityType, _integritySQL, _integrityField;
+	  function submitReport() {
+	      var updateSectionFields = "<%=updateSections%>";
+	      var newSectionFields = "<%=newSectionFields%>";
+	      
+	      <%if(CompanyHelper.EFlow_AIA_CHINA.equals(CompanyHelper.getInstance().getEFlowCompany())){%>
+		  	  try{
+		  		  _integrityType = checkIntegrityType();
+			      _integritySQL = checkIntegritySQL("<%=requestNo%>");
+			      _integrityField = checkIntegrityField();
+		  	  }catch(e){}
+	      <%}%>
+	      
+	      //如果存在可以修改的sectionField或者只在该节点才可以输入的sectionField,则调用父窗口的函数进行保存
+	      if (updateSectionFields != "" || newSectionFields != "" ) {
+	          if (confirm("确认后,系统将提交你的申请!")) {
+	              var result = updateReport("<%=currentNodeId%>", true);
+	              //  2015 add check
+	              if(result){
+	              	setTimeout(function(){ countTime(); }, 1000);
+	              }
+	          }
+	      } else {
+	          doSubmit();
+	      }
+	  };
+	
+	  var x = 0;
+	
+	  function countTime(){
+	      x++;
+	      if (document.readyState != "complete" && x <= 20) {
+	          setTimeout(function(){
+			      countTime();
+		      }, 500);
+	      } else if (x > 20) {
+	    	  return;//超时，为保证正确性停止所有操作。
+	      } else {
+	          if (document.title == "Error Display") {
+	              alert("Operate Error");
+	              return;
+	          }
+	          // alert("WaitTime: " + x);
+	          var handleType = "<%=handleType%>";
+	          if (handleType == "03" || handleType == "05") {
+	              // Refresh whether it's the Last Node after save the report data.
+	              handleType = document.all.approveRejectType.value;
+	              document.all.handleType.value = handleType;
+	          }
+	          doSubmit();
+	      }
+	  };
+	
+	  function doSubmit() {
+	        var handleType = document.all['approveRejectType'].value;
+	        // alert("handleType: " + handleType);
+	        
+	        var comments = "";       
+	        var rejectToNode = "";
+	                
+	        <%if(CompanyHelper.EFlow_AIA_CHINA.equals(CompanyHelper.getInstance().getEFlowCompany())){%>
+	        	try{
+		        	for(i=0;i<_integrityType.length;i++){
+			        	if (_integrityType[i] == handleType && _integrityField[i] == false) { //editable for current processor
+			   			    var sql = _integritySQL[i];
+						    var xmlObj = selectFromSQL(sql, 2);
+			   			    if (xmlObj) {
+			   			      var items = xmlObj.getElementsByTagName("item");
+			   			      if(items&&items.length>0){
+			            		if(!confirm(checkIntegrityFailed)){
+			              			window.close();
+			   		               	return;
+			   	        		}
+			   			      }
+			   			    }
+			   			}
+		        	}
+	        	}catch(e){}
+	        <%}%>
+	        
+	        if (handleType=="03"&&"<%=request.getAttribute("showSelectProcessor")%>"=="2" &&
+	        	document.all.<%=CommonName.NEXT_APPROVER_STAFF_CODE%>.value=="") {
+	          alert("Please select next approver!");
+	          location.reload(true);
+	          return;
+	        }
+	        
+	         var url = "<%=request.getContextPath()%>/wkfProcessAction.it?method=auditReport&requestNo=<%=requestNo%>"
+	                  +"&reportSystemId=<%=reportSystemId%>&currentNodeId=<%=currentNodeId%>&requestStaffCode=<%=requestStaffCode%>"
+	                  +"&handleComments="+comments
+	                  +"&handleType="+handleType+"&rejectToNode="+rejectToNode
+	                  +"&nextApproverStaffCode=&contextPath=<%=contextPath%>"
+	                  + "&reportReturn=<%=reportReturn%>";
+	        //alert(url)
+	        //return;
+	        document.forms[0].action = url;
+	        document.forms[0].submit();
+	  };
+	  
+	   	//window.onload=function(){resize(550);}
+	   	document.oncontextmenu = function() { return false;} 
+
+	   	function exportPDF(){
+	   	    if(confirm(confirm_export_pdf)==false){
+	   	      return;
+	   	    }
+	   	    var url = document.all['requestUrl'].value+"/reportManageAction.it?method=exportPDF&reportSystemId="+document.all['reportSystemId'].value+"&requestNo="+document.all['requestNo'].value;
+	   	    openCenterWindow(url,800,600);
+	   	  }
+
+	   	function formatTime(formatStr) {   
+	   		var myDate = new Date();
+	   		myDate.getYear();        //获取当前年份(2位)
+	   		myDate.getFullYear();    //获取完整的年份(4位,1970-????)
+	   		myDate.getMonth();       //获取当前月份(0-11,0代表1月)
+	   		myDate.getDate();        //获取当前日(1-31)
+	   		myDate.getDay();         //获取当前星期X(0-6,0代表星期天)
+	   		myDate.getTime();        //获取当前时间(从1970.1.1开始的毫秒数)
+	   		myDate.getHours();       //获取当前小时数(0-23)
+	   		myDate.getMinutes();     //获取当前分钟数(0-59)
+	   		myDate.getSeconds();     //获取当前秒数(0-59)
+	   		myDate.getMilliseconds();    //获取当前毫秒数(0-999)
+	   		myDate.toLocaleDateString();     //获取当前日期
+	   		var mytime=myDate.toLocaleTimeString();     //获取当前时间
+	   		myDate.toLocaleString();        //获取日期与时间
+	   	    var str = formatStr;   
+	   	    var Week = ['日','一','二','三','四','五','六'];  
+	   	  
+	   	    str=str.replace(/yyyy|YYYY/,myDate.getFullYear());   
+	   	    str=str.replace(/yy|YY/,(myDate.getYear() % 100)>9?(myDate.getYear() % 100).toString():'0' + (myDate.getYear() % 100));   
+	   	    str=str.replace(/MM/,myDate.getMonth()>9?myDate.getMonth().toString():'0' + myDate.getMonth());   
+	   	    str=str.replace(/M/g,myDate.getMonth());   
+	   	    str=str.replace(/w|W/g,Week[myDate.getDay()]);   
+	   	    str=str.replace(/dd|DD/,myDate.getDate()>9?myDate.getDate().toString():'0' + myDate.getDate());   
+	   	    str=str.replace(/d|D/g,myDate.getDate());   
+	   	    str=str.replace(/hh|HH/,myDate.getHours()>9?myDate.getHours().toString():'0' + myDate.getHours());   
+	   	    str=str.replace(/h|H/g,myDate.getHours());   
+	   	    str=str.replace(/mm/,myDate.getMinutes()>9?myDate.getMinutes().toString():'0' + myDate.getMinutes());   
+	   	    str=str.replace(/m/g,myDate.getMinutes());   
+	   	    str=str.replace(/ss|SS/,myDate.getSeconds()>9?myDate.getSeconds().toString():'0' + myDate.getSeconds());   
+	   	    str=str.replace(/s|S/g,myDate.getSeconds());   
+	   	    return str;   
+	   	}   
+	   	//根据需要的文本类型fileType到后台获取数据并将结果添加到本页面
+	   	function loadCSSJSContent(fileType){
+	   		fileType = fileType || 'css';
+	        var xmlhttp = createXMLHttpRequest();
+	        var url = "<%=request.getContextPath()%>/reportManageAction.it?method=loadReportCSSJS&fileType="+fileType+"&reportSystemId=<%=report.getReportSystemId()%>";
+	        var result;
+	        if(xmlhttp){
+	           	xmlhttp.open('POST',url,false);
+	           	xmlhttp.onreadystatechange = function() {
+	            	if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+	               		result = xmlhttp.responseText;
+	            	}
+	           	}
+	           	xmlhttp.setRequestHeader("If-Modified-Since","0");
+	           	xmlhttp.send(null);
+	        } 
+	        if(result.Trim()!=""){
+	        	if(fileType=='js') {
+	        		var script = document.createElement('script');
+	        		script.setAttribute("type","text/javascript");
+		        	try{  
+		        		script.appendChild(document.createTextNode(result));  
+		            } catch (ex){  
+		            	script.innerText = result; //IE  
+		            }  
+		            document.getElementsByTagName("head")[0].appendChild(script);
+	        	} else if(fileType=='css') {
+	        		var style = document.createElement('style');
+		        	style.setAttribute("type","text/css");
+		        	try{  
+		                style.appendChild(document.createTextNode(result));  
+		            } catch (ex){  
+		                style.styleSheet.cssText = result; //IE  
+		            }  
+		            document.getElementsByTagName("head")[0].appendChild(style);
+	        	}
+	        }
+	    }
+	   	
+	   	function getClassesByTagName(tagName,className) { //获得标签名为tagName,类名className的元素
+	   	    if(document.getElementsByClassName) { //支持这个函数
+	   	          return document.getElementsByClassName(className);
+	   	    } else {       
+	   	    	var tags=document.getElementsByTagName(tagName);//获取标签
+	   	        var tagArr=[];//用于返回类名为className的元素
+	   	        for(var i=0;i < tags.length; i++) {
+	   			var node = tags[i];
+	   	            if(node.getAttribute("className") == className || node.getAttribute("class") == className) {
+	   	                tagArr[tagArr.length] = node;//保存满足条件的元素
+	   	                node.parentNode.removeChild(node);
+	   	                i--;
+	   					node = '';
+	   	            }
+	   	        }
+	   	        return tagArr;
+	   	    }
+	   	}
+	   	// 导出页面内容到word －－ key为分页关键字，wordName为保存的文档名
+	   	/* 如分页标识为^newPage 则页面中的分页标签为
+	   	<span class="newPage" lang=EN-US
+			style="font-size: 10.5pt; mso-bidi-font-size: 12.0pt; font-family:"
+			mce_style="font-size:10.5pt;mso-bidi-font-size:12.0pt;font-family:"
+			Times New
+			Roman';mso-fareast-font-family:宋体;mso-font-kerning:1.0pt;mso-ansi-languageEN-US;mso-fareast-language:ZH-CN;mso-bidi-language:AR-SA'><br
+			clear=all style="page-break-before: always"
+			mce_style="page-break-before:always"></span>
+	   	*/
+	   	function ExportAllToWord(key, wordName, fileType){
+		   	
+	   		loadCSSJSContent();
+	   		
+		   	key = key || '^newPage';
+		   	wordName = wordName || formatTime('yyyyMMddHHmmss');
+	   	 	fileType = fileType || ".doc";
+	   		var word = new ActiveXObject("Word.Application");
+	   		//obj.run("Progra~1/xx/xx/xx.exe") 
+
+	   		
+	   		var clipboardData = window.clipboardData.getData("text"); //将剪切板数据保存起来
+	   		window.clipboardData.clearData('text'); //使用剪切板之前清空剪切板数据
+	   		var doc = word.Documents.Add("",0,1);
+	   		doc.ShowGrammaticalErrors = false; //屏蔽语法检查
+	   	 	doc.ShowSpellingErrors = false;  //屏蔽语法检查
+	   	    doc.PageSetup.TopMargin = word.Application.InchesToPoints(0.5);
+	   		doc.PageSetup.BottomMargin = word.Application.InchesToPoints(0.5);
+	   		doc.PageSetup.LeftMargin = word.Application.InchesToPoints(0.5);
+	   		doc.PageSetup.RightMargin = word.Application.InchesToPoints(0.5);
+	   		//横向打印设置部分
+			/* doc.PageSetup.LineNumbering.Active = false;
+			doc.PageSetup.Orientation.wdOrientLandscape =  1; //设置为横向打印
+			doc.PageSetup.TopMargin =  word.Application.CentimetersToPoints(3.17);
+			doc.PageSetup.BottomMargin =  word.Application.CentimetersToPoints(3.17);
+			doc.PageSetup.LeftMargin = word.Application.CentimetersToPoints(2.54);
+			doc.PageSetup.RightMargin = word.Application.CentimetersToPoints(2.54);
+			doc.PageSetup.Gutter = word.Application.CentimetersToPoints(0);
+			doc.PageSetup.HeaderDistance = word.Application.CentimetersToPoints(1.5);
+			doc.PageSetup.FooterDistance = word.Application.CentimetersToPoints(1.75);
+			doc.PageSetup.PageWidth = word.Application.CentimetersToPoints(29.7);
+			doc.PageSetup.PageHeight = word.Application.CentimetersToPoints(21);
+			doc.PageSetup.FirstPageTray =  0;
+			doc.PageSetup.OtherPagesTray = 0;
+			doc.PageSetup.SectionStart =  2;
+			doc.PageSetup.OddAndEvenPagesHeaderFooter = false;
+			doc.PageSetup.DifferentFirstPageHeaderFooter = false;
+			doc.PageSetup.VerticalAlignment = 0;
+			doc.PageSetup.SuppressEndnotes = false;
+			doc.PageSetup.MirrorMargins = false;
+			doc.PageSetup.TwoPagesOnOne = false;
+			doc.PageSetup.BookFoldPrinting = false;
+			doc.PageSetup.BookFoldRevPrinting = false;
+			doc.PageSetup.BookFoldPrintingSheets = 1
+			doc.PageSetup.GutterPos = 0;
+			doc.PageSetup.LayoutMode = 2;  */
+	   	 	
+	   		var range = doc.Range(0,1);
+	   		var tags = new Array('script','input','select','button','textarea','div','span','iframe','form','table','label','dd','a','img');//此处应该注意，优先移除的应该排在前边，必须显示的排在后面
+	   		//var tags = new Array('a', 'acronym', 'address', 'applet', 'area', 'b', 'base', 'basefont', 'bdo', 'bgsound', 'big', 'blockquote', 'body', 'br', 'button', 'caption', 'center', 'cite', 'code', 'col', 'colgroup', 'custom', 'dd', 'del', 'dfn', 'dir', 'div', 'dl', 'document', 'dt', 'em', 'embed', 'fieldset', 'font', 'form', 'frame', 'frameset', 'head', 'hn', 'hr', 'html', 'i', 'iframe', 'img', 'ins', 'kbd', 'label', 'legend', 'li', 'link', 'listing', 'map', 'marquee', 'menu', 'ol', 'p', 'plaintext', 'pre', 'q', 's', 'samp', 'script', 'select', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'textarea', 'tfoot', 'th', 'thead', 'title', 'tr', 'tt', 'u', 'ul', 'var', 'xmp');
+	   		var head = getClassesByTagName('div','HeaderPage');
+	   		var foot = getClassesByTagName('div','FooterPage');
+	   		//var newPages = getClassesByTagName('span','newPage');
+	   		//for(var idx = 0; idx < newPages.length; idx++) 
+	   		//	alert(newPages[idx].innerHTML);
+	   		//alert(head[0].innerHTML);
+	   		var sel = document.body.createTextRange();
+	   		for(var i=0; i<tags.length; i++) {
+	   			var nodes = document.body.getElementsByTagName(tags[i]);//调用word函数，将tag范围内容拷贝到word里面。		
+	   			for(j=0;j<nodes.length;j++){
+	   				var node = nodes[j];
+	   				var tagName = node.tagName.toLowerCase();
+	   				if(tagName=='script' || tagName=='input') {
+	   					console.log('the tagName of the node is ' + tagName + ', so skip it');
+	   					node.parentNode.removeChild(node);
+	   					//var oText=document.createTextNode("");
+	   					//node.parentNode.replaceChild(oText,node);
+	   					j--;
+	   					node = '';
+	   					continue;
+	   				}/*  else if(node.type=='hidden' || node.type=='checkbox' || node.type=='button' || node.type=='none' || node.type=='password' || node.type=='radio' || node.type=='reset' || node.type=='submit' || node.type=='text'){
+	   					console.log('the type of the node is ' + node.type + ', so skip it');
+	   					node.parentNode.removeChild(node);
+	   					//var oText=document.createTextNode("");
+	   					//node.parentNode.replaceChild(oText,node);
+	   					j--;
+	   					node = '';
+	   					continue;
+	   				} else if(node.style.display=='none' || node.style.display=='hidden' || node.className.display=='none' || node.className.display=='hidden') {
+	   					console.log('the style of the node is ' + node.style.display + ', so skip it');
+	   					node.parentNode.removeChild(node);
+	   					//var oText=document.createTextNode("");
+	   					//node.parentNode.replaceChild(oText,node);
+	   					j--;
+	   					node = '';
+	   					continue;
+	   				} */
+	   				
+	   				console.log(node.tagName + ' tag ' + j + ' of ' + nodes.length + ', the name is ' + node.name + ', the type is ' + node.type);
+	   				console.log('try to copy ' + node.tagName + ', the id is ' + node.id + ', the name is ' + node.name + ', the className is ' + node.className + ', the nodeType is ' + node.type);
+	   				try{
+	   					if(tagName=='table') {
+	   						var table_cells = node.rows[0].cells;
+	   						for(var k=0;k<table_cells.length;k++){
+	   						    range = doc.Range(range.End-1, range.End); //设定位置依次由上往下、从左往右
+	   						    sel.moveToElementText(table_cells[k]); //将单元格内容复制到word
+	   						    sel.select();
+	   						    sel.execCommand("Copy");
+	   						    sel.moveEnd('character');  //不加这句导出不了，里面参数为character、不是copy
+	   						    range.Collapse();
+	   						    range.Paste();
+	   						    //range = doc.Range(range.End-1, range.End);
+	   						}
+	   					} else if(tagName=='img') { //如果是图片，则直接添加
+	   						range = doc.Range(range.End-1, range.End);
+	   						word.Application.Selection.InlineShapes.AddPicture(node.src,false,true); 
+	   						//j++;
+	   					} else {
+	   						range = doc.Range(range.End-1, range.End); //设定位置依次由上往下、从左往右 --复制不同的东西，需要写这句继续 写死的这句话就是位置
+	   						sel.moveToElementText(node);
+	   						sel.select();
+	   						sel.execCommand('Copy');
+	   						sel.moveEnd('character');  //不加这句导出不了，里面参数为character、不是copy
+	   						range.Collapse();
+	   						range.Paste();
+	   					}
+	   				} catch(e) {
+	   					console.log('somthing goes wrong: ' + e.message + ' -- ' + e.description);
+	   				}
+	   				console.log((node.id || node.name || node.className) + '\tCopied');
+	   				node.parentNode.removeChild(node);
+	   			}
+	   		}
+	   		
+	   		var selection = word.Selection; //得到打开后word的selection对象 
+	   		selection.Font.Size = 10; //设置字体大小
+	   		//selection.Font.Name = "Times New Roman";
+	   		//selection.Font.AllCaps = true;
+	   	 	selection.WholeStory(); //ctrl+A 全选操作 
+	   	 	selection.Find.ClearFormatting(); //清除格式  
+	   	 	selection.Find.Text = key; //指定查找关键字 --^m为手动分页符标记 
+	   	 	selection.Find.Forward = true; //向下查找
+	   	 	selection.Find.Wrap = 1; 
+	   	 	selection.Find.MatchCase = false; //不区分大小写  
+	   	 	selection.Find.MatchWholeWord = false;  //不匹配整个单词  
+	   	 	//alert(selection.Tables.Count);
+	   	 	//var style = new Object();
+	   	 	//style.ParagraphFormat.LineUnitAfter = 0;
+	   	 	for(var idx=1; idx<selection.Tables.Count; idx++) {
+	   	 		var table = selection.Tables.Item(idx);
+	   	 		table.Style.ParagraphFormat.LineUnitAfter = 0;
+	   	 		//table.Style.ParagraphFormat.LineUnitBefore = 2;
+	   	 		table.Style.ParagraphFormat.SpaceAfter = 0;
+	   	 	} 
+	   	 	//如果找到指定字符串返回真,否则返回false 
+	   	 	while (selection.Find.Execute()) {  
+	   	  		selection.InsertBreak(7); //插入分页符,分页符常量为7,具体可查word api 
+	   	 	}  
+	   	 	if(head.length>0) {
+	   	 		//range = selection.Sections(1).Headers(1).Range(0,1);
+	   			var header = document.createElement();
+	   			header.innerHTML = '<div id="thedetailtableDIV" style="text-align: center; line-height: normal; font-family: Arial, Verdana,;" 10px;?="" margin-top:="" normal;="" font-weight:="" font-variant:="" font-style:="" 12px;="" font-size:="" 黑体?;=""><div style="width: 600px; text-align: left; overflow: hidden;"><div style="height: 1023px; overflow: hidden;"><div id="sectionTable1"><DIV class=HeaderPage>' + head[0].innerHTML + '</div></div></div></div>';
+	   			document.body.appendChild(header);
+	   			//cleanWhitespace( document.body );
+	   	 		sel.moveToElementText(header);
+	   	 		sel.select();
+	   	 		sel.execCommand('Copy');
+	   	 		sel.moveEnd('character');  //不加这句导出不了，里面参数为character、不是copy
+	   	 		//Headers( 3 ) --- 返回偶数页上的所有页眉或页脚
+	   	 		//Headers( 2 ) --- 返回文档或节中的第一个页眉或页脚
+	   	 		//Headers( 1 ) --- 返回文档或节中除第一页外所有页上的页眉或页脚
+	   	 		word.ActiveWindow.ActivePane.View.SeekView = 10;  
+	   	 	 	//selection.Fields.Add(selection.Range, 33);
+	   	 	 	selection.Sections(1).Headers(1).Range.Font.Size = 10.5; 
+	   	 		selection.Sections(1).Headers(1).Range.Collapse();
+	   	 	 	selection.Sections(1).Headers(1).Range.Paste();
+		   	 	var paragraphs = selection.Sections(1).Headers(1).Range.Paragraphs;
+	   			paragraphs.Item(paragraphs.Count-1).SpaceBefore = 0;
+	   			paragraphs.Item(paragraphs.Count-1).SpaceAfter = 0;
+	   			paragraphs.Item(paragraphs.Count-1).LineUnitAfter = 0;
+	   			paragraphs.Item(paragraphs.Count-1).KeepWithNext = true;
+	   			paragraphs.Item(paragraphs.Count).PageBreakBefore = false;
+	   			paragraphs.Item(paragraphs.Count).Range.Cut();
+	   	 		//selection.Sections(1).Headers(1).Range.ParagraphFormat.SpaceAfter = 0;
+	   	 		//selection.Sections(1).Headers(1).Range.ParagraphFormat.LineUnitAfter = 0;
+	   	 	 	//selection.Sections(1).Headers(1).Range.Text = ReplaceTags(head); 
+	   	 	 	//selection.ParagraphFormat.Alignment = 1; 
+	   	 	 	//selection.Sections(1).Headers(1).Range.Font.Size = 10.5; 
+	   	 	 	//selection.Sections(1).Headers(1).Range.InsertAfter(ReplaceTags(foot));
+	   	 	 	//添加图片到页眉中的且左对齐
+	   	 	 	//selection.Sections(1).PageSetup.LeftMargin = 20;
+	   	 	 	//selection.Sections(1).PageSetup.HeaderDistance = 20;
+	   	 	 	//selection.Sections(1).Headers(1).Shapes.Addpicture();
+	   			word.ActiveWindow.ActivePane.View.SeekView = 0;
+	   	 	}
+	   	 	
+	   	 	if(foot.length>0) {
+	   			var footer = document.createElement();
+	   			footer.innerHTML = '<div id="thedetailtableDIV" style="text-align: center; line-height: normal; font-family: Arial, Verdana,;" 10px;?="" margin-top:="" normal;="" font-weight:="" font-variant:="" font-style:="" 12px;="" font-size:="" 黑体?;=""><div style="width: 600px; text-align: left; overflow: hidden;"><div style="height: 1023px; overflow: hidden;"><span id="sectionTable1"><div class="FooterPage" style="bottom: 0px; position: absolute;">' + foot[0].innerHTML + '</div></span></div></div>';
+	   			document.body.appendChild(footer);
+	   			//cleanWhitespace( document.body );
+	   	 		sel.moveToElementText(footer);
+	   	 		sel.select();
+	   	 		sel.execCommand('Copy');
+	   	 		sel.moveEnd('character');  //不加这句导出不了，里面参数为character、不是copy
+	   	 		word.ActiveWindow.ActivePane.View.SeekView = 10;  
+	   	 		//添加页脚（奇数页 右对齐，偶数页 左对齐） 
+	   	 	 	selection.Sections(1).Footers(1).Range.Font.Size = 10.5;
+	   	 		selection.Sections(1).Footers(1).Range.Collapse();
+	   			selection.Sections(1).Footers(1).Range.Paste();
+	   			var paragraphs = selection.Sections(1).Footers(1).Range.Paragraphs;
+	   			paragraphs.Item(paragraphs.Count-1).SpaceBefore = 0;
+	   			paragraphs.Item(paragraphs.Count-1).SpaceAfter = 0;
+	   			paragraphs.Item(paragraphs.Count-1).LineUnitAfter = 0;
+	   			paragraphs.Item(paragraphs.Count-1).KeepWithNext = true;
+	   			paragraphs.Item(paragraphs.Count-1).PageBreakBefore = false;
+	   			paragraphs.Item(paragraphs.Count).Range.Cut();
+	   			
+	   			//selection.Sections(1).Footers(1).Range.ParagraphFormat.SpaceAfter = 0;
+	   	 		//selection.Sections(1).Footers(1).Range.ParagraphFormat.LineUnitAfter = 0;
+	   	 	 	//selection.ParagraphFormat.Alignment = 2; 
+	   	 	 	//selection.HomeKey(5);  
+	   	 	 	//selection.Sections(1).Footers(1).Range.InsertBefore("第 "); 
+	   	 	 	//selection.EndKey(5);  
+	   	 	 	//selection.Sections(1).Footers(1).Range.InsertAfter(" 页");  
+	   	 	 	word.ActiveWindow.ActivePane.View.SeekView = 0;
+	   	 	}
+	   	 	window.clipboardData.clearData('text'); //word导出完成清空剪切板数据
+	   	 	window.clipboardData.setData("text",clipboardData); 
+	   	 	word.ActiveWindow.ActivePane.View.Type=3;//设置浏览模式:1--为普通视图，2---大纲视图，3--页面视图， 4---web视图预览模式，5---大纲视图，6---web视图，7---阅读板式
+	   	 	//window.location.reload();
+	   	 	//调用Word的打印程序
+	   	 	//word.application.printout();  
+	   	 	//关闭word文档对象,参数0代表不保存文档
+	   		//word.application.activedocument.close(0); 
+	   	 	
+	   	 	var Name=wordName+fileType; 
+	   	 	if(fileType=='.doc') {//保存word文档为test.doc 
+		   	 	doc.SaveAs(Name); //存放到指定的位置注意路径一定要是“\\”不然会报错
+		   	 	word.Application.Visible = true; //这句意思是所有操作完毕后，在显示出来，如果写在里面，会发现word打开后，什么标签啊、内容啊就跟打字机一样往里面填
+	   	 	} else if(fileType=='.pdf') {
+	   	 		doc.SaveAs(Name, 17); //存放到指定的位置注意路径一定要是“\\”不然会报错
+	   	 		try{ 
+	            	var obj=new ActiveXObject("wscript.shell"); 
+	            	if(obj){ 
+	                	obj.Run("\""+Name+"\"", 1, false );
+	                	//obj.Run('"'+filename+'"'); 
+	                	obj=null; 
+		            } 
+		        }catch(e){ 
+		            alert("请确定是否存在该盘符或文件"); 
+		        } 
+	   	 	}
+	   	 	
+	   	 	doc = null; 
+	   	}  
+
+
+	 function showEditBox(id){
+		 jQuery("#text_"+id).hide();
+		 jQuery("#id_"+id).show().focus();		 
+		 } 	
+	 function saveFileBox(id){
+		 var str = id.split("_");
+		 var sectionid = str[0];	 
+		 var tid = str[1];
+		 if(jQuery("#id_"+id).val() != jQuery("#text_"+id).html()){
+			 var result = selectSimpleDataFromSQL("update teflow_report_<%=report.getReportSystemId()%>_"+sectionid+" set itemvalue='"+jQuery("#id_"+id).val()+"' where id="+tid);
+			 jQuery("#text_"+id).html(jQuery("#id_"+id).val());
+		 }else{
+			 jQuery("#text_"+id).show();
+			 jQuery("#id_"+id).hide();
+	     }	 		 
+	 }  
+	   	  
+	</script>
+	<style media=print>.Noprint{display:none;} 
+	</style> 
+
+<style>
+<%
+out.println(css);
+%>
+</style>
+</head>
+<body onkeydown="checkesc(event)">
+	 <input type="hidden" name="textareaLimitLength">
+	 <%if(printFlag!=null && !"".equals(printFlag)){%>
+		  <OBJECT id="WebBrowser" classid="CLSID:8856F961-340A-11D0-A96B-00C04FD705A2" height="0" width="0"> 
+		  </OBJECT> 
+	 <%}%>
+	 <input name="theHistoryRecord" type="hidden" value="">   
+	 <form name="myReport" method="post" >
+		  <input type='hidden' name='requestUrl' value='<%=request.getContextPath()%>'>
+		  <input type='hidden' name='reportSystemId' value='<%=report.getReportSystemId()%>'>
+		  <input type="hidden" name="curreportId" value="<%=report.getReportId()%>">
+		  <input type="hidden" name="updateSections" value='<%=updateSections==null?"":updateSections%>'>
+		  <input type="hidden" name="newSectionFields" value='<%=newSectionFields==null?"":newSectionFields%>'>
+		  <input type="hidden" name="requestNo" value="<%=requestNo%>">
+		  <input type="hidden" name="operateType" value="<%=operateType%>">
+		  <input type="hidden" name="currentNodeId" value="<%=currentNodeId%>">
+		  <input type="hidden" name="ccStaffCode">
+		  <input type="hidden" name="showCCFlag" value="<%=showCClist%>">
+		  <input type="hidden" name="requestStaffCode" value="<%=requestStaffCode%>">
+		  <input type="hidden" name="updateFieldsVal" value="">
+		  <input type="hidden" name="newFieldsVal" value="">
+		  <input type="hidden" name="handleType" value="<%=handleType%>">
+	  
+	  <% 
+	    if("00".equals(status) || "03".equals(status)){
+	  %>
+	    <input type="hidden" name="saveType" value="update">
+	  <%
+	   }
+	  %>
+	 <div id="thedetailtableDIV" style='text-align:center;margin-top:10px;font:normal normal 12px Arial, Verdana, "黑体"'>
+	  <!-- table width="100%"  border="0" cellpadding="3" cellspacing="0" bordercolor="#6595D6" style="border-collapse:collapse;" > -->
+	  
+	  <div style="text-align:left;overflow:hidden;width:<%if("02".equals(report.getDisplayType())){ %>1023px<%}else{ %>600px<%} %>">
+	  <%=pageUtil.displayReportWithContent(request)%> 
+	  </div> 
+	  <table>
+	  <tr>
+	    <td colspan='2'>&nbsp;&nbsp;</td>
+	  </tr>
+	  
+  
+
+
+	 <%if(pageUtil.getIsExceptionalCase()==true){%>
+	  <tr>
+	   <td colspan='6' align='center'>
+	     <input type="hidden" name="isExceptionalCase" value="true">
+	     <center class="Noprint" > 
+	     <img src="<%=request.getContextPath()%>/images/reminder_03.gif">&nbsp;&nbsp;<font color='red'><b>Please note: This report has the exceptional item!</b></font>
+	     </center>
+	   </td>
+	  </tr>
+	  <%}else{%>
+	   <input type="hidden" name="isExceptionalCase" value="false">
+	  <%}%>
+	  <tr>
+	      <td colspan='6' align='center'>
+	      
+	      <input type="button" name="exportBtn" value='<i18n:message key="button.export_pdf"/>' onclick='javascript:exportPDF()' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'"
+	onmouseout="this.className='btn3_mouseout'"
+	onmousedown="this.className='btn3_mousedown'"
+	onmouseup="this.className='btn3_mouseup'">
+	
+	
+	<input type="button" name="exportBtn" value='ExportWord' onclick='javascript:ExportAllToWord("^newPage","RP02")' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'"
+	onmouseout="this.className='btn3_mouseout'"
+	onmousedown="this.className='btn3_mousedown'"
+	onmouseup="this.className='btn3_mouseup'">
+	
+	
+	<input type="button" name="closeBtn" value='<i18n:message key="button.close"/>' onclick='javascript:window.close();' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'"
+	        onmouseout="this.className='btn3_mouseout'"
+	        onmousedown="this.className='btn3_mousedown'"
+	        onmouseup="this.className='btn3_mouseup'">
+	    
+	
+	
+	      </td>
+	     </tr>
+	         <% if("1".equals(request.getSession().getAttribute("nonIE"))){ %>
+	    <tr id="auditTR" >
+	         <td width="96%"><IFRAME frameBorder="0" name="audit" id="audit" scrolling="yes" src=""
+	            style="display:hidden  HEIGHT: 100px; VISIBILITY: inherit; WIDTH: 100%; Z-INDEX: 2"></IFRAME></td>
+	    </tr>
+	    <%} %>
+	   </table>
+	   
+	    </div>
+		
+	</form>
+</body>
+</html>

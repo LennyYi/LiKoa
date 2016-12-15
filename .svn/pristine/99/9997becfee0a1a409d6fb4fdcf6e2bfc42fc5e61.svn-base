@@ -1,0 +1,102 @@
+package com.aiait.eflow.search;
+
+import java.sql.*;
+import java.util.*;
+
+import com.aiait.eflow.common.CommonName;
+import com.aiait.eflow.common.helper.SystemFieldHelper;
+import com.aiait.eflow.formmanage.vo.*;
+import com.aiait.eflow.util.*;
+import com.aiait.framework.common.DataType;
+import com.aiait.framework.db.*;
+import com.aiait.framework.exception.DAOException;
+import com.aiait.framework.vo.BaseVO;
+
+public class SearchDAO extends BaseDAOImpl {
+
+    public SearchDAO(IDBManager dbManager) {
+        super(dbManager);
+    }
+    
+    public void executeSQL(String sql) throws DAOException {
+        dbManager.executeUpdate(sql);
+    }
+    
+    public Map prepareSearchDetailData(Map<String,String[]> paramMaps) throws DAOException{
+    	String searchType = paramMaps.get("searchType")[0];
+    	String policyNumber = paramMaps.get("policyNumber")[0];
+    	
+    	Map<String,Collection> detailData = new HashMap();
+    	
+    	if(SearchConstant.SEARCH_TYPE_POLICY.equalsIgnoreCase(searchType)){
+    		List<String> paramList = new ArrayList<String>();
+    		paramList.add(SearchConstant.SESSION_ID_POLICY_BASE);
+    		paramList.add(policyNumber);
+    		detailData.put(SearchConstant.SESSION_ID_POLICY_BASE, dbManager.prepareCall2("search_details_policy", paramList));
+    	}else if(SearchConstant.SEARCH_TYPE_MEMBER.equalsIgnoreCase(searchType)){
+        	String clientCode = paramMaps.get("clientCode")[0];
+        	String deptCode = paramMaps.get("deptCode")[0];
+        	String certNo = paramMaps.get("certNo")[0];
+        	List<String> paramList = new ArrayList<String>();
+        	paramList.add(SearchConstant.SESSION_ID_MEMB_POLI_BASE);
+    		paramList.add(policyNumber);
+        	paramList.add(certNo);
+        	paramList.add(clientCode);
+        	paramList.add(deptCode);
+    		detailData.put(SearchConstant.SESSION_ID_MEMB_POLI_BASE, dbManager.prepareCall2("search_details_member", paramList));
+    		
+    		paramList.set(0, SearchConstant.SESSION_ID_MEMB_BASE);
+    		detailData.put(SearchConstant.SESSION_ID_MEMB_BASE, dbManager.prepareCall2("search_details_member", paramList));
+    	}
+    	List<String> paramList = new ArrayList<String>();
+		paramList.add(SearchConstant.SESSION_ID_CLAIM_BASE);
+		paramList.add(policyNumber);
+    	detailData.put(SearchConstant.SESSION_ID_CLAIM_BASE, dbManager.prepareCall2("search_details_claim", paramList));
+    	return detailData;
+    }
+
+    public Collection getSearchDetailDataByPaging(Map<String,String[]> paramMaps) throws DAOException{
+    	String sectionId = paramMaps.get("sectionId")[0];
+    	String policyNumber = paramMaps.get("policyNumber")[0];
+
+    	List<String> paramList = new ArrayList<String>();
+		paramList.add(sectionId);
+		paramList.add(policyNumber);
+		
+    	Collection list = null;
+    	if(SearchConstant.SESSION_ID_BILL_PAY.equals(sectionId) || SearchConstant.SESSION_ID_BILL_LIST.equals(sectionId)){
+    		list = dbManager.prepareCall2("search_details_bill", paramList);
+    	}else if(SearchConstant.SESSION_ID_POLI_PROD.equals(sectionId) || SearchConstant.SESSION_ID_POLI_MEMB.equals(sectionId)){
+    		list = dbManager.prepareCall2("search_details_policy", paramList);
+    	}else if(SearchConstant.SESSION_ID_CLAIM_LIST.equals(sectionId) || SearchConstant.SESSION_ID_CLAIM_MEMB.equals(sectionId)){
+    		list = dbManager.prepareCall2("search_details_claim", paramList);
+    	}else if(SearchConstant.SESSION_ID_COVE_LIST.equals(sectionId)){
+        	String clientCode = paramMaps.get("clientCode")[0];
+        	String certNo = paramMaps.get("certNo")[0];
+        	paramList.add(certNo);
+        	paramList.add(clientCode);
+        	paramList.add("0");
+    		list = dbManager.prepareCall2("search_details_member", paramList);
+    	}
+    	return list;
+    }
+    
+	@Override
+	public int delete(BaseVO arg0) throws DAOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int save(BaseVO arg0) throws DAOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int update(BaseVO arg0) throws DAOException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+    
+}

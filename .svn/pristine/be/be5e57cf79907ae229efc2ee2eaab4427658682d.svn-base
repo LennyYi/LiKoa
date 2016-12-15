@@ -1,0 +1,182 @@
+<!-- Task_ID	Author	Modify_Date	Description------------------->
+<!-- IT0973		Young	 12/28/2007 For Project Management Function-->
+<%@ include file="/common/head.jsp" %>
+<%@ include file="/common/loading.jsp" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page import="java.util.*,com.aiait.eflow.housekeeping.vo.ProjectVO,com.aiait.eflow.housekeeping.vo.StaffVO,com.aiait.eflow.util.StringUtil,com.aiait.eflow.common.helper.*,com.aiait.eflow.common.*" %>
+<%@ taglib uri="/WEB-INF/purview.tld" prefix="purview" %>
+<html>
+<head>
+<title>Project Management</title>
+  <i18n:jsmessage jsRelativePath="js" prefixName="message"/>
+<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+<script src="<%=request.getContextPath()%>/js/webtools.js" language="JavaScript"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+<SCRIPT language="javascript" src="<%=request.getContextPath()%>/js/sorttable.js"></SCRIPT>
+<script language="javascript" src="<%=request.getContextPath()%>/js/resizeCol.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+<script language="javascript">
+
+ 	function searchProject(){
+		document.forms[0].action = "<%=request.getContextPath()%>/projectManageAction.it?method=searchProject";		                           
+		document.forms[0].submit();
+	}
+	 
+	function addProject(){
+ 		var url = "<%=request.getContextPath()%>/projectManageAction.it?method=enterEditProject&type=new&moduleId=<%=ModuleOperateName.MODULE_PROJECT_MANAGE%>&operateId=<%=ModuleOperateName.OPER_PROJECT_ADD%>";
+ 		window.location = url;
+	}	
+  
+	function deleteProject(){
+		if(checkSelect('projectcodeId')<=0){
+      		alert("You have not selected any Project to delete!");
+      		return;
+    	}
+    	if(confirm("Are you sure to delete the selected Project")==false){
+       		return;
+    	}
+    	var url = "<%=request.getContextPath()%>/projectManageAction.it?method=deleteProjects&moduleId=<%=ModuleOperateName.MODULE_PROJECT_MANAGE%>&operateId=<%=ModuleOperateName.OPER_PROJECT_DELETE%>";
+	    document.forms['projectForm'].action = url;
+      	document.forms['projectForm'].submit();
+	}
+  
+</script>
+</head>
+<%
+	String projectCode = (String)request.getParameter("projectCode");
+	String projectName = (String)request.getParameter("projectName");
+	String projectDesc = (String)request.getParameter("projectDesc");
+	String projLdId = (String)request.getParameter("projLdId");
+	String projLdName = (String)request.getParameter("projLdName");
+	String projStartDate = (String)request.getParameter("projStartDate");
+	String status = (String)request.getParameter("status");
+	
+	Iterator projectIt=null;
+	if (request.getAttribute("eflowprojectList")!=null){
+		Collection projectList = (ArrayList)request.getAttribute("eflowprojectList");
+		projectIt = projectList.iterator();
+	}
+	
+	
+%>
+<body>
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+	<tr><td height="10"></td></tr>
+ 	<!--<tr><td><strong><font color='#5980BB' family='Times New Roman'><i18n:message key="housekeeping_project.location"/></font></strong></td></tr>
+--></table>
+
+<form name="projectForm" method="post">
+<TABLE WIDTH=100% bordercolor="#6595D6" style="border-collapse:collapse;"  BORDER=1 CELLPADDING=3 CELLSPACING=0 class="tr0" >
+	<tr class="tr1">
+		<td align='center' colspan='4'><B><i18n:message key="housekeeping_project.title"/></B></td>
+	</tr>
+	<tr> 
+		<TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="housekeeping_project.projectcode"/></span></div></TD>
+		<TD width=35% height="20" > 
+			<input type="text"  value="<%=projectCode==null?"":projectCode%>" name="projectCode" >
+		</TD>
+      	<TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="housekeeping_project.projectname"/></span></div></TD>
+      	<TD width=30% height="20">
+         	<input type="text"  value="<%=projectName==null?"":projectName%>" name="projectName">
+		</TD>
+    </tr>
+    <tr> 
+		<TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="housekeeping_project.des"/></span></div></TD>
+		<TD width=35% height="20" > 
+			<input type="text"  value="<%=projectDesc==null?"":projectDesc%>" name="projectDesc" >
+		</TD>
+      	<TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="housekeeping_project.prjleaderid"/></span></div></TD>
+      	<TD width=30% height="20">
+         	<input type="text"  value="<%=projLdId==null?"":projLdId%>" name="projLdId">
+		</TD>
+    </tr>
+    <tr> 
+		<TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="housekeeping_project.prjleadername"/></span></div></TD>
+		<TD width=35% height="20" > 
+			<input type="text"  value="<%=projLdName==null?"":projLdName%>" name="projLdName" >
+		</TD>
+      	<TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="housekeeping_project.prjstartdate"/></span></div></TD>
+      	<TD width=30% height="20">
+         	<input type="text"  value="<%=projStartDate==null?"":projStartDate%>" name="projStartDate" onclick='setday(this)'>(mm/dd/yyyy)
+		</TD>
+    </tr>
+    <tr> 
+		<TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="housekeeping_project.status"/></span></div></TD>
+		<TD width=35% height="20" >
+			<select name="status">
+			    <option value=""></option>
+           		<option value="02" <%="02".equals(status)?"selected":""%>><i18n:message key="housekeeping_project.active"/></option>
+           		<option value="10" <%="10".equals(status)?"selected":""%>><i18n:message key="housekeeping_project.close"/></option>
+         	</select>
+		</TD>
+		<TD width=15% height="20" class="tr3"><div align="right"><span class="style1"></span></div></TD>
+		<TD width=35% height="20" >
+			
+		</TD>
+    </tr>
+    <tr>
+		<td align='center' colspan='4'>
+         	<input type="button" name="searchBtn" value='<i18n:message key="button.search"/>' onclick="searchProject()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           		onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+			<input type="Reset" name="resetBtn" value='<i18n:message key="button.reset"/>' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           		onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;        
+			<purview:purview moduleId='<%=ModuleOperateName.MODULE_PROJECT_MANAGE%>' operateId='<%=ModuleOperateName.OPER_PROJECT_ADD%>' isButton='true' labelValue='Add'>
+			<input type="button" name="addBtn" value='<i18n:message key="button.add"/>' onclick="addProject()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           		onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+           </purview:purview>
+           &nbsp;&nbsp;      
+           <purview:purview moduleId='<%=ModuleOperateName.MODULE_PROJECT_MANAGE%>' operateId='<%=ModuleOperateName.OPER_PROJECT_DELETE%>' isButton='true' labelValue='Delete'>  
+			<input type="button" name="deleteBtn" value='<i18n:message key="button.delete"/>' onclick="deleteProject()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           		onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+           </purview:purview>
+       	</td>
+	</tr>
+</TABLE>
+<table width="100%"  border="0" cellpadding="0" cellspacing="1" class=sortable id=mytable  style="border:1px #8899cc solid;">
+	<tr class="liebiao_tou">
+		<td align='center' ><input type="checkbox" name="allBtn" onclick="selectAll(this,'projectcodeId')"></td>
+		<td align='center' ><i18n:message key="housekeeping_project.projectcode"/></td>
+		<td align='center' ><i18n:message key="housekeeping_project.status"/></td>
+        <td align='center' ><i18n:message key="housekeeping_project.projectname"/></td>
+        <td align='center' ><i18n:message key="housekeeping_project.des"/></td>
+        <td align='center' ><i18n:message key="housekeeping_project.prjleaderid"/></td>
+        <td align='center' ><i18n:message key="housekeeping_project.prjleadername"/></td>
+        <td align='center' ><i18n:message key="housekeeping_project.prjstartdate"/></td>       
+	</tr>		
+	<%
+		if(projectIt!=null){
+			while(projectIt.hasNext()){
+				ProjectVO pvo = (ProjectVO)projectIt.next();
+				//System.out.println(")))))))))>"+pvo.getPrj_code());
+	%>
+			<tr class="tr_change">
+			<td align='center' ><input type="checkbox" <%=("10".equals(pvo.getStatus())?"disabled":"")%> name="projectcodeId" value="<%=pvo.getPrj_code()%>"></td>			
+			<td>
+				<purview:purview moduleId='<%=ModuleOperateName.MODULE_PROJECT_MANAGE%>' operateId='<%=ModuleOperateName.OPER_PROJECT_EDIT%>' isButton='false' labelValue='<%=pvo.getPrj_code()%>'>  
+                	<a href='<%=request.getContextPath()%>/projectManageAction.it?method=enterEditProject&type=edit&projectCode=<%=pvo.getPrj_code()%>'><%=pvo.getPrj_code()%></a>
+            	</purview:purview>
+			</td>
+			<% 
+				String pstatus="";
+				if(pvo.getStatus()==null){
+					pstatus="";
+				}else if("02".equals(pvo.getStatus())){
+					pstatus="Active";
+				}else if("10".equals(pvo.getStatus())){
+					pstatus="Close";	
+				}			
+			%>
+			<td><%=pstatus%>&nbsp;&nbsp;</td>
+			<td><%=pvo.getPrj_name()==null?"":pvo.getPrj_name() %>&nbsp;&nbsp;</td>	
+			<td><%=pvo.getPrj_desc()==null?"":pvo.getPrj_desc() %>&nbsp;&nbsp;</td>
+			<td><%=pvo.getPrj_ld_id()==null?"":pvo.getPrj_ld_id() %>&nbsp;&nbsp;</td>
+			<td><%=pvo.getPrj_ld_name()==null?"":pvo.getPrj_ld_name() %>&nbsp;&nbsp;</td>
+			<td><%=pvo.getPrj_start_date()==null?"":pvo.getPrj_start_date()%>&nbsp;&nbsp;</td>	
+	<% 		}
+		}
+	%>
+</table>
+</form>
+</body>
+</html>

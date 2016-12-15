@@ -1,0 +1,133 @@
+package com.aiait.eflow.formmanage.action;
+
+//import java.io.PrintWriter;	
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.aiait.eflow.common.CommonName;
+import com.aiait.eflow.housekeeping.dao.StaffHolidayDAO;
+import com.aiait.eflow.housekeeping.vo.StaffHolidayVO;
+import com.aiait.eflow.housekeeping.vo.StaffVO;
+import com.aiait.framework.db.DBManagerFactory;
+import com.aiait.framework.db.IDBManager;
+import com.aiait.framework.exception.DAOException;
+import com.aiait.framework.mvc.action.ActionLocation;
+import com.aiait.framework.mvc.action.DispatchAction;
+import com.aiait.framework.mvc.action.ModuleMapping;
+
+/**
+ * 使用引擎提交申请的form后，调用该类中的某个业务方法，来进行额外的具体业务操作
+ * @author asnpgj3
+ *
+ */
+
+public class FormAfterSaveAction extends DispatchAction {
+	
+	
+	public ActionLocation handleAfterSave(
+			ModuleMapping mapping,
+			HttpServletRequest request,
+			HttpServletResponse response)
+			throws Exception {
+		
+        String requestNo = (String) request.getAttribute("requestNo");
+        //String formSystemId = (String) request.getParameter("formSystemId");
+        StaffVO currentStaff = (StaffVO) request.getSession().getAttribute(CommonName.CURRENT_STAFF_INFOR);
+
+		String functionLabel = (String)request.getAttribute("functionLabel");
+		if(functionLabel!=null){
+			functionLabel = functionLabel.trim().toLowerCase();
+		}
+		String returnLabel = "saveFormSuccess";
+		if("balanceholiday".equals(functionLabel)){
+			balanceHoliday(request);
+		}else if("peof_".equals(functionLabel.substring(0, 5))){
+            IDBManager dbManager = null;
+            try {
+                dbManager = DBManagerFactory.getDBManager();
+                Collection paramList = new ArrayList();
+                paramList.add(requestNo);
+                paramList.add(currentStaff.getStaffCode());
+                System.out.println("Call Stored Procedure: " + functionLabel);
+                dbManager.prepareCall(functionLabel, paramList);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (dbManager != null)
+                    dbManager.freeConnection();
+            }
+        }
+		
+		return mapping.findActionLocation(returnLabel);
+	}
+    
+	/**
+	 * 申请请假后,调用该方法进行当前申请人的相应假期的结算
+	 * @param mapping
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean balanceHoliday(HttpServletRequest request)throws Exception {
+		//获取当前申请者
+		StaffVO staff = (StaffVO)request.getSession().getAttribute(CommonName.CURRENT_STAFF_INFOR);
+		//获取申请的假期类型
+		String leaveType = (String)request.getParameter("leave_type");
+		//获取申请的请假天数
+		String daysStr = (String)request.getParameter("leave_days");
+		double leaveDays = 0.0;
+		if(daysStr!=null && !"".equals(daysStr)){
+			leaveDays = Double.parseDouble(daysStr);
+		}
+		//对剩余假期进行结算
+		IDBManager dbManager = null;
+		try{
+		  dbManager =  DBManagerFactory.getDBManager();
+		  StaffHolidayDAO holidayDao = new StaffHolidayDAO(dbManager);
+		  dbManager.startTransaction();
+		  StaffHolidayVO holidayVo = holidayDao.getStaffHoliday(staff.getStaffCode(),leaveType);
+		  double saveDays = 0.0;
+		  //System.out.println("leaveType="+leaveType);
+		  if(CommonName.LEAVE_TYPE_ANNUAL_DAY.equals(leaveType)){//如果是年假
+			/**
+			//如果去年的假期大于0，则首先从去年的假期中减掉天数，如果去年的假期不够减，则剩余的天数从今年的年假中减除
+			if(holidayVo.getLastAnnualDays()>0){
+				if(holidayVo.getLastAnnualDays()>=leaveDays){
+					saveDays = holidayVo.getLastAnnualDays() - leaveDays;
+					holidayDao.balanceHolidays(staff.getStaffCode(),"00",saveDays);
+				}else{
+					saveDays = leaveDays - holidayVo.getLastAnnualDays();
+					holidayDao.balanceHolidays(staff.getStaffCode(),"00",0); //去年的年假剩余天数为0
+					holidayDao.balanceHolidays(staff.getStaffCode(),"01",saveDays); //今年的年假剩余假期为saveDays天
+				}
+			}else{//如果没有去年剩余的年假，则直接从今年年假中除掉
+				saveDays = holidayVo.getCurrentAnnualDays() - leaveDays;
+				holidayDao.balanceHolidays(staff.getStaffCode(),"01",saveDays);//今年的年假剩余假期为saveDays天
+			}
+			**/
+			saveDays = holidayVo.getUsedDays() + leaveDays;
+			holidayDao.balanceHolidays(staff.getStaffCode(),CommonName.LEAVE_TYPE_ANNUAL_DAY,saveDays);
+		  }else if(CommonName.LEAVE_TYPE_SICK_LEAVE.equals(leaveType)){//如果是病假
+			/**
+			saveDays = holidayVo.getCurrentSickDays() - leaveDays;
+			holidayDao.balanceHolidays(staff.getStaffCode(),"02",saveDays); //今年的病假剩余天数为saveDays天
+			**/
+			saveDays = holidayVo.getUsedDays() + leaveDays;
+			holidayDao.balanceHolidays(staff.getStaffCode(),CommonName.LEAVE_TYPE_SICK_LEAVE,saveDays);
+		  }
+		  dbManager.commit();
+		  return true;
+		}catch(DAOException e){
+		    dbManager.rollback();
+			e.printStackTrace();
+			return false;
+		}finally{
+			if(dbManager!=null) dbManager.freeConnection();
+		}
+	}
+	
+}

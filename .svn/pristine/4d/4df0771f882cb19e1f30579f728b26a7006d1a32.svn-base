@@ -1,0 +1,1362 @@
+var CompassDB = "";
+var CommonCompanyCode = "";
+
+var localObj = window.location;
+
+var contextPath = localObj.pathname.split("/")[1];
+
+var basePath = localObj.protocol+"//"+localObj.host+"/"+contextPath;
+
+var server_context=basePath;
+
+var defaultCommissionRate="";	//20150309 Justin Bin Added
+var defaultBusinessType="";		//20150506 业务渠道	Justin Bin Added
+var nMaxAge = 0;
+var nMinAge = 0;
+var formSystemId = "";
+
+jQuery(document).ready(function() {
+	if (document.readyState == "complete") 
+		delNode("loading");
+	
+	CompassDB = GetCompassDBName();
+	
+	ValidationSplit();
+	initMemSectionBtn();
+	initPendSectionBtn();
+	formSystemId = jQuery("input[name='formSystemId'][type='hidden']").val();
+	
+	initvalue();
+	listenInputFocus();
+	maxLengthControl();
+	appendMemInform();
+	paymentMethodCheck();
+	if(formSystemId!='30328'){
+		InitCommissionRate();	//20150309 Justin Bin Added for initialize the commission rate;
+		commissionRateCheck();	//20150305 Justin Bin Added
+	}
+	//countPeople();
+	initPeopleNo();
+	initPeopleByPlan();	//20150320 Justin Bin Added
+	SaveCommonCompanyAll();
+	changeOriPolicyCode();
+	
+	triggerBasicAction();
+	triggerTableAction();
+	
+	
+	
+	jQuery('input[isDate="true"]').each(function() { 
+		jQuery(this).blur(function() { _NOVA.until.changeDateFormat(this); });	
+	});
+	
+	if(jQuery('div.errorDiv').length>0 || jQuery('div.warningDiv').length>0)
+		CheckMemberNovaDuplicate()
+	setPendingCode();
+	initMemStatus();
+});
+
+function setPendingCode(){
+	if(jQuery('textarea[name="field_SystemFW_1"]').length>0)
+	{
+		if(jQuery('#formTablePend tr').length>1)
+		{
+			jQuery('textarea[name="field_SystemFW_1"]').text('W010');
+			jQuery('textarea[name="field_SystemFW_1"]').attr('readonly','true');
+		}
+	}
+}
+
+//table shortcut function
+jQuery(document).keydown(function(e) {
+	var itemName, tableName, sessionID;
+
+	if (e.altKey && e.which == 107 || e.altKey && e.which == 187) {
+		itemName = jQuery(":focus");
+		if (itemName.attr('name')) {
+			tableName = itemName.closest('table').attr('id');
+			m = tableName.match(/\d{1,100}/);
+			sessionID = m[0];
+			createTableSectionRow(tableName, sessionID, "0");
+		}
+		return false;
+	}
+
+	if (e.altKey && e.which == 109 || e.altKey && e.which == 189) {
+		itemName = jQuery(":focus");
+		if (itemName.attr('name')) {
+			tableName = itemName.closest('table').attr('id');
+			m = tableName.match(/\d{1,100}/);
+			sessionID = m[0];
+
+			itemName.closest('table').find(
+					"tr:last td:first input[type='checkbox']").attr(
+					"checked", true);
+
+			delAllRow(tableName, "chkid_" + sessionID);
+						
+		}
+		return false;
+	}
+});
+
+//all field trigger Action
+function triggerBasicAction(){
+	
+	jQuery("textarea[name='field_02_6']").focus(function(){domainidrequest();}).blur(function(){DupChecking_Pol(this);});
+	
+	jQuery("textarea[name='field_02_9']").blur(function(){jQuery(this).val(ToDBC(jQuery(this).val()));});
+	
+	jQuery("input[name='field_02_13']").change(function(){calSumFun();} );
+	
+	jQuery("textarea[name='field_02_16']").focus(function(){loadPic(this);}).blur(function(){DupChecking_Client(this); changeOriPolicyCode();});
+	
+	jQuery("textarea[name='field_02_17']").focus(function(){loadPic(this);}).blur(function(){SetPayeeName(this);});
+	
+	jQuery("textarea[name='field_02_19']").blur(function(){CheckSameNameandTel(this);});
+	
+	jQuery("textarea[name='field_02_20']").blur(function(){CheckSameNameandTel(this);});
+	
+	jQuery("textarea[name='field_02_21']").blur(function(){MailFormatChecking(this);});
+	
+	jQuery("textarea[name='field_02_25']").blur(function(){IdValidationClntPross(this);});
+	
+	jQuery("select[name='field_02_27']").blur(function(){LoadBranchCode(this);}).change(function(){SaveCommonCompany(this)});
+	
+	jQuery("input[name='field_2_1']").click(function(){clearBtn(this);calSumFun();});
+	
+	jQuery("input[name='field_2_5']").click(function(){clearBtn(this);});
+	
+	jQuery("input[name='field_5_1']").blur(function(){NoofMemValidation();});
+	
+	jQuery("input[name='field_5_2']").blur(function(){NoofMemValidation();});
+	
+	jQuery("select[name='field_5_3']").change(function(){SetReason();});
+
+	jQuery("input[name='field_6_1']").click(function(){clearBtn(this);CheckAgent(this);});
+	
+	jQuery("select[name='field_6_6']").click(function(){summaryCommission();});
+	
+	jQuery("select[name='BranCod_id']").change(function(){changeCityCode();});
+	
+	//NOVA-167
+	jQuery("select[name='PROVINCE']").blur(function(){LoadCityDistCode(this);});
+	jQuery("select[name='CITY']").blur(function(){LoadDistCode(this);});
+	
+}
+
+function triggerTableAction(){
+	bindTableNewRowAction("formTable11", 1);
+	bindTableNewRowAction("formTable4", 1);
+	bindTableNewRowAction("formTable7", 1);
+	bindTableNewRowAction("formTable9", 1);
+	bindTableNewRowAction("formTableProduct", 1);
+	bindTableNewRowAction("formTableplanDetail", 1);
+}
+
+function bindTableNewRowAction(tableId, type){
+	
+	switch (tableId) {
+		case "formTable11": {
+			bindTableTRAction(tableId,'textarea[name="field_11_3"]','blur','jQuery(this).text(ToDBC(jQuery(this).text()));',type);
+			bindTableTRAction(tableId,'textarea[name="field_11_5"]','blur','IdValidationClntPross(this);',type);
+			bindTableTRAction(tableId,'textarea[name="field_11_7"]','blur','MailFormatChecking(this);',type);
+			break;
+		}
+		case "formTable4": {			
+			if(formSystemId == '20267')
+				bindTableTRAction(tableId,'select[name="field_4_3"]','change','flexPlanChange(this);',type);
+			if(formSystemId!='30321'){
+				bindTableTRAction(tableId,'select[name="field_4_1"]','change','pkgProductChange(this);',type);
+				bindTableTRAction(tableId,'select[name="field_4_19"]','change','pkgProductChange(this);',type);
+				
+						
+				bindTableTRAction(tableId,'select[name="field_4_11"]','change','changeMemProduct(this);',type);
+			}
+
+			bindTableTRAction(tableId,'select[name="Product_id"]','change','productChange(this,true);',type);	
+			bindTableTRAction(tableId,'select[name="Product_id"]','focus','loadNProduct(this,false);',type);
+			
+			if(formSystemId == '20259'||formSystemId=='30319' )	//20150428 Justin Bin Modified
+				bindTableTRAction(tableId,'select[name="Plan_id"]','change','flexPlanChange(this);',type);
+			else
+			{
+				bindTableTRAction(tableId,'select[name="Plan_id"]','focus','loadPlan(this,false);',type);
+				bindTableTRAction(tableId,'select[name="Plan_id"]','change','planChange(this);',type);
+			}
+			
+			if(formSystemId == '20261'|| formSystemId == '20264')
+				bindTableTRAction(tableId,'select[name="field_4_6"]','click','loadCProduct(this);',type);
+			
+			
+			if(formSystemId == '20261'|| formSystemId == '20264')
+				bindTableTRAction(tableId,'select[name="field_4_7"]','focus','loadCPlan(this);',type);
+			
+			break;
+		}
+		case "formTable7": {
+			bindTableTRAction(tableId,'textarea[name="field_7_2"]','focus','checkAgentManual();',type);
+			bindTableTRAction(tableId,'textarea[name="field_7_2"]','blur','GetProducerInfo(this);',type);
+			
+			bindTableTRAction(tableId,'textarea[name="field_7_5"]','focus','AddPrecentageSign(this);',type);
+			bindTableTRAction(tableId,'textarea[name="field_7_5"]','click','AddPrecentageSign(this);',type);
+			
+			break;
+		}
+		case "formTable9": {
+			bindTableTRAction(tableId,'input[name="field_9_12"]','change','effectDayVali(this);',type);
+			bindTableTRAction(tableId,'select[name="field_9_13"]','change','changeMemSHIP(this);',type);
+			
+			bindTableTRAction(tableId,'select[name="field_9_20"]','focus','loadMemPkgPdt(this);',type);
+			
+			bindTableTRAction(tableId,'select[name="field_9_21"]','focus','changeMemProduct(this);',type);
+			bindTableTRAction(tableId,'select[name="field_9_21"]','change','changeMemPlan(this,true);',type);
+			
+			bindTableTRAction(tableId,'textarea[name="field_9_7"]','focus','RemoveCheckingMsg(this);',type);
+			bindTableTRAction(tableId,'textarea[name="field_9_7"]','blur','IdValidation(this,0);OtherChecking(this);',type);
+			
+			//if(formSystemId!=="30328")			//if JS_flex form, no need to calculate 
+				bindTableTRAction(tableId,'input[name="field_9_9"]','blur','calculatePremium(this,true);',type);
+			
+			if(formSystemId == '20259' || formSystemId=='30319' || formSystemId=='30328' )
+				bindTableTRAction(tableId,'select[name="MemPlan_id"]','focus','changeMemProduct(this);',type);
+			
+			
+				bindTableTRAction(tableId,'select[name="MemPlan_id"]','change','changeMemPlan(this,true);',type);
+			
+				//bindTableTRAction(tableId,'select[name="MemProduct_id"]','focus','loadMemPkgPdt(this);',type);
+				bindTableTRAction(tableId,'select[name="MemProduct_id"]','focus','loadMemProduct(this,false,true,false);',type);
+	
+				
+				bindTableTRAction(tableId,'select[name="MemProduct_id"]','change','changeMemProduct(this,true);',type);
+
+			break;
+		}
+		//NOVA-87
+		case "formTablePend": {
+			bindTableTRAction(tableId,'select[name="PendingList"]','change','changePendingData(this,true);',type);			
+			break;						
+		}
+		
+		//20150507 Justin Bin Added
+		case "formTableProduct":{
+			//bindTableTRAction(tableId,'select[name="field_Product_1"]','blur','showProduct(this);',type);
+			if(formSystemId=="30321")
+				bindTableTRAction(tableId,'select[name="field_Product_1"]','blur','showProduct(this);',type);
+			bindTableTRAction(tableId,'select[name="field_Product_1"]','blur','showProductPlan();',type);
+			bindTableTRAction(tableId,'select[name="field_Product_1"]','change','calSumFun();',type);
+			bindTableTRAction(tableId,'select[name="field_Product_2"]','change','calSumFun();',type);
+			
+			bindTableTRAction(tableId,'textarea[name="field_Product_3"]','blur','AddPrecentageSign(this);',type);
+			bindTableTRAction(tableId,'textarea[name="field_Product_4"]','blur','AddPrecentageSign(this);',type);
+			bindTableTRAction(tableId,'textarea[name="field_Product_5"]','blur','AddPrecentageSign(this);',type);
+			bindTableTRAction(tableId,'textarea[name="field_Product_6"]','blur','AddPrecentageSign(this);',type);
+			bindTableTRAction(tableId,'textarea[name="field_Product_7"]','blur','AddPrecentageSign(this);',type);
+			bindTableTRAction(tableId,'textarea[name="field_Product_8"]','blur','AddPrecentageSign(this);',type);
+			bindTableTRAction(tableId,'textarea[name="field_Product_9"]','blur','AddPrecentageSign(this);',type);
+			break;
+			
+		}
+		
+		case "formTableplanDetail":{
+			bindTableTRAction(tableId, 'input[name="field_planDetail_3"]','blur','calSumFun();',type);
+			bindTableTRAction(tableId, 'input[name="field_planDetail_4"]','blur','calSumFun();',type);
+		}
+	}
+	
+	if(type==0)
+	{
+		jQuery("#"+tableId+" tr:last").find('textarea').each(function(){
+	    	jQuery(this).focus(function(){ jQuery(this).css("background-color","#F8FEC3");});
+	    	jQuery(this).blur(function(){ jQuery(this).css("background-color","#FFFFFF");});
+	    });
+	    
+		jQuery("#"+tableId+" tr:last").find('input[type="text"]').each(function(){
+	    	jQuery(this).focus(function(){jQuery(this).css("background-color","#F8FEC3");});
+	    	jQuery(this).blur(function(){jQuery(this).css("background-color","#FFFFFF");});
+	    });
+	    
+		jQuery("#"+tableId+" tr:last").find('input[type="checkbox"]').each(function(){
+	    	jQuery(this).focus(function(){jQuery(this).parent().css("background-color","#F8FEC3");});
+	    	jQuery(this).blur(function(){jQuery(this).parent().css("background-color","rgb(239, 239, 239)");});
+	    });
+	}
+}
+
+function bindTableTRAction(tableId, fieldId, action, func, type){
+	if(type == 1)
+	{
+		if(jQuery("#"+tableId +" tr").length>1){
+			jQuery("#"+tableId +" tr " + fieldId).each(function(){
+				jQuery(this).bind(action,function(){eval(func);} );
+			});
+		}
+	}
+	else
+	{
+		jQuery("#"+tableId+" tr:last " + fieldId).bind(action,function(){eval(func);} );
+		
+	}
+}
+
+function initMemStatus(){
+	if(jQuery('input[name="field_9_19"]').length>0)
+	{
+		jQuery('input[name="field_9_19"]').each(function(){
+			ChangeFont(jQuery(this).parent());
+		})
+	}
+}
+
+function paymentMethodCheck(){
+	var checkPayMeth = jQuery('input[type="checkbox"][name="field_2_5"]:checked')
+	if(checkPayMeth.length>0){
+		if(checkPayMeth.val()==3){
+			jQuery("#combox_transform_field_2_9").css('color','red');
+			jQuery('#combox_transform_field_2_9').unbind("blur");
+		}
+	}
+	
+	jQuery('input[type="checkbox"][name="field_2_5"]').click(function(){
+		if(jQuery(this).is(':checked')&&jQuery(this).val()==3)
+		{
+			jQuery("#combox_transform_field_2_9").css('color','red');
+			jQuery('textarea[name="field_2_10"]').text("");
+			jQuery('#combox_transform_field_2_9').unbind("blur");
+		}
+		else
+		{
+			var clntName = jQuery('textarea[name="field_02_17"]').text().trim();
+			
+			if(clntName!="")
+				jQuery('textarea[name="field_2_10"]').text(clntName);
+			
+			jQuery('#combox_transform_field_2_9').blur(function(){
+				jQuery('select[name="field_2_9"]').combobox("setValue","");
+			});
+			
+			jQuery('select[name="field_2_9"]').combobox("setValue","");
+		}
+	});
+}
+
+//20150305 Justin Bin Added
+function commissionRateCheck(){
+	//jQuery('select[name="field_6_6"]').combobox("setValue",defaultCommissionRate);
+	var checkCommission = jQuery('input[type="checkbox"][name="field_6_1"]:checked')
+	if(checkCommission.length>0){
+		if(checkCommission.val()=="D" ){
+			//jQuery("#combox_transform_field_6_6").css('color','red');
+			//jQuery('#combox_transform_field_6_6').unbind("blur");
+			jQuery('select[name="field_6_6"]').combobox("setValue","");
+			jQuery('select[name="field_6_6"]').next().find("*").attr("disabled","disable");
+			//jQuery('#combox_transform_field_6_6').removeAttr("disabled");
+		}else{
+			jQuery('select[name="field_6_6"]').next().find("*").removeAttr("disabled");
+		}
+	}
+	
+	jQuery('input[type="checkbox"][name="field_6_1"]').click(function(){
+		defaultBusinessType=jQuery(this).val();
+		if(jQuery(this).is(':checked')&&jQuery(this).val()=="D")
+		{
+			//jQuery("#combox_transform_field_6_6").css('background-color','grey');
+			jQuery('select[name="field_6_6"]').combobox("setValue","");
+			
+			jQuery('select[name="field_6_6"]').next().find("*").attr("disabled","disable");
+			jQuery('select[name="field_6_6"]').next().css('background-color','rgb(239, 239, 239)');
+			//jQuery('#combox_transform_field_6_6').unbind("blur");
+			//jQuery('#combox_transform_field_6_6').attr("disabled","disable");
+			//jQuery('div7.')
+			
+		}
+		else
+		{				
+			jQuery('select[name="field_6_6"]').combobox("setValue",defaultCommissionRate);
+			jQuery('select[name="field_6_6"]').next().find("*").removeAttr("disabled");
+			jQuery('select[name="field_6_6"]').next().removeAttr('style');
+		}
+		
+		if(formSystemId!='30328'){
+			summaryCommission();
+		}
+		
+	});
+	
+	jQuery('#combox_transform_field_6_6').blur(function(){
+		if(defaultBusinessType!="D"){
+			jQuery('select[name="field_6_6"]').combobox("setValue",jQuery('select[name="field_6_6"]').val());
+			//jQuery('#combox_transform_field_6_6').removeAttr("disabled");
+		}else{
+			jQuery('select[name="field_6_6"]').combobox("setValue","");
+		}
+	});
+	
+}
+
+function appendMemInform(){
+	jQuery('span.spSectionName').each(function(){
+		if(jQuery(this).parent().text().indexOf('人员信息')>0)
+		{	
+			jQuery(this).next().after('&nbsp;&nbsp;&nbsp;(<span style="font-family:Webdings;color:red;font-size:14px">r</span>&nbsp;-&nbsp;黑名单问题&nbsp;'+
+					'<span style="font-family:Webdings;color:red;font-size:14px">y</span>&nbsp;-&nbsp;超龄投保问题&nbsp;'+
+					'<span style="font-family:Webdings;color:red;font-size:14px">w</span>&nbsp;-&nbsp;有无社保问题&nbsp;'+
+					'<span style="font-family:Webdings;color:red;font-size:14px">q</span>&nbsp;-&nbsp;重复投保问题&nbsp;)');
+			
+			return false;
+		}
+		else
+			return;	
+	});
+}
+
+function ValidationSplit() {
+	// testing("pre");
+	LoadCompany();
+	//GetClientCode();
+	triggerAddRow();
+}
+
+var branchcode = "";
+
+//NOVA-167
+var provcode = "";
+var citycode = "";
+
+function initvalue() {
+	
+	ChangeFont(jQuery('textarea[name="field_9_19"]'));
+	if (jQuery.trim(jQuery('textarea[name="field_5_1"]').val()) == "") {
+		jQuery('textarea[name="field_5_1"]')
+				.val("1. 全体员工人数：\n2. 初投保人数：\n3. 是否第三方缴费：\n4. 购买计划：\n5. 版本号：\n6. 年证编号：\n7. 缴溢保费处理：");
+	}
+	
+	var sumAmount = jQuery("input[name='field_10_1']");
+	var sumAmountVal = sumAmount.val().replace(",","");
+	
+	if(!isNaN(parseFloat(sumAmountVal)))
+		sumAmount.val(parseFloat(sumAmountVal).toFixed(2));
+	
+	if(jQuery('select[name="field_02_27"]').val()!="")
+	{
+		//var branchText = jQuery('select[name="BranCod_id"]').find("option:selected").text();
+		changeBranchCode();
+		
+		document.getElementsByName("field_02_6")[0].focus();
+	}
+	
+	jQuery('html,body').animate({scrollTop:0},'slow');
+	
+}
+
+function LoadBranchCode(selectedID) {
+	
+	var selectedVal = jQuery(selectedID).val();
+	if(branchcode != selectedVal)
+	{
+		changeBranchCode();
+		branchcode = selectedVal;
+	}
+}
+
+function changeBranchCode(){
+	var nCompCode = jQuery('select[name="field_02_27"] option:selected').val();
+	
+	if(nCompCode != undefined )
+	{
+		var sql = "select distinct COMPCODE,BRANCHCODE,BRANCHSHORT from TCOMPBRANCH WHERE COMPCODE ='"+ nCompCode +"'";
+		
+		var data = selectFromSQLJson('compnwJNDI',sql);
+		
+		var branchCode = jQuery('select[name="BranCod_id"]');
+		var branchCodeVal = jQuery('select[name="BranCod_id"]').val()
+
+		branchCode.empty();
+		
+		if (data.length>0) {
+			
+			branchCode.append("<option value=''></option>");
+			
+			jQuery.each(data,function(i,item) {
+				value = item.COMPCODE+ item.BRANCHCODE;
+				text = item.BRANCHCODE + " - " + item.BRANCHSHORT;
+				branchCode.append("<option value='" + value + "'>" + text + "</option>");
+			});
+			
+			branchCode.combobox("rebindData");
+		}
+		
+		branchCode.combobox("setValue",branchCodeVal);
+		branchCode.trigger("onchange");
+	}
+}
+
+//NOVA-167
+function LoadCityDistCode(selectedID) {
+	//reload city & district code when province code has change
+	var selectedVal = jQuery(selectedID).val();
+	if(provcode != selectedVal)
+	{
+		changeProvinceCode_Company();
+		provcode = selectedVal;
+	}
+}
+
+function changeProvinceCode_Company(){
+	
+	//var nProvinceCode = jQuery('select[name="PROVINCE"] option:selected');
+	var nProvinceCodeVal = jQuery('select[name="PROVINCE"] option:selected').val();
+	
+	var nCityCode     = jQuery('select[name="CITY"]');
+	var nCityCodeVal  = jQuery('select[name="CITY"]').val();
+	
+	var nDistrictCode = jQuery('select[name="DISTRICT"]');
+	var nDistrictCodeVal = jQuery('select[name="DISTRICT"]').val();
+	
+	var nCityVal = "";
+	var nDistVal = "";
+	
+	
+	if(nProvinceCodeVal != undefined )
+	{
+		//var sql = "select distinct COMPCODE,BRANCHCODE,BRANCHSHORT from TCOMPBRANCH WHERE COMPCODE ='"+ nCompCode +"'";
+		
+		var sql_city = "select DICTCODE, DICTDESCCN from TCIRCSYSDICT where DICTTYPE = 'REGIONALISM' and REMARK1 = '2' and REMARK2 = '" + nProvinceCodeVal + "'";		
+		var data_city = selectFromSQLJson('compnwJNDI',sql_city);
+		
+		//alert("sql_city: " + sql_city);
+
+		nCityCode.empty();
+		
+		var i = 0;
+		if (data_city.length>0) {
+			
+			nCityCode.append("<option value=''></option>");
+			
+			jQuery.each(data_city,function(i,item) {
+				value = item.DICTCODE;
+				text = item.DICTDESCCN;
+				
+				if (i == 0){
+					nCityCode.append("<option value='" + value + "' selected>" + text + "</option>");
+					nCityVal = value;
+				}else{					
+					nCityCode.append("<option value='" + value + "'>" + text + "</option>");
+					i++;
+				}
+				
+			});
+			
+			nCityCode.combobox("rebindData");
+		}
+		
+		nCityCode.combobox("setValue",nCityVal);
+		nCityCode.trigger("onchange");
+		
+		nCityCodeVal  = jQuery('select[name="CITY"] option:selected').val();
+		
+		var sql_dist = "select DICTCODE, DICTDESCCN from TCIRCSYSDICT where DICTTYPE = 'REGIONALISM' and REMARK1 = '3' and REMARK2 = '" + nCityCodeVal + "'";		
+		var data_dist = selectFromSQLJson('compnwJNDI',sql_dist);
+		
+		//alert("sql_dist: " + sql_dist);
+
+		nDistrictCode.empty();
+		i = 0;
+		if (data_dist.length>0) {
+			
+			nDistrictCode.append("<option value=''></option>");
+			
+			jQuery.each(data_dist,function(i,item) {
+				value = item.DICTCODE;
+				text = item.DICTDESCCN;
+				
+				
+				if (i == 0){
+					nDistrictCode.append("<option value='" + value + "' selected>" + text + "</option>");
+					nDistVal = value;
+				}else{					
+					nDistrictCode.append("<option value='" + value + "'>" + text + "</option>");
+					i++;
+				}				
+				
+			});
+			
+			nDistrictCode.combobox("rebindData");
+		}
+		
+		nDistrictCode.combobox("setValue",nDistVal);
+		nDistrictCode.trigger("onchange");		
+		
+	}
+}
+
+
+function LoadDistCode(selectedID) {
+	//reload city & district code when province code has change
+	var selectedVal = jQuery(selectedID).val();
+	if(citycode != selectedVal)
+	{
+		changeCityCode_Company();
+		citycode = selectedVal;
+	}
+}
+
+function changeCityCode_Company(){
+
+	//var nProvinceCode = jQuery('select[name="PROVINCE"] option:selected');
+	var nProvinceCodeVal = jQuery('select[name="PROVINCE"] option:selected').val();
+	
+	var nCityCode     = jQuery('select[name="CITY"]');
+	var nCityCodeVal  = jQuery('select[name="CITY"]').val();
+	
+	var nDistrictCode = jQuery('select[name="DISTRICT"]');
+	var nDistrictCodeVal = jQuery('select[name="DISTRICT"]').val();
+	
+	var nDistVal = "";
+	
+	
+	if(nProvinceCodeVal != undefined && nCityCodeVal != undefined)
+	{	
+		nCityCodeVal  = jQuery('select[name="CITY"] option:selected').val();
+		
+		var sql_dist = "select DICTCODE, DICTDESCCN from TCIRCSYSDICT where DICTTYPE = 'REGIONALISM' and REMARK1 = '3' and REMARK2 = '" + nCityCodeVal + "'";		
+		var data_dist = selectFromSQLJson('compnwJNDI',sql_dist);
+		
+		//alert("sql_dist: " + sql_dist);
+
+		nDistrictCode.empty();
+		i = 0;
+		if (data_dist.length>0) {
+			
+			nDistrictCode.append("<option value=''></option>");
+			
+			jQuery.each(data_dist,function(i,item) {
+				value = item.DICTCODE;
+				text = item.DICTDESCCN;
+				
+				
+				if (i == 0){
+					nDistrictCode.append("<option value='" + value + "' selected>" + text + "</option>");
+					nDistVal = value;
+				}else{					
+					nDistrictCode.append("<option value='" + value + "'>" + text + "</option>");
+					i++;
+				}				
+				
+			});
+			
+			nDistrictCode.combobox("rebindData");
+		}
+		
+		nDistrictCode.combobox("setValue",nDistVal);
+		nDistrictCode.trigger("onchange");				
+	}		
+}
+
+function changeOriPolicyCode(){
+	
+    var nClntCode = jQuery('textarea[name="field_02_16"]').val();
+    if(nClntCode != undefined )
+    {
+          var sql = "SELECT POLNO,STATUS FROM TPOLICY WHERE CLNTCODE ='"+ nClntCode +"'";
+          
+          var data = selectFromSQLJson('compnwJNDI',sql);
+          
+          var OriginalPol = jQuery('select[name="OriginalPol"]');
+          var OriginalPolVal = jQuery('select[name="OriginalPol"]').val()
+
+          OriginalPol.empty();
+        //alert (sql);
+          if (data.length>0) {
+                //alert (item.POLNO + "  " + item.STATUS);
+                OriginalPol.append("<option value=''></option>");
+                
+                jQuery.each(data,function(i,item) {
+                      value = item.POLNO;
+                      text = item.POLNO + ' - ' + item.STATUS;
+                      OriginalPol.append("<option value='" + value + "'>" + text + "</option>");
+                });
+                
+                OriginalPol.combobox("rebindData");
+          }
+          
+          OriginalPol.combobox("setValue",OriginalPolVal);
+          OriginalPol.trigger("onchange");
+          
+    }
+}
+
+function changeCityCode(){
+	var nCompCode = jQuery('select[name="BranCod_id"]').val();
+	
+	if(nCompCode =="" || nCompCode == null|| nCompCode == "null"){return false;}
+	
+	var SubBranch = "", SubCompany="";
+	SubBranch = nCompCode.substr(2,3);
+	SubCompany = nCompCode.substr(0,2);
+	
+	var sql = "select BRANCHCODE, COUNTYCODE,COUNTYDESC from TCOMPBRNCOUNTY WHERE BRANCHCODE = '" 
+		+ SubBranch + "' AND COMPCODE = '"+ SubCompany +"'" ;
+	
+	var data = selectFromSQLJson('compnwJNDI',sql);
+		
+	var CityCode = jQuery('select[name="SecCity"]');
+	
+	var cityCodeVal = jQuery('select[name="SecCity"]').val(); 
+	
+	CityCode.empty();
+	
+	if (data.length>0) {
+		
+		CityCode.append("<option value=''></option>");
+		
+		jQuery.each(data,function(i,item) {
+			var value = item.COUNTYCODE ;
+			var text  = item.BRANCHCODE + " - " + item.COUNTYCODE + " - " + item.COUNTYDESC;
+			CityCode.append("<option value='" + value + "'>" + text + "</option>");
+		});
+		
+		CityCode.combobox("rebindData");
+	}
+	CityCode.combobox("setValue",cityCodeVal);	
+}
+
+function initPendSectionBtn(){
+	
+	var delBtn = jQuery('#formTablePend').parent().find('input[name="deleteRowBtn"]');
+	
+	if (delBtn) {
+		var button = ' <input type="button" id="impt_formTablePend" value="照会检查" onclick="SubmitValidation()" /> ';
+		var copyBut = ' <input type="button" name="copy_formTablePend" id="copy_formTablePend" value="CopyAll" onclick="copyAll();getSystemId4Pending ()"/> ';
+		delBtn.after(button);
+		delBtn.after(copyBut);
+	}
+}
+
+function copyAll(){
+	
+	var text;
+	var val='';
+	text=jQuery('div#div12 textarea[name="field_Pend_3"]');
+	//这里无法固定，字符流与现实文本中的字数是不相同的。这里固定为文本中全部为汉字的宽度
+	var colNum =41;
+	for(var i=0;i<text.length;i++){
+		var rows= text[i].value.length/colNum;
+		rows=Math.ceil(rows);
+		var endStr = text[i].value.length%colNum;
+		var idx = '';
+		for(var j=0; j<rows;j++){
+			idx =idx+( text[i].value.substr(j*colNum,colNum)+"\r\n");
+			  if(text[i].value.length==idx.length+endStr){
+				  idx=idx+text[i].value.substr(rows*colNum,endStr)+"\r\n";
+			  }
+		}
+		val+=idx;
+	}
+	window.clipboardData.setData('Text',val);
+}
+
+function initMemSectionBtn() {
+	var tid = "'formTable9'";
+	
+	var delBtn = jQuery('#formTable9').parent().find('input[name="deleteRowBtn"]');
+	
+	if (delBtn) {
+		var file = "  <input type='file' id='xlsFile'/>";
+		var button1 = '  <input type="button" id="copy_formTable9" value="Copy" onclick="memberCopy(\'formTable9\');" />'
+		var button2 = '  <input type="button" id="impt_formTable9" value="导入Excel" onclick="validateXls(\'formTable9\');" />'
+		var button3 = '  <input type="button" id="model_formTable9" value="Download" onclick="downloadXls(\'formTable9\');" />'
+		delBtn.after(button1 + file + button2 + button3);
+
+		jQuery('div#div10 input[name="deleteRowBtn"]').each(function(){
+		    jQuery(this).data('onclick', this.onclick);
+		    
+		    var checkBox = jQuery('#formTable9 input[name="chkid_9"][type="checkbox"]');
+		    	
+		    this.onclick = function(event) {
+		    	if(checkBox.length>0)
+		    	{
+		    		checkBox.each(function(){
+			    		if(jQuery(this).is(":checked")){
+			    			var memIDField = jQuery(this).closest('tr').find('textarea[name="field_9_7"]')
+			    			RemoveCheckingMsg(memIDField);
+			    		}
+			    	});
+		    	}
+		    	jQuery(this).data('onclick').call(this, event || window.event);
+		    	
+		    	if(checkBox.length>0)
+		    	{
+		    		checkBox.each(function(){
+			    		if(jQuery(this).is(":checked")){
+			    			var memIDField = jQuery(this).closest('tr').find('textarea[name="field_9_7"]')
+			    			CheckDuplicate(memIDField);
+			    		}
+			    	});
+		    		
+		    		
+		    	}
+		    };
+		});
+	}
+}
+
+//下载人员信息模板
+function downloadXls(tblId){
+	//var path = "\\\\cangzdwsql07\\Sting\\NOVA\\MemberUpload.xlsx";
+	var path = "/download/template/MemberUplload_20264.xlsx";
+	
+	if(formSystemId!=""&&formSystemId!=null)
+	{
+		var sql = "select param_value as PATHName from teflow_param_config where param_code = 'MemberUpload_path' and description = '"+formSystemId+"'";
+		
+		var data = selectFromSQLJson('',sql);
+		
+		if (data.length>0)
+			path = data[0].PATHNAME;
+	}
+	window.location.href = server_context + path;
+	
+}
+
+function memberCopy(tblId){
+	
+	var m = tblId.match(/\d{1,100}/);
+	var sessionID = m[0];
+	var table = jQuery('#'+tblId);
+	var rowNum = table.find('tr').length;
+	
+	createTableSectionRow(tblId, sessionID, "0");
+	if(rowNum>1)
+	{	
+		var trLast = table.find('tr:visible:last');
+		jQuery.each(trLast.find('td'),function(i1,item1){
+			var child = jQuery(item1).children().eq(0);
+			var preChild = trLast.prev().find('td').eq(i1).children().eq(0);
+			var tagName = child.prop('tagName');
+			
+			switch (tagName) {
+				case "TEXTAREA": {
+					if(child.attr('name') =="field_9_7")
+						child.trigger('blur');
+					
+					child.text(preChild.val());
+					break;
+				}
+				case "SELECT": {
+					if(child.attr('name') == "MemProduct_id" || child.attr('name') == "MemPlan_id" 
+						|| child.attr('name') == "field_9_13"|| child.attr('name') == "field_9_20"
+						 || child.attr('name') == "field_9_21")
+						child.trigger('focus');
+					
+					child.val(preChild.val());
+					
+					if(child.attr('name') == "MemProduct_id" || child.attr('name') == "MemPlan_id" 
+						|| child.attr('name') == "field_9_13"|| child.attr('name') == "field_9_20"
+						 || child.attr('name') == "field_9_21")
+						child.trigger('change');
+					break;
+				}
+				case "INPUT": {
+					if (child.attr('isdate') == 'true') {
+						child.val(preChild.val());
+						if(child.attr('name') == "field_9_9")
+						{
+							calculatePremium(child,false);
+							break;
+						}
+					}
+					break;
+				}
+				default:
+					break;
+			}
+			
+		});
+	}
+}
+
+// 文件校验
+function validateXls(tblId) {
+	var excelPath = jQuery('#xlsFile').val();
+	if (excelPath == null || excelPath == '') {
+		alert("请选择要上传的Excel文件");
+	} else {
+		var fileExtend = excelPath.substring(excelPath.lastIndexOf('.'))
+				.toLowerCase();
+		if (fileExtend != '.xls' && fileExtend != '.xlsx') {
+			alert("文件格式需为'.xls'或'xlsx'格式");
+
+		} else {
+			var m = tblId.match(/\d{1,100}/);
+			var sessionID = m[0];
+			var filePath = jQuery('#xlsFile').val();
+			
+			// jQuery('#'+tblId).append(content);
+			var outTimer1,outTimer2
+			/*
+			outTimer1 = setTimeout(function(){loadingDiv(tblId);
+				clearTimeout(outTimer1);}, 50);
+			*/
+			outTimer1 = setTimeout(function(){ShopConfirm("人员上传处理中。。。");
+			clearTimeout(outTimer1);}, 50);
+			//outTimer1 = setTimeout(function(){ShopConfirm();}, 1);
+			
+			var content
+			
+			outTimer2 = setTimeout(function(){
+				content = readXls(filePath, tblId, sessionID);
+				clearTimeout(outTimer2);
+			}, 1000);
+			//clearTimeout(outTimer1);
+			
+		    //var content = readXls(filePath, tblId, sessionID);
+		}
+
+		var file = jQuery('#xlsFile');
+		file.after(file.clone().val(""));
+		file.remove();
+	}
+	return;
+}
+
+// 读取xls文件
+function readXls(filePath, tableName, sessionID) {
+	var sheet_id = 1; // 读取第1个表
+	var row_start = 2; // 从第2行开始读取
+	var tempStr = '';
+
+	var birthday = '';
+	var effectDay = '';
+	var oXL;
+	var dateStr;
+	try {
+		oXL = new ActiveXObject("Excel.application");
+	}
+	// 创建Excel.Application对象
+	catch (err) {
+		alert(err.message);
+	}
+	
+	var oWB = oXL.Workbooks.open(filePath);
+    
+	try {
+		
+		oWB.worksheets(sheet_id).select();
+		var oSheet = oWB.ActiveSheet;
+		
+		//var rowNum = oXL.Worksheets(sheet_id).UsedRange.Cells.Rows.Count;
+		var rowNum = oXL.Worksheets(sheet_id).Range("A65536").End(-4162).Row;
+		//alert(rowNum2);
+		var index, self, value, child, tagName, i2
+		var tableRow = jQuery('#' + tableName).find('tr').length;
+		for (var i1=row_start; i1<=rowNum; i1++) {
+			
+			i2 = tableRow;
+			// 添加新行
+			createTableSectionRow(tableName, sessionID, "0");
+			tableRow++;
+			
+			jQuery('#' + tableName).find('tr').eq(i2).find('td').each(
+				function(indexD) {
+					if (indexD > 1) {
+						self = jQuery(this);
+						
+						indexD = indexD - 1;
+						
+						value = jQuery.trim(oSheet.Cells(i1, indexD).value);
+						child = self.children().eq(0);
+						tagName = child.prop('tagName');
+						childName = child.attr('name'); 
+							
+						switch (tagName) {
+							case "TEXTAREA": {
+								child.text(value);
+								
+								if(child.attr('name') =="field_9_7")
+									child.trigger('onblur');
+								
+								break;
+							}
+							case "SELECT": {
+								//NOVA-170
+//								if(child.attr('name') == "field_9_8")
+//									break;
+								
+								if(child.attr('name') == "MemProduct_id" || child.attr('name') == "MemPlan_id" 
+									|| child.attr('name') == "field_9_13"|| child.attr('name') == "field_9_20"
+									 || child.attr('name') == "field_9_21")
+									child.trigger('focus');
+								
+								child.find('option').filter(function() {
+								    return jQuery(this).text() == value; 
+								}).prop('selected', true);
+								
+								if(child.attr('name') == "MemProduct_id" || child.attr('name') == "MemPlan_id" 
+									|| child.attr('name') == "field_9_13"|| child.attr('name') == "field_9_20"
+									 || child.attr('name') == "field_9_21")
+									child.trigger('change');
+								
+								break;
+							}
+							case "INPUT": {
+								if (child.attr('isdate') == 'true') {
+									if(value!=""){
+										d = new Date(value);
+										if(!isNaN(d))
+										{
+											month = d.getMonth() + 1;
+											month = month<10?('0'+month):month;
+											date = d.getDate();
+											date = date<10?('0'+date):date;
+											
+											dateStr = month + "/" + date + "/" + d.getFullYear();
+											
+											child.val(formatDate1(dateStr,"MM/dd/yyyy",dateFormat));
+										}
+									}
+									
+									if(child.attr('name') == "field_9_9")
+									{
+										calculatePremium(child,false);
+										break;
+									}
+								}
+								
+								//child.trigger('onblur');
+								break;
+							}
+							default:
+								break;
+						}
+					}
+				});
+		}
+		
+		calSumFun();
+		GenCERTNO();
+		
+		oXL.DisplayAlerts = false;
+		oWB.Close(savechanges=false);
+		oWB = null;
+		//oXL.DisplayAlerts = true;
+		oXL.Quit();
+		oXL.Application.Quit(); 
+		oXL = null;
+		window.setTimeout(CollectGarbage, 10);
+		
+	} catch (err) {
+		alert(err.message);
+	
+		//oXL.DisplayAlerts = true;
+		if(oXL)
+		{
+			oXL.DisplayAlerts = false;
+			if(oWB)
+			{
+				oWB.Close(savechanges=false);
+				oWB = null;
+			}
+			oXL.Quit();
+			oXL.Application.Quit(); 
+			oXL = null;
+			window.setTimeout(CollectGarbage, 10);
+		}
+		closeWindow2();
+	}
+	
+	closeWindow2();	
+	jQuery('#loadingTR').remove();
+	return tempStr; // 返回
+}
+
+function loadingDiv(tblId){
+	var colNum = jQuery('#' + tblId).find('tr:eq(0) td').length;
+	
+	var loadingTR = jQuery('<tr id="loadingTR"><td colspan="'+colNum+'" style="text-align:center;width:100%;"><div class="t-loading"></div></td></tr>');
+	
+	jQuery('#' + tblId).append(loadingTR);
+}
+
+function Cleanup() {
+    window.clearInterval(idTmr);
+    CollectGarbage();
+}
+
+function addLabelRow() {
+	var table = jQuery('#formTable11');
+
+	var tdlength = jQuery('#formTable11 tr:eq(0) td').length;
+
+	var suboffic = jQuery('#formTable11 tr:eq(1) td:eq(1) textarea').text();
+
+	if (suboffic != "100") 
+		createTableSectionRow("formTable11", "11", "0");
+	
+	//sub office code
+	var value = '100';
+	var object = jQuery('#formTable11 tr:eq(1) td:eq(1) textarea');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_1','textarea');
+	
+	//sub office name
+	value = jQuery('textarea[name="field_02_17"]').text();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(2) textarea');
+		
+	appendHiddenToSubOffic(object, value, 'field_11_2','textarea');
+	
+	//sub office local name
+	value = jQuery('textarea[name="field_02_26"]').text();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(3) textarea');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_8','textarea');
+
+	//sub office address
+	value = jQuery('textarea[name="field_02_9"]').text();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(4) textarea');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_3','textarea');
+	
+	//sub office post code
+	value = jQuery('textarea[name="field_02_18"]').text();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(5) textarea');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_13','textarea');
+
+	//sub office contact person
+	value = jQuery('textarea[name="field_02_19"]').text();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(6) textarea');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_6','textarea');
+	
+	//sub office ID card no
+	value = jQuery('textarea[name="field_02_25"]').text();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(7) textarea');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_5','textarea');
+	
+	//sub office phone
+	value = jQuery('textarea[name="field_02_20"]').text();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(8) textarea');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_4','textarea');
+	
+	//sub office email
+	value = jQuery('textarea[name="field_02_21"]').text();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(9) textarea');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_7','textarea');
+	
+	//sub office bank 
+	value = jQuery('select[name="field_2_3"] option:selected').val();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(10) select');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_9','select');
+	
+	//sub office bank branch name 
+	value = jQuery('textarea[name="field_2_6"]').val();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(11) textarea');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_10','textarea');
+	
+	//sub office bank account
+	value = jQuery('textarea[name="field_2_7"]').val();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(12) textarea');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_11' ,'textarea');
+	
+	//sub office bank account
+	value = jQuery('select[name="field_2_8"] option:selected').val();
+	object = jQuery('#formTable11 tr:eq(1) td:eq(13) select');
+	
+	appendHiddenToSubOffic(object, value, 'field_11_12','select');
+
+	jQuery('#formTable11 tr:eq(1) td:eq(0) input[type="checkbox"]').attr('disabled', 'disabled');
+}
+
+function appendHiddenToSubOffic(object, value, fieldName, type){
+	if(type=='select')
+		object.val(value).attr('disabled', 'disabled');
+	else
+		object.text(value).attr('disabled', 'disabled');
+	
+	if(object.parent().find('input[type="hidden"]').length>0)
+		object.parent().find('input[type="hidden"]').val(value);
+	else
+		jQuery('<input name="'+fieldName+'" type="hidden" required="false" value="'+value+'" />').appendTo(object.parent());
+}
+
+function triggerAddRow() {
+
+	var item = 'textarea[name="field_02_22"],textarea[name="field_02_17"],textarea[name="field_02_26"],textarea[name="field_02_9"],' + 
+	'textarea[name="field_02_19"],textarea[name="field_02_25"],textarea[name="field_02_20"],textarea[name="field_02_21"],' + 
+	'select[name="field_2_3"], textarea[name="field_2_6"], textarea[name="field_02_18"], textarea[name="field_2_7"], select[name="field_2_8"]';
+	
+	jQuery(item).blur(function() {
+		addLabelRow();
+		if(jQuery(this).attr('name')=="field_02_17")
+		{	
+			ShowSearch(this);
+			addLabelRow();
+		}
+	});
+	
+	var suboffic = jQuery('#formTable11 tr:eq(1) td:eq(1) textarea').text();
+
+	if(suboffic == "100")
+		addLabelRow();
+}
+
+function ChangeFont(statusField)
+{ 
+	if(statusField.length>1)
+		statusField.each(function (){
+			jQuery(this).css({'color':'red','fontFamily':'Webdings','fontSize':'14','text-align':'center'});
+			if(jQuery(this).val()!='')
+				jQuery(this).closest('tr').css('background-color','#F8FEC3');
+			else
+				jQuery(this).closest('tr').css('background-color','rgb(235, 235, 233)');
+		});
+	else
+	{
+		jQuery(statusField).css({'color':'red','fontFamily':'Webdings','fontSize':'14','text-align':'center'});
+		if(jQuery(statusField).val()!='')
+			jQuery(statusField).closest('tr').css('background-color','#F8FEC3');
+		else
+			jQuery(statusField).closest('tr').css('background-color','rgb(235, 235, 233)');
+	}
+}
+
+function ImproveLength(Operitem, Length, Sign){
+	var OperitemLen  = Operitem.length;
+	if(OperitemLen  < Length && OperitemLen >0){
+		for ( var i = 0; i<= (Length-OperitemLen-1) ; i++) {Operitem= Sign + Operitem;}
+	}
+	return Operitem;
+}
+
+function SetPayeeName(Clntname){
+	var payeeName = jQuery(Clntname).val(); 
+	
+	jQuery("textarea[name='field_2_10']").val(payeeName) ;
+	
+	if(jQuery(Clntname).siblings('span.t-loading').length>0)
+		jQuery(Clntname).siblings('span.t-loading').remove();
+}
+
+function LoadCompany()
+{
+	var NovaCompanyname = jQuery('input[name="company_id"]');
+	var Orgname = NovaCompanyname.parent().text().trim();
+	var CompCode,TeamCode
+	
+	var sql = "SELECT top 1 COMPCODE,TEAMCD from TNovaCompanyMapping WHERE ORG_NAME = '" +Orgname+ "'";
+	
+	var data = selectFromSQLJson('',sql);
+	
+	if(data!="" && data != null)
+	{
+		CompCode = data[0].COMPCODE;
+		TeamCode = data[0].TEAMCD;
+	}
+	else
+		return false;
+	
+	// for the Team code
+     var TeamCodeField = jQuery('textarea[name="field_02_32"]');
+     
+     if(TeamCodeField.length>0)
+    	 TeamCodeField.val(TeamCode);
+	    
+	// for the COMPCODE
+	var CompanySelect = jQuery('select[name="field_02_27"]');
+	if(CompanySelect.length>0)
+		CompanySelect.combobox("setValue",CompCode);
+}
+
+function SaveCommonCompany(OperItem) { 
+	CommonCompanyCode = OperItem.value;
+  //alert (CommonCompanyCode);
+}
+
+function SaveCommonCompanyAll() 
+{ 
+	CommonCompanyCode = jQuery('select[name="field_02_27"]').find("option:selected").val();
+}
+
+//20150306 Justin Bin Added
+function initPeopleNo(){
+	var countMember=jQuery('input[name="field_9_16"]').length;
+	
+	jQuery('input[name="field_10_7"]').val(countMember);
+}
+
+//20150320 Justin Bin Added for count the enroll member
+function initPeopleByPlan(){
+	//var countMember=jQuery('input[name="field_9_16"]').length;
+	var tableA=jQuery('#formTable4')
+	var trList=tableA.find("tr");
+	
+	for(var i=1;i<trList.length;i++){
+		var pkgCode=jQuery(trList[i]).find('select[name="field_4_1"]').val();
+		var pkgPlan=jQuery(trList[i]).find('select[name="field_4_3"]').val();
+		
+		if(pkgCode==null && pkgPlan==null){
+			pkgCode=jQuery(trList[i]).find('select[name="Product_id"]').val();
+			pkgPlan=jQuery(trList[i]).find('select[name="Plan_id"]').val();
+			var count1=initPeopleCount2(pkgCode,pkgPlan);		// for Flex form
+			jQuery(trList[i]).find('textarea[name="field_4_3"]').val(count1);
+		}else if(pkgCode==null && pkgPlan==null){
+			pkgCode=jQuery(trList[i]).find('select[name="field_4_19"]').val();
+			pkgPlan=jQuery(trList[i]).find('select[name="Plan_id"]').val();
+			var count1=initPeopleCount3(pkgCode,pkgPlan);			// for NB form
+			jQuery(trList[i]).find('textarea[name="field_4_3"]').val(count1);
+		}else{
+			var count1=initPeopleCount(pkgCode,pkgPlan);		//GCPA Form
+			jQuery(trList[i]).find('textarea[name="field_4_9"]').val(count1);
+		}
+	}
+}
+
+function initPeopleCount(pkgCode,pkgPlan){
+	var selectedTr=jQuery('select[name="field_9_20"] option:selected[value="'+pkgCode+'"]').closest('tr').find('select[name="field_9_21"] option:selected[value="'+pkgPlan+'"]').closest('tr');
+	return selectedTr.length;
+}
+
+function initPeopleCount2(pkgCode,pkgPlan){
+	var selectedTr=jQuery('select[name="MemProduct_id"] option:selected[value="'+pkgCode+'"]').closest('tr').find('select[name="MemPlan_id"] option:selected[value="'+pkgPlan+'"]').closest('tr');
+	return selectedTr.length;
+}
+
+function initPeopleCount3(pkgCode,pkgPlan){
+	var selectedTr=jQuery('select[name="field_9_20"] option:selected[value="'+pkgCode+'"]').closest('tr').find('select[name="MemPlan_id"] option:selected[value="'+pkgPlan+'"]').closest('tr');
+	return selectedTr.length;
+}
+
+//20150309 Justin Bin Added
+function InitCommissionRate(){
+	var sql,data 
+	
+	sql="SELECT param_value from teflow_param_config where param_code='commission_rate' and description='"+formSystemId+"'";
+	
+	data = selectFromSQLJson('',sql);
+	
+	if (data.length>0){
+		//jQuery('select[name="field_6_6"]').val(data[0].TEXT);
+		//jQuery('select[name="field_6_6"]').combobox("setValue",data[0].TEXT);
+		defaultCommissionRate=data[0].PARAM_VALUE;
+	}
+}
+
+function GetCompassDBName(){
+	var sql = "select param_value as DBName from teflow_param_config where param_code = 'CompassDB'";
+	
+	var data = selectFromSQLJson('',sql);
+	
+	if(data.length>0)
+		return data[0].DBNAME;
+	else
+		return "";
+}
+
+

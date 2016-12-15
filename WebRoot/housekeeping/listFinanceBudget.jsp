@@ -1,0 +1,203 @@
+<%@ page contentType="text/html;charset=GBK" pageEncoding="GBK"%>
+<%@ include file="/common/loading.jsp" %>
+<%@page import="java.util.*,com.aiait.eflow.housekeeping.vo.StaffVO,com.aiait.eflow.common.CommonName,com.aiait.eflow.housekeeping.vo.FinanceBudgetVO" %>
+<%@page import="com.aiait.eflow.common.helper.CompanyHelper,com.aiait.eflow.housekeeping.vo.CompanyVO,com.aiait.eflow.housekeeping.vo.TeamVO,com.aiait.eflow.common.helper.OptionHelper" %>
+<%@page import="com.aiait.eflow.common.helper.StaffTeamHelper,com.aiait.eflow.util.StringUtil" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@ taglib uri="/WEB-INF/purview.tld" prefix="purview" %>
+<%@ taglib uri="/WEB-INF/taglibs-page.tld" prefix="pageTag" %>
+<html>
+<head>
+<title>List Finance Budget</title>
+<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+<script type=text/javascript src="<%=request.getContextPath()%>/common/message.jsp"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+<SCRIPT language="javascript" src="<%=request.getContextPath()%>/js/sorttable.js"></SCRIPT>
+<script language="javascript" src="<%=request.getContextPath()%>/js/aiaitjsframe.js"></script>
+<script language="javascript">
+   function getOptionList(orgId){
+     var url = "<%=request.getContextPath()%>/teamManageAction.it?method=getTeamList";
+     var param = "orgId="+orgId;
+     var myAjax = new Ajax.Request(
+         url,
+        {
+            method:"post",       //
+            parameters:param,   //
+            setRequestHeader:{"If-Modified-Since":"0"},     //
+            onComplete:function(x){    //
+                   updateListTeam(x.responseXML);
+            },
+            onError:function(x){          //
+                    alert('Fail to get team list for company');
+            } 
+        } 
+       ); 
+  }
+  function search(){
+    document.forms[0].action = "<%=request.getContextPath()%>/financeBudgetAction.it?method=search";
+    document.forms[0].submit();
+  }
+  
+  function displayDetail(orgId,departId,categoryId,subCategoryId){
+    var url = "<%=request.getContextPath()%>/financeBudgetAction.it?method=viewPage&orgId="+orgId+
+               "&departmentId="+departId+"&categoryId="+categoryId+"&subCategoryId="+subCategoryId;
+    window.location = url;
+  }
+
+  function deleteItem(){
+  	    if(checkSelect('compoundValue')<=0){
+	      alert(have_no_select);
+	      return;
+	    }
+	    if(confirm(confirm_delete_records)){
+	      document.forms[1].action = "<%=request.getContextPath()%>/financeBudgetAction.it?method=delete";
+	      document.forms[1].submit();
+	    }
+  }
+  
+  function fileUpload(byType){
+    var url = "<%=request.getContextPath()%>/financeBudgetAction.it?method=showExcelTemplateSelect&byType="+byType;
+    openCenterWindow(url,450,100);
+  }
+  
+  
+</script>
+</head>
+<body>
+<%
+  String orgId = (String)request.getParameter("orgId");
+  String team_code = (String)request.getParameter("team_code");
+  String categoryId = (String)request.getParameter("categoryId");
+  StaffVO currentStaff = (StaffVO)request.getSession().getAttribute(CommonName.CURRENT_STAFF_INFOR);
+  Collection teamList = (ArrayList)request.getAttribute("teamList");
+  
+  Collection resultList = (ArrayList)request.getAttribute("resultList");
+%>
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+	<tr><td height="10"></td></tr>
+ 	<!--<tr><td><strong><font color='#5980BB' family='Times New Roman'><i18n:message key="housekeeping_financebudget.location"/></font></strong></td></tr>
+--></table>
+<form name="projectForm" method="post">
+ <TABLE WIDTH=100% bordercolor="#6595D6" style="border-collapse:collapse;"  BORDER=1 CELLPADDING=3 CELLSPACING=0 class="tr0" >
+	<tr class="tr1">
+		<td align='center' colspan='4'><B><i18n:message key="housekeeping_financebudget.title"/></B></td>
+	</tr>
+	<tr> 
+		<TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="housekeeping_financebudget.org"/></span></div></TD>
+		<TD width=35% height="20" > 
+		 <select name="orgId" onchange="getOptionList(this.value)">
+		  <option value=''></option>
+           <%
+            Collection companyList = currentStaff.getOwnCompanyList(); //CompanyHelper.getInstance().getOwnCompanyList(currentStaff.getOrgId());
+            if(companyList!=null && companyList.size()>0){
+            	Iterator it = companyList.iterator();
+            	while(it.hasNext()){
+            	   CompanyVO vo = (CompanyVO)it.next();
+            	   if(vo.getOrgId().equals(orgId)){
+            		   out.print("<option value='"+vo.getOrgId()+"' selected>" + vo.getOrgName()+"</option>");   
+            	   }else{
+            	     out.print("<option value='"+vo.getOrgId()+"'>" + vo.getOrgName()+"</option>");
+            	   }
+            	}
+            }
+           %>
+         </select>
+		</TD>
+      	<TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="housekeeping_financebudget.department"/></span></div></TD>
+      	<TD width=30% height="20">
+         <select name="team_code">
+           <option value=""></option>
+           <%
+           	if(teamList!=null&&teamList.size()>0){
+           			Iterator teamIt = teamList.iterator();
+           			while(teamIt.hasNext()){
+           				TeamVO tvo = (TeamVO)teamIt.next();
+           %>           
+           <option value="<%=tvo.getTeamCode()%>" <%=(team_code!=null&&tvo.getTeamCode().equals(team_code))?"selected":""%>><%=tvo.getTeamName()%></option>
+           <%
+           			}
+           		}
+           %>               
+         </select>
+		</TD>
+    </tr>
+	<tr>
+		<TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="housekeeping_financebudget.category"/></span></div></TD>
+		<TD width=35% height="20" colspan='3'>
+		   <select name="categoryId">
+		     <option value=''></option>
+		     <%
+		       HashMap categoryMap = OptionHelper.getInstance().getFieldMap("expenses_category");
+		       if(categoryMap!=null){
+		    	  Object[] keys = categoryMap.keySet().toArray();
+		    	  for(int i=0;i<keys.length;i++){
+		    		  out.print("<option value='"+keys[i]+"' ");
+		    		  if(keys[i].equals(categoryId)){
+		    			  out.print("selected");
+		    		  }
+		    		  out.print(">"+categoryMap.get(keys[i])+"</option>");
+		    	  }
+		       }
+		     %>
+		   </select>
+		</TD>
+	</tr>
+    <tr>
+		<td align='center' colspan='4'>
+		  <input type="button" name="searchBtn" value='<i18n:message key="button.search"/>' onclick="search()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           		onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+          <input type="Reset" name="resetBtn" value='<i18n:message key="button.reset"/>' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           		onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;  
+		  <input type="button" name="deleteBtn" value='<i18n:message key="button.delete"/>' onclick="deleteItem()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           		onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;  
+		  <input type="button" name="uploadBtn1" value='<i18n:message key="button.annually_upload"/>' onclick="fileUpload('01')" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           		onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;  
+		  <input type="button" name="uploadBtn2" value='<i18n:message key="button.monthly_upload"/>' onclick="fileUpload('02')" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           		onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">           
+		</td>
+	</tr>
+ </TABLE>
+</form>
+<form name='listForm' method="post">
+<table width="100%"  border="0" cellpadding="0" cellspacing="1" class=sortable id=mytable  style="border:1px #8899cc solid;">
+	<tr class="liebiao_tou">
+		<td align='center' ><input type="checkbox" name="allBtn" onclick="selectAll(this,'compoundValue')"></td>
+		<td align='center' ><i18n:message key="housekeeping_financebudget.org"/></td>
+		<td align='center' ><i18n:message key="housekeeping_financebudget.department"/></td>
+		<td align='center' >&nbsp;T2 &nbsp;</td>
+        <td align='center' ><i18n:message key="housekeeping_financebudget.category"/></td>
+        <td align='center' ><i18n:message key="housekeeping_financebudget.subcategory"/></td>
+        <td align='center' ><i18n:message key="housekeeping_financebudget.fullYearBudget"/></td>
+        <td align='center' ><i18n:message key="housekeeping_financebudget.adjustfullYearBudget"/></td>
+        <td align='center' ><i18n:message key="housekeeping_financebudget.ytdBudget"/></td>
+        <td align='center' ><i18n:message key="housekeeping_financebudget.actualExpense"/></td>
+        <td align='center' ><i18n:message key="housekeeping_financebudget.balance"/></td>
+        <td align='center' ><i18n:message key="button.action"/></td>    
+	</tr>	
+	<%
+	 if(resultList!=null && resultList.size()>0){
+		 Iterator it = resultList.iterator();
+		 while(it.hasNext()){
+			 FinanceBudgetVO vo = (FinanceBudgetVO)it.next();
+	%>
+	<tr class="tr_change">
+	  <td align='center' ><input type="checkbox" name="compoundValue" value="<%=vo.getOrgId()%>||<%=vo.getDepartmentId()%>||<%=vo.getCategoryId()%>||<%=vo.getSubCategoryId()%>"></td>	 	 
+	  <td><%=CompanyHelper.getInstance().getOrgName(vo.getOrgId())%></td>
+	  <td><%=StaffTeamHelper.getInstance().getTeamNameByCode(vo.getDepartmentId())%></td>
+	  <td>&nbsp;<%=vo.getAccountDC()%>&nbsp;</td>
+	  <td><%=OptionHelper.getInstance().getOptionLabel("expenses_category",vo.getCategoryId())%></td>
+	  <td><%=vo.getSubCategoryName()%></td>
+	  <td><%=StringUtil.formatDouble(vo.getFullYearBudget())%></td>
+	  <td><%=StringUtil.formatDouble(vo.getAdjustFullYearBudget())%></td>
+	  <td><%=StringUtil.formatDouble(vo.getYtnBudget())%></td>
+	  <td><%=StringUtil.formatDouble(vo.getYtnActualExpense())%></td>
+	  <td><%=StringUtil.formatDouble(vo.getBanlance())%></td>
+	  <td><a href="javascript:displayDetail('<%=vo.getOrgId()%>','<%=vo.getDepartmentId()%>','<%=vo.getCategoryId()%>','<%=vo.getSubCategoryId()%>')"><i18n:message key="button.view"/></a></td>
+	<%	 }
+	 }
+	%>
+</table>
+<pageTag:page action="/financeBudgetAction.it?method=search"></pageTag:page> 
+</form>
+</body>

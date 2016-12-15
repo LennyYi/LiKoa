@@ -1,0 +1,302 @@
+package com.aiait.eflow.formmanage.vo;
+
+import java.util.Collection;
+
+public class FormSectionFieldVO {
+	public int formSystemId;
+
+	public String sectionId;
+	
+	public String fieldId;
+	
+	public String sectionType;
+
+	public String fieldLabel;
+
+	public int fieldType = 1; // 控件类型，例如：1单文本框；2多文本框；3日期选择框；4下拉选择框；5多选一选择项；6多选多选择项; 8Comments(注解)
+
+	public boolean isRequired; // 是否允许为空：true--允许为空；false--不允许为空，为必填项
+
+	public int dataType = 1; // 数据类型，例如：1字符串；2日期；3数字
+
+	public int fieldLength; // 字段数据长度
+
+	public int fieldDataSourceType; // 如果控件类型为“4下拉选择框“或“5多选一选择项”或“6多选多选择项”，指定选项的数据定义来源类型：
+                                    // 1来自于系统其他表；2来自于数据库字典表
+	
+	public String fieldDataSrSQL; // 获取生成该选择框各选项的SQL;
+	
+	public int orderId;
+	
+	public int decimalDigits = 0;    //如果dataType=3是数字，则需要指定小数位数，默认为0
+	
+	private int highLevel = -1; //是否高亮度显示，-1表示不需要，1表示需要
+	
+	private int ismoney;		//是否为金额
+	
+	private int issinglerow =-1;  //是否单行显示
+	
+	private int controlsWidth;  //控件的宽度，只当控件类型为“1单文本框”，“2多文本框”时有效
+	
+	private int controlsHeight; //控件的高度，只当控件类型为“2多文本框”时有效
+	
+	private String fieldComments; //该字段的注释说明
+	
+	private String commentContent;//对其它字段或当前Section的解释说明;区别于上面的fieldComments
+	
+	public Collection optionList;
+	
+	private String systemFieldType; //用来保存System Field字段中的fieldType
+	
+	private String systemFieldParams; //用来保存System Field字段中的paramList
+	
+	private	int columnType;
+	
+	private String defaultValue;   //该字段设定的默认值
+	
+	private int columnWidth;       //如果是‘table’section中的field,该字段用来设定该field所在列的显示宽度的百分比值
+	
+	private String clickEvent;     //鼠标单击事件
+	 
+	private String dbclickEvent;   //鼠标双击事件
+
+	private String onfocusEvent;   //获得焦点事件
+	
+	private String lostfocusEvent; //失去焦点事件
+	
+	private String changeEvent;    //改变事件
+	
+	private int isReadonly = -1;   //是否是只读，-1表示非只读，1表示是只读
+	
+	public int getIsReadonly() {
+		return isReadonly;
+	}
+	public void setIsReadonly(int isReadonly) {
+		this.isReadonly = isReadonly;
+	}
+	public String getChangeEvent() {
+		return changeEvent;
+	}
+	public void setChangeEvent(String changeEvent) {
+		this.changeEvent = changeEvent;
+	}
+	public String getClickEvent() {
+		return clickEvent;
+	}
+	public void setClickEvent(String clickEvent) {
+		this.clickEvent = clickEvent;
+	}
+	public String getDbclickEvent() {
+		return dbclickEvent;
+	}
+	public void setDbclickEvent(String dbclickEvent) {
+		this.dbclickEvent = dbclickEvent;
+	}
+	public String getLostfocusEvent() {
+		return lostfocusEvent;
+	}
+	public void setLostfocusEvent(String lostfocusEvent) {
+		this.lostfocusEvent = lostfocusEvent;
+	}
+	public String getOnfocusEvent() {
+		return onfocusEvent;
+	}
+	public void setOnfocusEvent(String onfocusEvent) {
+		this.onfocusEvent = onfocusEvent;
+	}
+	public int getColumnWidth() {
+		return columnWidth;
+	}
+	public void setColumnWidth(int columnWidth) {
+		this.columnWidth = columnWidth;
+	}
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+	public void setDefaultValue(String defaultValue) {
+		this.defaultValue = defaultValue;
+	}
+	public int getColumnType(){
+		return this.columnType;
+	}
+	public void setColumnType(int columnType){
+		this.columnType = columnType;
+	}
+	public int getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(int orderId) {
+		this.orderId = orderId;
+	}
+
+	public int getDataType() {
+		return dataType;
+	}
+
+	public void setDataType(int dataType) {
+		this.dataType = dataType;
+	}
+
+	public int getFieldDataSourceType() {
+		return fieldDataSourceType;
+	}
+
+	public void setFieldDataSourceType(int fieldDataSourceType) {
+		this.fieldDataSourceType = fieldDataSourceType;
+	}
+
+	public String getFieldDataSrSQL() {
+		return fieldDataSrSQL;
+	}
+
+	public void setFieldDataSrSQL(String fieldDataSrSQL) {
+		this.fieldDataSrSQL = fieldDataSrSQL;
+	}
+
+	public String getFieldId() {
+		return fieldId;
+	}
+
+	public void setFieldId(String fieldId) {
+		this.fieldId = fieldId;
+	}
+
+	public String getFieldLabel() {
+		return fieldLabel;
+	}
+
+	public void setFieldLabel(String fieldLabel) {
+		this.fieldLabel = fieldLabel;
+	}
+
+	public int getFieldLength() {
+		return fieldLength;
+	}
+
+	public void setFieldLength(int fieldLength) {
+		this.fieldLength = fieldLength;
+	}
+
+	public int getFieldType() {
+		return fieldType;
+	}
+
+	public void setFieldType(int fieldType) {
+		this.fieldType = fieldType;
+	}
+	
+	public String getSectionType() {
+		return sectionType;
+	}
+
+	public void setSectionType(String sectionType) {
+		this.sectionType = sectionType;
+	}
+
+	public int getFormSystemId() {
+		return formSystemId;
+	}
+
+	public void setFormSystemId(int formSystemId) {
+		this.formSystemId = formSystemId;
+	}
+
+	public boolean getIsRequired() {
+		return isRequired;
+	}
+
+	public void setIsRequired(boolean isRequired) {
+		this.isRequired = isRequired;
+	}
+
+	public String getSectionId() {
+		return sectionId;
+	}
+
+	public void setSectionId(String sectionId) {
+		this.sectionId = sectionId;
+	}
+
+	public int getDecimalDigits() {
+		return decimalDigits;
+	}
+
+	public void setDecimalDigits(int decimalDigits) {
+		this.decimalDigits = decimalDigits;
+	}
+
+	public Collection getOptionList() {
+		return optionList;
+	}
+
+	public void setOptionList(Collection optionList) {
+		this.optionList = optionList;
+	}
+
+	public int getHighLevel() {
+		return highLevel;
+	}
+
+	public void setHighLevel(int highLevel) {
+		this.highLevel = highLevel;
+	}
+	
+	public int getIsMoney() {
+		return ismoney;
+	}
+
+	public void setIsMoney(int IsMoney) {
+		this.ismoney = IsMoney;
+	}
+	
+	public int getIsSingleRow() {
+		return issinglerow;
+	}
+
+	public void setIsSingleRow(int IsSingleRow) {
+		this.issinglerow = IsSingleRow;
+	}
+
+	public int getControlsHeight() {
+		return controlsHeight;
+	}
+
+	public void setControlsHeight(int controlsHeight) {
+		this.controlsHeight = controlsHeight;
+	}
+
+	public int getControlsWidth() {
+		return controlsWidth;
+	}
+
+	public void setControlsWidth(int controlsWidth) {
+		this.controlsWidth = controlsWidth;
+	}
+
+	public String getFieldComments() {
+		return fieldComments;
+	}
+
+	public void setFieldComments(String fieldComments) {
+		this.fieldComments = fieldComments;
+	}
+	public String getCommentContent() {
+		return commentContent;
+	}
+	public void setCommentContent(String commentContent) {
+		this.commentContent = commentContent;
+	}
+	public String getSystemFieldType() {
+		return systemFieldType;
+	}
+	public void setSystemFieldType(String systemFieldType) {
+		this.systemFieldType = systemFieldType;
+	}
+	public String getSystemFieldParams() {
+		return systemFieldParams;
+	}
+	public void setSystemFieldParams(String systemFieldParams) {
+		this.systemFieldParams = systemFieldParams;
+	}
+}

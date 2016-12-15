@@ -1,0 +1,101 @@
+package com.aiait.eflow.reportmanage.vo;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+public class ReportSectionVO 
+{
+	private int reportSystemId;
+
+	private String sectionId;
+
+	private String sectionType;
+
+	private String sectionRemark;
+
+	private String tableName;
+	
+	private String orderId;
+
+	private String sectionUrl;
+	
+	private Collection fieldList = new ArrayList();
+	
+	private String htmlCode;
+
+	
+	
+	public String getSectionUrl() {
+		return sectionUrl;
+	}
+
+	public void setSectionUrl(String sectionUrl) {
+		this.sectionUrl = sectionUrl;
+	}
+
+	public Collection getFieldList() {
+		return fieldList;
+	}
+
+	public void setFieldList(Collection fieldList) {
+		this.fieldList = fieldList;
+	}
+
+	public int getReportSystemId() {
+		return reportSystemId;
+	}
+
+	public void setReportSystemId(int reportSystemId) {
+		this.reportSystemId = reportSystemId;
+	}
+
+	public String getSectionId() {
+		return sectionId;
+	}
+
+	public void setSectionId(String sectionId) {
+		this.sectionId = sectionId;
+	}
+
+	public String getSectionRemark() {
+		return sectionRemark;
+	}
+
+	public void setSectionRemark(String sectionRemark) {
+		this.sectionRemark = sectionRemark;
+	}
+
+	public String getSectionType() {
+		return sectionType;
+	}
+
+	public void setSectionType(String sectionType) {
+		this.sectionType = sectionType;
+	}
+
+	public String getTableName() {
+		return tableName;
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+
+	public String getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+
+	public String getHtmlCode() {
+		return htmlCode;
+	}
+
+	public void setHtmlCode(String htmlCode) {
+		this.htmlCode = htmlCode;
+	}
+	
+
+}

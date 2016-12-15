@@ -1,0 +1,143 @@
+<%@ include file="/common/head.jsp" %>
+<%@ include file="/common/loading.jsp" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page import="java.util.*,com.aiait.eflow.common.helper.StaffTeamHelper,com.aiait.eflow.housekeeping.vo.TeamVO,com.aiait.eflow.util.HtmlUtil" %>
+<html>
+<head>
+<title>Closed Form List</title>
+<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+<script type=text/javascript src="<%=request.getContextPath()%>/common/message.jsp"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+<SCRIPT language="javascript" src="<%=request.getContextPath()%>/js/sorttable.js"></SCRIPT>
+<script language="javascript" src="<%=request.getContextPath()%>/js/resizeCol.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+<script language="javascript">
+    function createYearMonth(fieldId){ 
+      //var Span=months;
+      document.write("<select name='"+fieldId+"'>");
+      document.write("<option></option>");
+      var NowDate=new Date();
+      var StartDate=new Date(2007,12,1);
+      var EndDate=new Date();
+      //StartDate.setMonth(StartDate.getMonth()-Span, 1);
+      EndDate.setMonth(EndDate.getMonth(), 1);
+      var Month,year;
+      //for(var d=StartDate;d<EndDate;d.setMonth(d.getMonth()+1))
+      for(var d=EndDate;d>StartDate;d.setMonth(d.getMonth()-1))
+      {
+         Month=d.getMonth()+1;
+         year=d.getFullYear();
+         //alert("Year/Month: " + year + "/" + Month);
+         //if((NowDate.getMonth()-1)==Month&&d.getFullYear()==year)
+         if((NowDate.getMonth())==Month&&NowDate.getFullYear()==year)
+           document.write("<option value='"+year+"/"+((Month)<10?"0"+(Month):(Month))+"' selected>"+year+"/"+((Month)<10?"0"+(Month):(Month))+"</option>");
+         else
+            document.write("<option value='"+year+"/"+((Month)<10?"0"+(Month):(Month))+"'>"+year+"/"+((Month)<10?"0"+(Month):(Month))+"</option>");
+      }
+       document.write("</select>");
+   }
+   function summaryOT(){
+      if(document.forms[0].yearMonth.value.Trim()==""){
+        alert("Please fill in the field 'Year/Month'!")
+        document.forms[0].yearMonth.focus();
+        return;
+      }
+      if(document.all['byType'].value==""){
+        alert("Please select 'By Type'!")
+        return;
+      }
+      if(document.forms[0].byType.value=="01"){ //team
+        if(document.forms[0].teamCode.value==""){
+          alert("Please select 'Team Name'!");
+          document.forms[0].teamCode.focus();
+          return;
+        }
+        document.forms[0].action = "<%=request.getContextPath()%>/otFormAction.it?method=showTeamOTSummary&printFlag=false";
+      }else if(document.forms[0].byType.value=="02"){
+        document.forms[0].action = "<%=request.getContextPath()%>/otFormAction.it?method=showCompanyOTSummary&printFlag=false";
+      }else{
+        alert("Please select 'By Type'!")
+        return;
+      }
+      document.forms[0].submit();
+   }
+   function typeChange(obj){
+     document.forms[0].byType.value=obj.value
+     if(obj.value=="01"){
+       document.forms[0].teamCode.disabled = "";
+     }else{
+       document.forms[0].teamCode.disabled = "true";
+     }
+   }
+</script>
+<body>
+<FORM nane=AVActionForm method="post" action="<%=request.getContextPath()%>/otFormAction.it?method=showTeamOTSummary&printFlag=false"> 
+<input type="hidden" name="byType" value="01">
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+ <tr>
+ 	<td height="10"></td>
+ </tr><!--
+ <tr>
+ 	<td>
+ 	  <strong><font color='#5980BB' family='Times New Roman'><i18n:message key="team_meal_query.location"/></font></strong>
+ 	 </td>
+ </tr>
+--></table>
+ <TABLE WIDTH=100% bordercolor="#6595D6" style="border-collapse:collapse;"  BORDER=1 CELLPADDING=3 CELLSPACING=0 class="tr0" >
+   <TR align="center" >
+      <TD height="25" colspan="4" class="tr1"><i18n:message key="team_meal_query.title"/></TD>
+   </TR>
+    <TR> 
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="team_meal_query.bytype"/></span></div></TD>
+      <TD width=35% height="20" > 
+       <input type="radio" name="searchType" value="01" checked onclick="typeChange(this)"><i18n:message key="team_meal_query.team"/>
+       <input type="radio" name="searchType" value="02" onclick="typeChange(this)"><i18n:message key="team_meal_query.company"/> (<font color='red'>*</font>)
+      </TD>
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="team_meal_query.monthtag"/></span></div></TD>
+      <TD width=35% height="20" >
+       <script>
+         createYearMonth("yearMonth");
+       </script>
+       (<font color='red'>*</font>)(yyyy/mm)
+      </TD>
+    </TR>
+    <TR> 
+    <TD width=15% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="team_meal_query.teamname"/></span></div></TD>
+      <TD width=35% height="20">
+      <select name="teamCode">
+        <option value=""></option>
+        <%
+          Collection teamList = StaffTeamHelper.getInstance().getTeamList();
+          if(teamList!=null && teamList.size()>0){
+        	  Iterator it = teamList.iterator();
+        	  while(it.hasNext()){
+        		 TeamVO team = (TeamVO)it.next();
+        %>
+           <option value="<%=team.getTeamCode()%>"><%=team.getTeamName()%></option>
+        <%}
+         }
+        %>
+      </select>
+      </TD>
+      <td width=15% height="20" class="tr3"><div align="right"><span class="style1">Location</span></div></td>
+      <td width=35% height="20">
+      <select name="location">
+          <option value=""></option>
+          <option value="GZ">Guangzhou</option>
+          <option value="BJ">Beijing</option>
+      </select>
+      </td>
+    </TR>
+    <tr>
+      <td colspan='4' align='center'>
+         <input type="button" name="searchBtn" value='<i18n:message key="button.search"/>' onclick="summaryOT()"  class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+         <input type="Reset" name="resetBtn" value='<i18n:message key="button.reset"/>' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+      </td>
+    </tr>
+ </TABLE>
+ </FORM>
+ </body>
+ </html>

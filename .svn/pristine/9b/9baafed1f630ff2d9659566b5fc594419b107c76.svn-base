@@ -1,0 +1,262 @@
+<%@ include file="/common/head.jsp" %>
+<%@ include file="/common/loading.jsp" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@ taglib uri="/WEB-INF/purview.tld" prefix="purview" %>
+<%@page import="java.util.*,com.aiait.eflow.common.*,java.util.*,com.aiait.eflow.common.helper.*,com.aiait.eflow.housekeeping.vo.StaffVO,com.aiait.eflow.housekeeping.vo.OTRecordVO" %>
+<%@page import="com.aiait.eflow.formmanage.vo.*" %>
+<%
+    String requestStaffCode = (String)request.getParameter("requestStaffCode");
+    Collection waitingOTList = (ArrayList)request.getAttribute("waitingOTList");
+    //
+    Collection fieldList = (ArrayList)request.getAttribute("fieldList");
+    //
+    String beginDate = (String)request.getParameter("otPlanDateBegin");
+    String endDate = (String)request.getParameter("otPlanDateEnd");
+    String exceptionalCase = (String)request.getParameter("exceptionalCase");
+ %>
+<html>
+<head>
+  <title>eForm - waitingStaffList</title>
+  <link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+    <i18n:jsmessage jsRelativePath="js" prefixName="message"/>
+  <script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+  <script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+  <SCRIPT language="javascript" src="<%=request.getContextPath()%>/js/sorttable.js"></SCRIPT>
+  <script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+  <script language="javascript">
+     function otConfirm(){
+       if(checkSelect('requestNo')<=0){
+          alert("You have not selected any records to confirm!");
+          return;
+       }
+       if(confirm("Are you sure to Confirm these selected records")){
+          var formSystemIdStr = getTableSelectRecordStr("requestNo","requestNo");
+          var url = "<%=request.getContextPath()%>/otFormAction.it?method=confirmOTRecords&"+formSystemIdStr;
+          //alert(url);
+          //return;
+          var  xmlhttp = createXMLHttpRequest();
+          var result;
+          document.all['confirmkBtn'].disabled = "true";
+          if(xmlhttp){
+            xmlhttp.open('POST',url,false);
+            xmlhttp.onreadystatechange = function()
+            {
+              if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                 result = xmlhttp.responseText;
+                 if(result.Trim()=="success"){
+                   alert("Successfully confirm these selected records!")
+                   document.forms[0].submit();
+                 }else{
+                   alert("Fail to confirm these selected records!");
+                 }
+                 document.all['confirmkBtn'].disabled = "";
+              }
+           }
+           xmlhttp.setRequestHeader("If-Modified-Since","0");
+           xmlhttp.send(null);
+        }
+       }
+     }
+     function otReject(){
+       if(checkSelect('requestNo')<=0){
+          alert("You have not selected any records to reject!");
+          return;
+       }
+       if(confirm("Are you sure to Reject these selected records")){
+           document.forms[0].all['otRecordIds'].value = getTableSelectRecordStr("requestNo","requestNo");
+           var url = "<%=request.getContextPath()%>/otFormAction.it?method=enterRejectOTRecords";
+           openCenterWindow(url,380,270);
+       }
+     }
+     
+     function goBack(){
+       window.document.location = "<%=request.getContextPath()%>/otFormAction.it?method=enterWaitingStaff";
+     }
+
+     function showCheckInout(url){
+         url = url + "&staffCode=<%=requestStaffCode%>";
+         openCenterWindow(url,500,500)
+     }
+  </script>
+ </head>
+ 
+ <body>
+ <table border="0" width="100%" cellspacing="0" cellpadding="0">
+ <tr>
+ 	<td height="10"></td>
+ </tr>
+ <!--<tr>
+ 	<td>
+ 	  <strong><font color='#5980BB' family='Times New Roman'>Current Location:</font> <font color='#5980BB' family='Times New Roman'> &gt;Form Monitoring</font> <font color='#5980BB' family='Times New Roman'> &gt; <span class='submenu'>Meal Allowance Form Confirm</span></font>
+ 	  <font color='#5980BB' family='Times New Roman'> &gt; <span class='submenu'>Meal Allowance Records</span></font></strong>
+ 	 </td>
+ </tr>
+--></table>
+<form name="searchForm" method="post" action="<%=request.getContextPath()%>/otFormAction.it?method=enterWaitingOTList&requestStaffCode=<%=requestStaffCode%>">
+<input type="hidden" name="otRecordIds">
+<TABLE WIDTH=100% bordercolor="#6595D6" style="border-collapse:collapse;"  BORDER=1 CELLPADDING=3 CELLSPACING=0 class="tr0" >
+   <TR align="center" >
+      <TD height="25" colspan="4" class="tr1">OT Records (Owner is <font color='red'><%=StaffTeamHelper.getInstance().getStaffNameByCode(requestStaffCode)%></font>) Waiting For Confirm</TD>
+   </TR>
+   <TR > 
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1">OT Plan Date From</span></div></TD>
+      <TD width=35% height="20" >
+       <INPUT Name="otPlanDateBegin" onclick='setday(this)'  Type="text" value="<%=beginDate==null?"":beginDate%>" class="text2" style="WIDTH: 130px" id="beginSubmissionDate">(mm/dd/yyyy)
+      </TD>
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1">OT Plan Date From</span></div></TD>
+      <TD width=35% height="20" >
+       <INPUT Name="otPlanDateEnd" onclick='setday(this)'  Type="text" value="<%=endDate==null?"":endDate%>" class="text2" style="WIDTH: 130px" id="beginSubmissionDate">(mm/dd/yyyy)
+      </TD>
+    </TR>
+   <TR > 
+      <TD width=15% height="20" class="tr3"><div align="right"><span class="style1">OT Exceptional Case</span></div></TD>
+      <TD width=35% height="20" colspan='3'>
+       <select name="exceptionalCase">
+          <option value=""></option>
+          <option value="02" <%="02".equals(exceptionalCase)?"selected":""%>>Not Exceptional Case</option>
+          <option value="01" <%="01".equals(exceptionalCase)?"selected":""%>>Normal Exceptional Case</option>
+          <option value="03" <%="03".equals(exceptionalCase)?"selected":""%>>Mid-night Support Case</option>
+          <option value="04" <%="04".equals(exceptionalCase)?"selected":""%>>Day Time Support Case</option>
+       </select>
+      </TD>
+    </TR>
+    <tr>
+      <td colspan='4' align='center'>
+         <input type="submit" name="searchBtn" value="Search" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+         <input type="button" name="confirmkBtn" value="Confirm" onclick='otConfirm()' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'"
+           onmouseout="this.className='btn3_mouseout'" onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+        <input type="button" name="backBtn" value="Reject" onclick='otReject()' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'"
+           onmouseout="this.className='btn3_mouseout'" onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+        <input type="button" name="backBtn" value="Back" onclick='javascript:goBack()' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'"
+           onmouseout="this.className='btn3_mouseout'" onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+    </td>
+    </tr>
+    </TABLE>
+  </form>
+  <table width="100%"  border="0" cellpadding="0" cellspacing="1" class=sortable id=mytable style="border:1px #8899cc solid;">
+   <tr class="liebiao_tou">
+   <%
+      if(fieldList!=null && fieldList.size()>0){
+    	  Iterator fieldIt = fieldList.iterator();
+    	  
+    	  while(fieldIt.hasNext()){
+    		  FormSectionFieldVO field = (FormSectionFieldVO)fieldIt.next();
+    		  if("ID".equals(field.getFieldId().toUpperCase())){
+    			continue;
+    		  }
+    		  if("REQUEST_NO".equals(field.getFieldId().toUpperCase())){
+    			  out.println(" <td align='center'><input type=\"checkbox\" name=\"allBtn\" onclick=\"selectAll(this,'requestNo')\"></td>");
+    		  }
+   %>
+      <td align='center' ><%=field.getFieldLabel()%></td>
+    <% }
+     }
+    %>
+   </tr>
+   <%
+     if(waitingOTList!=null && waitingOTList.size()>0){
+    	 java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("yyyy-MM-dd");
+    	 String otFormSystemId = ParamConfigHelper.getInstance().getParamValue(CommonName.PARAM_OT_FORM_SYSTEM_ID_CODE);
+    	 Iterator otIt = waitingOTList.iterator();
+    	 String requestNo = "";
+    	 double weekyNum = 0, publicNum=0, statNum =0 ;
+    	 while(otIt.hasNext()){
+    		 HashMap map = (HashMap)otIt.next();
+    		 Iterator fieldIt = fieldList.iterator();
+    		 //如果该加班记录还不是有效的，则需要高亮度显示出来
+             String isExceptionCase = (String) map.get("IS_EXCEPTIONAL_CASE");
+    		 if(!"01".equals(isExceptionCase) && !"03".equals(isExceptionCase)&& !"04".equals(isExceptionCase)){
+    			 if((String)map.get("WEEKY_NUM")!=null && !"".equals((String)map.get("WEEKY_NUM"))){
+    				 weekyNum = Double.parseDouble((String)map.get("WEEKY_NUM"));
+    			 }
+    			 if((String)map.get("PUB_HOLIDAY_NUM")!=null && !"".equals((String)map.get("PUB_HOLIDAY_NUM"))){
+    				 publicNum = Double.parseDouble((String)map.get("PUB_HOLIDAY_NUM"));
+    			 }
+    			 if((weekyNum+publicNum+statNum)>0){
+    				 out.println("<tr class=\"tr_change\">");
+    			 }else{
+    				 out.println("<tr class=\"tr_highlight\">");
+    			 }
+    		 }else{
+    		   //out.println("<tr class=\"tr_change\">");
+    		   out.println("<tr class=\"tr_highlight\">");
+    		 }
+    		 weekyNum = 0;
+    		 publicNum=0;
+    		 statNum =0 ;
+    		 while(fieldIt.hasNext()){
+    			 FormSectionFieldVO field = (FormSectionFieldVO)fieldIt.next();
+    			 if(!"ID".equals(field.getFieldId().toUpperCase())){
+    			   double d = 0 ;
+   				   try{
+   					  d = Double.parseDouble((String)map.get("WEEKY_NUM"));
+   				   }catch(Exception e){}
+    			   if("REQUEST_NO".equals(field.getFieldId().toUpperCase())){
+    			       requestNo = (String)map.get("REQUEST_NO");
+    			       String url = "<a href=\"javascript:openCenterWindow('"
+                           + request.getContextPath()
+                           + "/formManageAction.it?method=displayFormContent&operateType=view&viewFlag=false&pop=true&requestNo="
+                           + requestNo + "&formSystemId=" + otFormSystemId + "',800,600)\">" + requestNo + "</a>";
+    				     out.println("<td>" + url + "</td>");
+    			   }else if("IS_EXCEPTIONAL_CASE".equals(field.getFieldId().toUpperCase()) && "02".equals(map.get("IS_EXCEPTIONAL_CASE"))){
+    				   out.println("<td>Not Exceptional Case</td>");
+    			   }else if("IS_EXCEPTIONAL_CASE".equals(field.getFieldId().toUpperCase()) && "01".equals(map.get("IS_EXCEPTIONAL_CASE"))){
+    				   out.println("<td>Normal Exceptional Case</td>");
+    			   }else if("IS_EXCEPTIONAL_CASE".equals(field.getFieldId().toUpperCase()) && "03".equals(map.get("IS_EXCEPTIONAL_CASE"))){
+    				   out.println("<td>Mid-night Support Case</td>");
+    			   }else if("IS_EXCEPTIONAL_CASE".equals(field.getFieldId().toUpperCase()) && "04".equals(map.get("IS_EXCEPTIONAL_CASE"))){
+    				   out.println("<td>Day Time Support Case</td>");
+    			   }else if("OT_PLAN_DATE".equals(field.getFieldId().toUpperCase()) && map.get("OT_PLAN_DATE")!=null){
+    	               java.util.Date cDate = df.parse((String) map.get("OT_PLAN_DATE"));
+    	               String otdate = com.aiait.eflow.util.StringUtil.getDateStr(cDate,"MM/dd/yyyy");
+    	    	       out.println("<td><a href='javascript:showCheckInout(\""+request.getContextPath()+"/otFormAction.it?method=listStaffCheckInout&otPlanDate="+otdate+"\")'>"+otdate+"</a></td>");
+    			   }else if("WEEKY_NUM".equals(field.getFieldId().toUpperCase()) && "01".equals((String)map.get("IS_EXCEPTIONAL_CASE"))){
+    				   /*double d = 1 ;
+    				   try{
+    					  d = Double.parseDouble((String)map.get("WEEKY_NUM"));
+    					  if(d==0){
+    						  d = 1;
+    					  }
+    				   }catch(Exception e){}*/
+    				   out.println("<td>" + d + "</td>");
+    			   }else if("WEEKY_NUM".equals(field.getFieldId().toUpperCase()) && "03".equals((String)map.get("IS_EXCEPTIONAL_CASE"))){
+    				   /*double d = 2 ;
+    				   try{
+    					  d = Double.parseDouble((String)map.get("WEEKY_NUM"));
+    					  if(d==0){
+    						  d = 2;
+    					  }
+    				   }catch(Exception e){}*/
+    				   out.println("<td>" + d + "</td>");
+    			   }else if("WEEKY_NUM".equals(field.getFieldId().toUpperCase()) && "02".equals((String)map.get("IS_EXCEPTIONAL_CASE"))){
+    				   /*double d = 0 ;
+    				   try{
+    					  d = Double.parseDouble((String)map.get("WEEKY_NUM"));
+    					  if(d==0){
+    						  d = 0;
+    					  }
+    				   }catch(Exception e){}*/
+    				   out.println("<td>" + d + "</td>");
+    			   }else if("WEEKY_NUM".equals(field.getFieldId().toUpperCase()) && "04".equals((String)map.get("IS_EXCEPTIONAL_CASE"))){
+    				   out.println("<td>" + d + "</td>");
+    			   }else{
+   %>
+       <td><%=map.get(field.getFieldId().toUpperCase())==null?"":map.get(field.getFieldId().toUpperCase())%></td>
+   <%
+    			   }
+    			 }else{
+    				 if("".equals(requestNo) || !(requestNo).equals((String)map.get("REQUEST_NO"))){
+    				   out.println("<td><input type=\"checkbox\" name=\"requestNo\" value='"+map.get("REQUEST_NO")+"'></td>");
+    				 }else{
+    				   out.println("<td></td>");
+    				 }
+    			 }
+    		 }
+    		 out.print("</tr>");
+    	 }
+   }
+   %>
+  </table>
+ </body>
+ </html>

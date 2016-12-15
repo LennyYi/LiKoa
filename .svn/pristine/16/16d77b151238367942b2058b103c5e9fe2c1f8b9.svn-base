@@ -1,0 +1,645 @@
+<script language='javascript' src='Proposal.js'></script>
+<script type="text/javascript" src="/Nova/js/jquery.min.js"></script>
+<script type="text/javascript" src="/Nova/js/NovaJS/listAvailable_jsp_common.js"></script>
+
+
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<title>Employee Benefit Proposal</title>
+<style>
+
+ /* Font Definitions */
+ @font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:10.0pt;
+	line-height:115%;}
+@page WordSection1
+	{size:596.0pt 842.0pt;
+	margin:77.0pt 30.0pt 14.0pt 84.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+@page WordSection2
+	{size:596.0pt 842.0pt;
+	margin:77.0pt 30.0pt 14.0pt 84.0pt;}
+div.WordSection2
+	{page:WordSection2;}
+@page WordSection3
+	{size:596.0pt 842.0pt;
+	margin:77.0pt 30.0pt 14.0pt 84.0pt;}
+div.WordSection3
+	{page:WordSection3;}
+
+</style>
+
+
+<STYLE type=text/css>H1 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 14pt; FONT-WEIGHT: bold
+}
+H2 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 12pt; FONT-WEIGHT: bold; TEXT-DECORATION: underline
+}
+.s1 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 12pt; FONT-WEIGHT: bold
+}
+.s2 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 12pt; FONT-WEIGHT: bold
+}
+.s21 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 12pt; FONT-WEIGHT: bold; text-align:right
+}
+.s3 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 12pt; FONT-WEIGHT: normal
+}
+.s4 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 10pt; FONT-WEIGHT: normal; text-align:right
+}
+.s5 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 8pt; FONT-WEIGHT: bold
+}
+.s6 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 6.5pt; FONT-WEIGHT: normal
+}
+.p {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 8pt; FONT-WEIGHT: bold
+}
+P {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 8pt; FONT-WEIGHT: bold
+}
+H3 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 9pt; FONT-WEIGHT: bold
+}
+.s7 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 9pt; FONT-WEIGHT: normal
+}
+.s8 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 6pt; FONT-WEIGHT: normal
+}
+.s9 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 10pt; FONT-WEIGHT: normal
+}
+.s10 {
+	FONT-FAMILY: "Arial",sans-serif; FONT-SIZE: 8pt; FONT-WEIGHT: normal
+}
+</STYLE>
+
+</head>
+
+<body lang=EN-US>
+<div style="filter:alpha(opacity=60);-moz-opacity:0.6; opacity: 0.6">
+<table align="center">
+<TBODY>
+<tr>
+<td><INPUT onmouseup="this.className='btn3_mouseup'" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'" onmousedown="this.className='btn3_mousedown'" onclick="editClick(this)" name="btnEdit" value="Edit" type="button"></td>
+<td><INPUT onmouseup="this.className='btn3_mouseup'" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'" onmousedown="this.className='btn3_mousedown'" onclick="saveClick(this)" name="btnSave" value="Save" type="button" style="display: none;"></td>
+
+</tr>
+</TBODY>
+</table>
+</div>
+
+<img width=827 height=1169 src="ProposalIndemnity_2_files/ProposalIndemnity_Page_1.tif">
+<div style="text-indent: 120px">
+<div class=WordSection1>
+
+<H1><span style="line-height: 135%; text-indent: 280px">GROUP MEDICAL SCHEME BENEFIT SUMMARY</span></H1>
+
+<img style="margin-top: -35px" width=600 height=4 src="ProposalIndemnity_2_files/image001.gif">
+<H1 style="margin-top: -20px" >SCHEDULE OF PROPOSED BENEFITS:</H1>
+
+<p class=MsoNormal style='margin-top:.5pt;margin-right:0in;margin-bottom:0in;
+margin-left:0in;margin-bottom:.0001pt;line-height:8.5pt'><span
+style='font-size:8.5pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:-1.0pt;margin-bottom:
+0in;margin-bottom:.0001pt;line-height:13.55pt'><b><u><span
+style='font-size:12.0pt;font-family:"Arial",sans-serif;position:relative;
+top:.5pt;letter-spacing:-.1pt'>Gr</span></u></b><b><u><span style='font-size:
+12.0pt;font-family:"Arial",sans-serif;position:relative;top:.5pt;letter-spacing:
+-.15pt'>ou</span></u></b><b><u><span style='font-size:12.0pt;font-family:"Arial",sans-serif;
+position:relative;top:.5pt'>p<span style='letter-spacing:-.35pt'> </span><span
+style='letter-spacing:-.15pt'>H</span><span style='letter-spacing:-.25pt'>o</span><span
+style='letter-spacing:-.05pt'>s</span><span style='letter-spacing:-.15pt'>p</span><span
+style='letter-spacing:-.1pt'>i</span><span style='letter-spacing:-.3pt'>t</span><span
+style='letter-spacing:-.05pt'>a</span><span style='letter-spacing:-.2pt'>l</span><span
+style='letter-spacing:-.1pt'>iz</span><span style='letter-spacing:-.05pt'>a</span><span
+style='letter-spacing:-.3pt'>t</span><span style='letter-spacing:-.1pt'>i</span><span
+style='letter-spacing:-.15pt'>o</span>n<span style='letter-spacing:-.35pt'> </span>&amp;<span
+style='letter-spacing:-.25pt'> </span><span style='letter-spacing:-.2pt'>S</span><span
+style='letter-spacing:-.15pt'>u</span><span style='letter-spacing:-.1pt'>r</span><span
+style='letter-spacing:-.25pt'>g</span><span style='letter-spacing:-.1pt'>i</span><span
+style='letter-spacing:-.2pt'>c</span><span style='letter-spacing:-.05pt'>a</span>l<span
+style='letter-spacing:-.3pt'> </span><span style='letter-spacing:-.15pt'>B</span><span
+style='letter-spacing:-.2pt'>e</span><span style='letter-spacing:-.15pt'>n</span><span
+style='letter-spacing:-.05pt'>e</span><span style='letter-spacing:-.3pt'>f</span><span
+style='letter-spacing:-.1pt'>i</span><span style='letter-spacing:-.15pt'>t</span>s</span></u></b><b><span
+style='font-size:12.0pt;font-family:"Arial",sans-serif;position:relative;
+top:.5pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <u><span style='letter-spacing:-.15pt;'>R</span><span
+style='letter-spacing:-.05pt'>e</span><span style='letter-spacing:-.1pt'>i</span><span
+style='letter-spacing:-.25pt'>m</span><span style='letter-spacing:-.15pt'>bu</span><span
+style='letter-spacing:-.25pt'>r</span><span style='letter-spacing:-.05pt'>s</span><span
+style='letter-spacing:-.2pt'>e</span><span style='letter-spacing:-.1pt'>m</span><span
+style='letter-spacing:-.2pt'>e</span><span style='letter-spacing:-.15pt'>n</span>t<span
+style='letter-spacing:-.15pt'> </span><span style='letter-spacing:-.5pt'>A</span><span
+style='letter-spacing:-.1pt'>m</span>o<span style='letter-spacing:-.15pt'>un</span>t</u></span></b></p>
+
+<p class=MsoNormal style='margin-top:.8pt;margin-right:0in;margin-bottom:0in;
+margin-left:0in;margin-bottom:.0001pt;line-height:11.0pt'>&nbsp;</p>
+
+
+<!-- <TABLE style="BORDER-COLLAPSE: collapse" border=0 cellSpacing=0> -->
+<table class="MsoNormalTable" style="margin-left: 7.6pt; border-collapse: collapse;text-indent: 110px" border="0" cellSpacing="0" cellPadding="0">
+<TBODY>
+
+
+<TR>
+<TD>
+<P class=s2>Plan
+<SPAN style="text-align:right"><INPUT onmouseup="this.className='btn3_mouseup'" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'" onmousedown="this.className='btn3_mousedown'" onclick="addBenefits(this)" name="addBenefits" value="Add Benefits" type="button" style="display: none;">
+</SPAN>
+</P>
+</TD>
+<TD>
+<P class=s21>01</P>
+</TD>
+<TD>
+<P class=s21>02</P>
+</TD>
+</TR>
+
+
+
+<TR name="addBenefitCopy_ben">
+<TD>
+<P style="LINE-HEIGHT: 6.5pt; MARGIN: 0.5pt 0in 0pt" class=MsoNormal><SPAN style="FONT-SIZE: 6.5pt">&nbsp;</SPAN></P>
+<P class=s2>Daily Room and Board</P></TD>
+<TD></TD>
+<TD></TD></TR>
+
+<TR name="addBenefitCopy_dtl">
+<TD style="PADDING-BOTTOM: 0in; PADDING-LEFT: 0in; WIDTH: 268.15pt; PADDING-RIGHT: 0in; HEIGHT: 0.2in; PADDING-TOP: 0in" vAlign=top width=358>
+<P class=s3>per day limit</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>650</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>1,200</P></TD></TR>
+<TR name="addBenefitCopy_dtl">
+<TD>
+<P class=s3>Max. No. of days per disability</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>45</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>45</P></TD></TR>
+
+<TR>
+<TD>
+
+<P style="LINE-HEIGHT: 6.5pt; MARGIN: 0.5pt 0in 0pt" class=MsoNormal><SPAN style="FONT-SIZE: 6.5pt">&nbsp;</SPAN></P>
+<P class=s2>Intensive Care Unit <SPAN class=s5>1</SPAN></P></TD>
+<TD></TD>
+<TD></TD></TR>
+
+<TR>
+<TD>
+<P class=s3>per day limit</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>1,300</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>2,400</P></TD></TR>
+<TR>
+<TD>
+<P class=s3>Max. No. of days per disability</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>7</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>7</P></TD></TR>
+
+<TR>
+<TD>
+<P style="LINE-HEIGHT: 6.5pt; MARGIN: 0.5pt 0in 0pt" class=MsoNormal><SPAN style="FONT-SIZE: 6.5pt">&nbsp;</SPAN></P>
+<P class=s2>Other Hospital Services <SPAN class=s5>2</SPAN></P></TD>
+<TD></TD>
+<TD></TD></TR>
+
+<TR>
+<TD>
+<P class=s3>per disability limit</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>10,000</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>20,000</P></TD></TR>
+
+<TR>
+<TD>
+<P style="LINE-HEIGHT: 6.5pt; MARGIN: 0.5pt 0in 0pt" class=MsoNormal><SPAN style="FONT-SIZE: 6.5pt">&nbsp;</SPAN></P>
+<P class=s2>Surgical Fees</P></TD>
+<TD></TD>
+<TD></TD>
+</TR>
+
+<TR>
+<TD>
+<P class=s3>Complex</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>40,000</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>70,000</P></TD></TR>
+<TR>
+<TD>
+<P class=s3>Major</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>20,000</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>35,000</P></TD></TR>
+<TR>
+<TD>
+<P class=s3>Intermediate</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>10,000</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>17,500</P></TD></TR>
+<TR>
+<TD>
+<P class=s3>Minor</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>5,000</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>8,750</P></TD></TR>
+<TR>
+<TD>
+<P class=s3>per disability limit</P></TD>
+<TD>
+<TD></TD>
+
+
+<TR name="Ben_Master">
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)">
+<P style="LINE-HEIGHT: 6.5pt; MARGIN: 0.5pt 0in 0pt" class=MsoNormal><SPAN style="FONT-SIZE: 6.5pt">&nbsp;</SPAN></P>
+<P class=s2>In-Hospital Physician’s Call
+<INPUT onmouseup="this.className=btn3_mouseup" class=btn3_mouseout onmouseover="this.className=btn3_mouseover" onmouseout="this.className=btn3_mouseout" onmousedown="this.className=btn3_mousedown" onclick="delBenMaster(this)" name="btnDelBenMaster" value="Delete" type="button" style="display:none">
+
+</P></TD>
+<TD></TD>
+<TD></TD>
+</TR>
+
+
+<TR name="Ben_Dtl">
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)">
+<P class=s3>per day limit
+<INPUT onmouseup="this.className=btn3_mouseup" class=btn3_mouseout onmouseover="this.className=btn3_mouseover" onmouseout="this.className=btn3_mouseout" onmousedown="this.className=btn3_mousedown" onclick="delBenDtl(this)" name="btnDelBenDtl" value="Delete" type="button" style="display:none">
+
+</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>650</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>1,200</P></TD></TR>
+<TR name="Ben_Dtl">
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)">
+<P class=s3>Max. No. of days per disability
+<INPUT onmouseup="this.className=btn3_mouseup" class=btn3_mouseout onmouseover="this.className=btn3_mouseover" onmouseout="this.className=btn3_mouseout" onmousedown="this.className=btn3_mousedown" onclick="delBenDtl(this)" name="btnDelBenDtl" value="Delete" type="button" style="display:none">
+
+</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>45</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>45</P></TD></TR>
+<TR>
+<TD>
+<P style="LINE-HEIGHT: 6.5pt; MARGIN: 0.5pt 0in 0pt" class=MsoNormal><SPAN style="FONT-SIZE: 6.5pt">&nbsp;</SPAN></P>
+<P class=s2>Anesthetist's Fee</P></TD>
+<TD>
+<TD></TD>
+<TR>
+<TD>
+<P class=s3>Complex</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>12,000</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>21,000</P></TD></TR>
+<TR>
+<TD>
+<P class=s3>Major</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>6,000</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>10,500</P></TD></TR>
+<TR>
+<TD>
+<P class=s3>Intermediate</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>3,000</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>5,250</P></TD></TR>
+<TR>
+<TD>
+<P class=s3>Minor</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>1,500</P></TD>
+<TD onmouseover="SelectRow(this)" onmouseout="unSelectRow(this)" ondblclick="editFieldValue(this)">
+<P class=s4>2,625</P></TD></TR>
+<TR>
+<TD>
+<P class=s3>per disability limit</P></TD>
+<TD>
+<TD></TD></TR>
+<TR name="lastRow"></TR>
+</TBODY>
+</TABLE>
+
+<p class=MsoNormal style='margin-top:.45pt;margin-right:0in;margin-bottom:0in;
+margin-left:0in;margin-bottom:.0001pt;line-height:8.0pt'><span
+style='font-size:8.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;
+<INPUT onmouseup="this.className='btn3_mouseup'" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'" onmousedown="this.className='btn3_mousedown'" onclick="addRemarks(this)" name="addRemarks" value="Add Remarks" type="button" style="display: none;"></span></p>
+
+<p name="remark_copy" class=MsoNormal style='margin-top:2.15pt;margin-right:-1.0pt;margin-bottom:0in;margin-left:9.6pt;margin-bottom:.0001pt;line-height:normal'>
+<span style='font-size:6.5pt;font-family:"Arial",sans-serif;position:relative;top:-3.0pt'>1</span>
+<span style='letter-spacing:.9pt'> </span>
+<span style='font-size:8.0pt;font-family:"Arial",sans-serif;letter-spacing:-.25pt' onmouseover="selectRemark(this)" onmouseout="unSelectRemark(this)" ondblclick="editRemarkValue(this)">
+The specified maximum number of days set forth in this benefit are included in Room & Board Benefit.
+</span>
+</p>
+
+<p class=MsoNormal style='margin-top:2.15pt;margin-right:-1.0pt;margin-bottom:0in;margin-left:9.6pt;margin-bottom:.0001pt;line-height:normal'>
+<span style='font-size:6.5pt;font-family:"Arial",sans-serif;position:relative;top:-3.0pt'>2</span>
+<span style='letter-spacing:.9pt'> </span>
+<span style='font-size:8.0pt;font-family:"Arial",sans-serif;letter-spacing:-.25pt' onmouseover="selectRemark(this)" onmouseout="unSelectRemark(this)" ondblclick="editRemarkValue(this)">
+Surgical Supplies shall be payable under Other Hospital Services.
+</span>
+</p>
+<p name="remark_last"></p>
+<p class=MsoNormal style='margin-top:.7pt;margin-right:-1.0pt;margin-bottom:
+0in;margin-left:9.6pt;margin-bottom:.0001pt;line-height:10.6pt'><span
+style='position:absolute;z-index:-1895825408;left:0px;margin-left:520px;
+margin-top:15px;width:231px;height:55px'>
+
+<table cellpadding=0 cellspacing=0>
+ <tr>
+  <td width=231 height=55 style='vertical-align:top'><span style='position:
+  absolute;left:25pt;z-index:-1895825408'>
+  <table cellpadding=0 cellspacing=0 width="100%">
+   <tr>
+    <td>
+    <div style='padding:0pt 0pt 0pt 0pt'>
+    <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+     style='border-collapse:collapse'>
+     <tr style='height:14.95pt'>
+      <td width=76 valign=top style='width:56.65pt;border:solid black 1.0pt;
+      padding:0in 0in 0in 0in;height:14.95pt'>
+      <p class=MsoNormal style='margin-top:.55pt;margin-right:-1.0pt;
+      margin-bottom:0in;margin-left:5.0pt;margin-bottom:.0001pt;line-height:
+      normal'><span style='font-size:7.0pt;font-family:"Arial",sans-serif;
+      letter-spacing:.05pt'>P</span><span style='font-size:7.0pt;font-family:
+      "Arial",sans-serif;letter-spacing:-.05pt'>re</span><span
+      style='font-size:7.0pt;font-family:"Arial",sans-serif;letter-spacing:
+      .1pt'>p</span><span style='font-size:7.0pt;font-family:"Arial",sans-serif;
+      letter-spacing:-.05pt'>ar</span><span style='font-size:7.0pt;font-family:
+      "Arial",sans-serif;letter-spacing:.1pt'>e</span><span style='font-size:
+      7.0pt;font-family:"Arial",sans-serif'>d<span style='letter-spacing:-.25pt'>
+      </span><span style='letter-spacing:.1pt'>b</span><span style='letter-spacing:
+      -.1pt'>y</span>:</span></p>
+      </td>
+      <td width=72 valign=top style='width:54.25pt;border:solid black 1.0pt;
+      border-left:none;padding:0in 0in 0in 0in;height:14.95pt'>
+      <p class=MsoNormal style='margin-top:.55pt;margin-right:-1.0pt;
+      margin-bottom:0in;margin-left:5.0pt;margin-bottom:.0001pt;line-height:
+      normal'><span style='font-size:7.0pt;font-family:"Arial",sans-serif'>Ch<span
+      style='letter-spacing:-.05pt'>e</span>c<span style='letter-spacing:.1pt'>k</span><span
+      style='letter-spacing:-.05pt'>e</span>d<span style='letter-spacing:-.25pt'>
+      </span><span style='letter-spacing:.1pt'>b</span><span style='letter-spacing:
+      -.1pt'>y</span>:</span></p>
+      </td>
+      <td width=75 valign=top style='width:56.2pt;border:solid black 1.0pt;
+      border-left:none;padding:0in 0in 0in 0in;height:14.95pt'>
+      <p class=MsoNormal style='margin-top:.55pt;margin-right:-1.0pt;
+      margin-bottom:0in;margin-left:5.0pt;margin-bottom:.0001pt;line-height:
+      normal'><span style='font-size:7.0pt;font-family:"Arial",sans-serif;
+      letter-spacing:-.15pt'>I</span><span style='font-size:7.0pt;font-family:
+      "Arial",sans-serif;letter-spacing:.1pt'>s</span><span style='font-size:
+      7.0pt;font-family:"Arial",sans-serif'>s<span style='letter-spacing:-.05pt'>u</span>i<span
+      style='letter-spacing:.1pt'>n</span>g<span style='letter-spacing:-.25pt'>
+      </span><span style='letter-spacing:.1pt'>D</span><span style='letter-spacing:
+      -.05pt'>a</span>t<span style='letter-spacing:-.05pt'>e</span>:</span></p>
+      </td>
+     </tr>
+     <tr style='height:19.6pt'>
+      <td width=76 valign=top style='width:56.65pt;border:solid black 1.0pt;
+      border-top:none;padding:0in 0in 0in 0in;height:19.6pt'>
+      <p class=MsoNormal>&nbsp;</p>
+      </td>
+      <td width=72 valign=top style='width:54.25pt;border-top:none;border-left:
+      none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+      padding:0in 0in 0in 0in;height:19.6pt'>
+      <p class=MsoNormal>&nbsp;</p>
+      </td>
+      <td width=75 valign=top style='width:56.2pt;border-top:none;border-left:
+      none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+      padding:0in 0in 0in 0in;height:19.6pt'>
+      <p class=MsoNormal style='margin-top:0in;margin-right:-1.0pt;margin-bottom:
+      0in;margin-left:10.15pt;margin-bottom:.0001pt;line-height:normal'><span
+      style='font-size:9.0pt;font-family:"Arial",sans-serif;letter-spacing:
+      .05pt'>03</span><span style='font-size:9.0pt;font-family:"Arial",sans-serif'>/<span
+      style='letter-spacing:.05pt'>19</span><span style='letter-spacing:-.1pt'>/</span><span
+      style='letter-spacing:.05pt'>1</span>5</span></p>
+      </td>
+     </tr>
+    </table>
+    <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    line-height:normal'>&nbsp;</p>
+    </div>
+    </td>
+   </tr>
+  </table>
+  </span>&nbsp;</td>
+ </tr>
+</table>
+
+</span>
+</p>
+
+<p class=MsoNormal style='margin-top:.2pt;margin-right:0in;margin-bottom:0in;
+margin-left:0in;margin-bottom:.0001pt;line-height:5.0pt'><span
+style='font-size:5.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+10.0pt'><span style='font-size:10.0pt'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-top:1.85pt;margin-right:-1.0pt;margin-bottom:
+0in;margin-left:15.0pt;margin-bottom:.0001pt;line-height:10.15pt'><b><span
+style='font-size:9.0pt;font-family:"Arial",sans-serif;position:relative;
+top:.5pt;letter-spacing:-.15pt'>N</span></b><b><span style='font-size:9.0pt;
+font-family:"Arial",sans-serif;position:relative;top:.5pt;letter-spacing:-.1pt'>ote</span></b><b><span
+style='font-size:9.0pt;font-family:"Arial",sans-serif;position:relative;
+top:.5pt'>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><span style='font-size:
+9.0pt;font-family:"Arial",sans-serif;position:relative;top:.5pt;letter-spacing:
+-.15pt'>A</span><span style='font-size:9.0pt;font-family:"Arial",sans-serif;
+position:relative;top:.5pt;letter-spacing:-.1pt'>l</span><span
+style='font-size:9.0pt;font-family:"Arial",sans-serif;position:relative;
+top:.5pt'>l<span style='letter-spacing:-.3pt'> </span><span style='letter-spacing:
+-.2pt'>a</span><span style='letter-spacing:-.1pt'>bo</span><span
+style='letter-spacing:-.3pt'>v</span>e<span style='letter-spacing:-.3pt'> </span><span
+style='letter-spacing:-.1pt'>f</span><span style='letter-spacing:-.2pt'>i</span><span
+style='letter-spacing:-.1pt'>g</span><span style='letter-spacing:-.2pt'>u</span><span
+style='letter-spacing:-.1pt'>r</span><span style='letter-spacing:-.2pt'>e</span>s<span
+style='letter-spacing:-.3pt'> </span><span style='letter-spacing:-.1pt'>a</span><span
+style='letter-spacing:-.25pt'>r</span>e<span style='letter-spacing:-.3pt'> </span><span
+style='letter-spacing:-.1pt'>e</span><span style='letter-spacing:-.3pt'>x</span><span
+style='letter-spacing:-.1pt'>pre</span><span style='letter-spacing:-.2pt'>ss</span><span
+style='letter-spacing:-.1pt'>e</span>d<span style='letter-spacing:-.3pt'> </span><span
+style='letter-spacing:-.2pt'>i</span>n<span style='letter-spacing:-.2pt'> </span><span
+style='letter-spacing:-.25pt'>t</span><span style='letter-spacing:-.1pt'>h</span>e<span
+style='letter-spacing:-.3pt'> </span><span style='letter-spacing:-.25pt'>f</span><span
+style='letter-spacing:-.1pt'>o</span><span style='letter-spacing:-.2pt'>ll</span><span
+style='letter-spacing:-.1pt'>o</span><span style='letter-spacing:-.25pt'>w</span><span
+style='letter-spacing:-.1pt'>in</span>g<span style='letter-spacing:-.3pt'> </span><span
+style='letter-spacing:-.2pt'>c</span><span style='letter-spacing:-.1pt'>u</span><span
+style='letter-spacing:-.25pt'>r</span><span style='letter-spacing:-.1pt'>r</span><span
+style='letter-spacing:-.2pt'>e</span><span style='letter-spacing:-.1pt'>n</span><span
+style='letter-spacing:-.05pt'>c</span><span style='letter-spacing:-.3pt'>y</span>:<span
+style='letter-spacing:-.2pt'> </span><span style='letter-spacing:-.15pt'>HK</span>D</span></p>
+
+<p class=MsoNormal style='margin-top:.45pt;margin-right:0in;margin-bottom:0in;
+margin-left:0in;margin-bottom:.0001pt;line-height:7.5pt'><span
+style='font-size:7.5pt'>&nbsp;</span></p>
+
+</div>
+
+<span style='font-size:11.0pt;line-height:115%;font-family:"Calibri",sans-serif'><br
+clear=all style='page-break-before:auto'>
+</span>
+
+<div class=WordSection2>
+
+<p class=MsoNormal style='margin-top:2.2pt;margin-right:-2.9pt;margin-bottom:
+0in;margin-left:9.6pt;margin-bottom:.0001pt;line-height:normal'><span
+style='font-size:6.0pt;font-family:"Arial",sans-serif'>JN/LL/<span
+style='letter-spacing:.05pt'>0</span>1/<span style='letter-spacing:.05pt'>2</span>3<span
+style='letter-spacing:-.1pt'>/</span>2<span style='letter-spacing:.05pt'>0</span>15<span
+style='letter-spacing:-.25pt'>/</span><span style='letter-spacing:.2pt'>W</span>/<span
+style='letter-spacing:-.05pt'>S</span>/<span style='letter-spacing:.05pt'>0</span><span
+style='letter-spacing:-.1pt'>1</span>/<span style='letter-spacing:.05pt'>2</span>1/<span
+style='letter-spacing:.05pt'>2</span><span style='letter-spacing:-.1pt'>0</span>15</span></p>
+
+<span style='font-size:11.0pt;font-family:"Calibri",sans-serif'><br clear=all>
+</span>
+
+<p class=MsoNormal style='margin-top:.7pt;margin-right:0in;margin-bottom:0in;
+margin-left:0in;margin-bottom:.0001pt;line-height:13.0pt'></p>
+
+<p class=MsoNormal style='margin-top:0in;margin-right:-1.0pt;margin-bottom:
+0in;margin-left:0in;margin-bottom:.0001pt;line-height:11.25pt;text-indent: 700'><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;position:relative;
+top:.5pt;letter-spacing:-.05pt'>PA</span><span style='font-size:10.0pt;
+font-family:"Arial",sans-serif;position:relative;top:.5pt;letter-spacing:.15pt'>G</span><span
+style='font-size:10.0pt;font-family:"Arial",sans-serif;position:relative;
+top:.5pt'>E<span style='letter-spacing:-.35pt'> </span>2</span></p>
+
+</div>
+
+<span style='font-size:11.0pt;line-height:115%;font-family:"Calibri",sans-serif'><br
+clear=all style='page-break-before:auto'>
+</span>
+
+<div class=WordSection3>
+
+<p class=MsoNormal style='margin-top:2.45pt;margin-right:49.25pt;margin-bottom:
+0in;margin-left:9.6pt;margin-bottom:.0001pt;line-height:normal'><span
+style='font-size:8.0pt;font-family:"Arial",sans-serif'>&quot;<span
+style='letter-spacing:.05pt'>A</span><span style='letter-spacing:-.05pt'>I</span><span
+style='letter-spacing:.05pt'>A</span><span style='letter-spacing:-.1pt'>&quot;</span>,<span
+style='letter-spacing:.1pt'> </span><span style='letter-spacing:-.1pt'>&quot;</span><span
+style='letter-spacing:.05pt'>A</span><span style='letter-spacing:-.05pt'>I</span>A<span
+style='letter-spacing:.1pt'> </span><span style='letter-spacing:-.05pt'>Hon</span>g<span
+style='letter-spacing:-.1pt'> </span><span style='letter-spacing:.05pt'>K</span><span
+style='letter-spacing:-.05pt'>ong</span>&quot;<span style='letter-spacing:-.05pt'>
+o</span>r <span style='letter-spacing:-.1pt'>&quot;</span><span
+style='letter-spacing:.05pt'>A</span><span style='letter-spacing:-.05pt'>I</span>A<span
+style='letter-spacing:.1pt'> </span><span style='letter-spacing:-.2pt'>M</span><span
+style='letter-spacing:-.05pt'>a</span><span style='letter-spacing:.05pt'>c</span><span
+style='letter-spacing:-.05pt'>au</span>&quot;<span style='letter-spacing:.05pt'>
+</span><span style='letter-spacing:-.05pt'>here</span>in<span style='letter-spacing:
+.05pt'> </span><span style='letter-spacing:-.05pt'>r</span><span
+style='letter-spacing:-.15pt'>e</span><span style='letter-spacing:.05pt'>f</span><span
+style='letter-spacing:-.05pt'>er</span>s <span style='letter-spacing:.05pt'>t</span>o<span
+style='letter-spacing:-.1pt'> </span><span style='letter-spacing:.05pt'>A</span><span
+style='letter-spacing:-.05pt'>I</span>A<span style='letter-spacing:-.05pt'> </span><span
+style='letter-spacing:.05pt'>I</span><span style='letter-spacing:-.05pt'>n</span><span
+style='letter-spacing:.05pt'>t</span><span style='letter-spacing:-.05pt'>erna</span><span
+style='letter-spacing:.05pt'>t</span><span style='letter-spacing:-.1pt'>i</span><span
+style='letter-spacing:-.05pt'>ona</span>l<span style='letter-spacing:.05pt'> </span><span
+style='letter-spacing:-.05pt'>L</span><span style='letter-spacing:-.1pt'>i</span><span
+style='letter-spacing:.15pt'>m</span><span style='letter-spacing:-.1pt'>i</span><span
+style='letter-spacing:.05pt'>t</span><span style='letter-spacing:-.05pt'>e</span>d
+<span style='letter-spacing:-.05pt'>(</span><span style='letter-spacing:.05pt'>I</span><span
+style='letter-spacing:-.15pt'>n</span><span style='letter-spacing:.05pt'>c</span><span
+style='letter-spacing:-.05pt'>orpora</span><span style='letter-spacing:.05pt'>t</span><span
+style='letter-spacing:-.05pt'>e</span>d in<span style='letter-spacing:-.1pt'> </span><span
+style='letter-spacing:.05pt'>B</span><span style='letter-spacing:-.05pt'>e</span><span
+style='letter-spacing:-.15pt'>r</span>mu<span style='letter-spacing:-.05pt'>d</span>a
+<span style='letter-spacing:-.15pt'>w</span>i<span style='letter-spacing:.05pt'>t</span>h
+l<span style='letter-spacing:-.1pt'>i</span><span style='letter-spacing:.15pt'>m</span><span
+style='letter-spacing:-.1pt'>i</span><span style='letter-spacing:.05pt'>t</span><span
+style='letter-spacing:-.05pt'>e</span>d liability)</span>.</span></p>
+
+</div>
+</div>
+
+<img width=827 height=1169 src="ProposalIndemnity_2_files/ProposalIndemnity_Page_3.tif">
+<img width=827 height=1169 src="ProposalIndemnity_2_files/ProposalIndemnity_Page_4.tif">
+<img width=827 height=1169 src="ProposalIndemnity_2_files/ProposalIndemnity_Page_5.tif">
+<img width=827 height=1169 src="ProposalIndemnity_2_files/ProposalIndemnity_Page_6.tif">
+<img width=827 height=1169 src="ProposalIndemnity_2_files/ProposalIndemnity_Page_7.tif">
+</body>
+
+</html>

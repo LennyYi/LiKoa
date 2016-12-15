@@ -1,0 +1,587 @@
+
+var localObj = window.location;
+
+var contextPath = localObj.pathname.split("/")[1];
+
+var basePath = localObj.protocol+"//"+localObj.host+"/"+contextPath;
+
+var server_context=basePath;
+
+//set date format
+if(parent.jQuery)
+	parent.jQuery.ajax({
+		url:server_context+"/paramConfigAction.it?method=getParamByCodeforAJAX",
+		data:{"paramCode":"dateFormat"},
+		type:"post",
+		cache:false,
+		async:false,
+		success: function(obj){dateFormat = obj;}
+	});
+else
+	if (typeof jQuery != 'undefined')
+		jQuery.ajax({
+			url:server_context+"/paramConfigAction.it?method=getParamByCodeforAJAX",
+			data:{"paramCode":"dateFormat"},
+			type:"post",
+			cache:false,
+			async:false,
+			success: function(obj){dateFormat = obj;}
+		});
+	else
+		if (parent.parent.jQuery)
+			parent.parent.jQuery.ajax({
+				url:server_context+"/paramConfigAction.it?method=getParamByCodeforAJAX",
+				data:{"paramCode":"dateFormat"},
+				type:"post",
+				cache:false,
+				async:false,
+				success: function(obj){dateFormat = obj;}
+			});
+
+function formatDate1(date,format1,format2) {
+	if (!date) return;   
+    if (!format2) format2 = "yyyy-MM-dd";
+    
+    var forms;
+    if(format1 == "yyyyMMdd")
+    	forms = ["yyyy","MM","dd"];
+    else
+    	forms = format1.replace(/-/, "/").split("/");
+    
+    var dates;
+    
+    if(format1 == "yyyyMMdd"){	
+    	dates = date.match(/(\d{4})(\d{2})(\d{2})/);
+    	dates = [dates[1],dates[2],dates[3]];
+    }
+    else
+    	dates = date.replace(/-/, "/").split("/")
+    		
+    var yy;
+    var MM;
+    var dd;
+    var l = forms.length;
+    for(var i=0;i<l;i++){
+		if(forms[i]=="yyyy"){
+			yy=dates[i];
+		}
+		if(forms[i]=="MM"){
+			MM=parseInt(dates[i],10)-1;	//when the number is begin with 0,will return 0, 20150312 Justin Bin fix bug
+		}
+		if(forms[i]=="dd"){
+			dd=dates[i];
+		}
+	}
+    switch(typeof date) {   
+        case "string":	
+            date = new Date(yy,MM,dd);   
+            break;   
+        case "number":   
+            date = new Date(date);   
+            break;   
+    } 
+    if (!date instanceof Date) return;  
+    var dict = {   
+        "yyyy": date.getFullYear(),   
+        "M": date.getMonth()+1,   
+        "d": date.getDate(),   
+        "H": date.getHours(),   
+        "m": date.getMinutes(),   
+        "s": date.getSeconds(),   
+        "MM": ("" + (date.getMonth() + 101)).substr(1),   
+        "dd": ("" + (date.getDate() + 100)).substr(1),   
+        "HH": ("" + (date.getHours() + 100)).substr(1),   
+        "mm": ("" + (date.getMinutes() + 100)).substr(1),   
+        "ss": ("" + (date.getSeconds() + 100)).substr(1)   
+    };       
+    return format2.replace(/(yyyy|MM?|dd?|HH?|ss?|mm?)/g, function() {   
+        return dict[arguments[0]];   
+    });                   
+}   
+
+
+
+function openScript(url, width, height) {
+	var Win = window.open(url, "openScript", 'width=' + width + ',height='
+			+ height + ',resizable=1,scrollbars=yes,menubar=no,status=yes');
+}
+
+var bMoveable = false;
+var _VersionInfo = "Version:2.0"
+
+var strFrame;
+document.writeln('<iframe id=meizzDateLayer Author=wayx frameborder=0 style="position: absolute; width: 142; height: 186; z-index: 9998; display: none"></iframe>');
+strFrame = '<style>';
+strFrame += 'INPUT.button{BORDER-RIGHT: #0080FF 1px solid;BORDER-TOP: #0080FF 1px solid;BORDER-LEFT: #0080FF 1px solid;';
+strFrame += 'BORDER-BOTTOM: #0080FF 1px solid;BACKGROUND-COLOR: #fff8ec;font-family:arial;}';
+strFrame += 'TD{FONT-SIZE: 9pt;font-family:arial;}';
+strFrame += '</style>';
+strFrame += '<scr' + 'ipt>';
+strFrame += 'var datelayerx,datelayery; ';
+strFrame += 'var bDrag; ';
+strFrame += 'function document.onmousemove() ';
+strFrame += '{if(bDrag && window.event.button==1)';
+strFrame += ' {var DateLayer=parent.document.all.meizzDateLayer.style;';
+strFrame += '  DateLayer.posLeft += window.event.clientX-datelayerx;';
+strFrame += '  DateLayer.posTop += window.event.clientY-datelayery;}}';
+strFrame += 'function DragStart() ';
+strFrame += '{var DateLayer=parent.document.all.meizzDateLayer.style;';
+strFrame += ' datelayerx=window.event.clientX;';
+strFrame += ' datelayery=window.event.clientY;';
+strFrame += ' bDrag=true;}';
+strFrame += 'function DragEnd(){  ';
+strFrame += ' bDrag=false;}';
+strFrame += '</scr' + 'ipt>';
+strFrame += '<div style="z-index:9999;position: absolute; left:0; top:0;" onselectstart="return false"><span id=tmpSelectYearLayer Author=wayx style="z-index: 9999;position: absolute;top: 3; left: 19;display: none"></span>';
+strFrame += '<span id=tmpSelectMonthLayer Author=wayx style="z-index: 9999;position: absolute;top: 3; left: 78;display: none"></span>';
+strFrame += '<table  cellspacing=0 cellpadding=0 width=142 height=160 style=\"border:1px solid #0066FF;\" bgcolor=\"Silver\" Author="wayx">';
+strFrame += '  <tr Author="wayx"><td width=142 height=23 Author="wayx" bgcolor=#FFFFFF><table border=0 bordercolor=\"Silver\" bgcolor=#D4DAE8 cellspacing=1 cellpadding=0 width=140 Author="wayx" height=23>';
+strFrame += '      <tr align=center Author="wayx">';
+strFrame += '        <td width=60 align=center  ';
+strFrame += ' ><span Author=meizz id=meizzYearHead></span></td>';
+strFrame += '<td width=48 align=center ';
+strFrame += '><span id=meizzMonthHead Author=meizz></span></td><td style=\"border-bottom:0px solid #0066FF; background-color:D4DAE8; font-weight:bold; font-family:Wingdings 2,Wingdings,Webdings; font-size:16px; padding-top:2px; color:#4477FF; cursor:hand\" onclick=\"parent.closeLayer()\" align=\"right\" title=\"Close\" name=\"closeWindow\">X</td>\n ';
+strFrame += '</tr>';
+strFrame += '    </table></td></tr>';
+strFrame += '  <tr Author="wayx"><td width=142 height=18 Author="wayx">';
+strFrame += '<table border=1 cellspacing=0 cellpadding=0 bgcolor=#00287d' + (bMoveable ? 'onmousedown="DragStart()" onmouseup="DragEnd()"'
+		: '');
+strFrame += ' BORDERCOLORLIGHT=\"Silver\" BORDERCOLORDARK=\"Silver\" width=140 height=20 Author="wayx" style="cursor:' + (bMoveable ? 'move'
+		: 'default') + '">';
+strFrame += '<tr Author="wayx" align=center valign=bottom><td style="font-size:12px;color:#FFFFFF" Author=meizz>S</td>';
+strFrame += '<td style="font-size:12px;color:#FFFFFF" Author=meizz>M</td><td style="font-size:12px;color:#FFFFFF" Author=meizz>T</td>';
+strFrame += '<td style="font-size:12px;color:#FFFFFF" Author=meizz>W</td><td style="font-size:12px;color:#FFFFFF" Author=meizz>T</td>';
+strFrame += '<td style="font-size:12px;color:#FFFFFF" Author=meizz>F</td><td style="font-size:12px;color:#FFFFFF" Author=meizz>S</td></tr>';
+strFrame += '</table></td></tr>';
+strFrame += '  <tr Author="wayx"><td width=142 height=75 Author="wayx">';
+strFrame += '    <table border=0 cellspacing=2 cellpadding=0 BORDERCOLORLIGHT=#0080FF BORDERCOLORDARK=#FFFFFF bgcolor=#fff8ec width=140 height=120 Author="wayx">';
+var n = 0;
+for (j = 0; j < 5; j++) {
+	strFrame += ' <tr align=center Author="wayx">';
+	for (i = 0; i < 7; i++) {
+		strFrame += '<td width=15 height=10 id=meizzDay' + n + ' style="font-size:12px" Author=meizz onclick=parent.meizzDayClick(this.innerText,0)></td>';
+		n++;
+	}
+	strFrame += '</tr>';
+}
+strFrame += '      <tr align=center Author="wayx">';
+for (i = 35; i < 42; i++)
+	strFrame += '<td width=15 height=10 id=meizzDay' + i + ' style="font-size:12px" Author=wayx onclick="parent.meizzDayClick(this.innerText,0)"></td>';
+strFrame += '        </tr>';
+strFrame += '    </table></td></tr><tr Author="wayx"><td Author="wayx">';
+strFrame += '        <table border=0 cellspacing=1 cellpadding=0 width=100% Author="wayx" bgcolor=#D4DAE8>';
+strFrame += '          <tr Author="wayx"><td ';
+strFrame += '             Author=meizz align=center><input Author=meizz type=button class=button value=Today onclick="parent.meizzToday()" ';
+strFrame += '             onfocus="this.blur()"  style="font-size: 12px; height: 18px; cursor:hand"></td> ';
+strFrame += '</tr></table></td></tr></table></div>';
+
+window.frames.meizzDateLayer.document.writeln(strFrame);
+window.frames.meizzDateLayer.document.close();
+
+var outObject;
+var outButton;
+var outDate = "";
+var odatelayer = window.frames.meizzDateLayer.document.all;
+
+function setday(tt, obj) {
+	if (arguments.length > 2) {
+		alert("Sorry!It is too param!");
+		return;
+	}
+	if (arguments.length == 0) {
+		alert("Sorry!It hasn't any param!");
+		return;
+	}
+	var dads = document.all.meizzDateLayer.style;
+	var th = tt;
+	/**
+	 * if (typeof(tt)=="object") { th=tt; } else { th=element.document.all[tt]; }
+	 */
+	var tmp = (arguments.length == 1) ? tt : obj;
+
+	var ttop = tmp.offsetTop;
+	var thei = tmp.clientHeight;
+	var tleft = tmp.offsetLeft;
+	var ttyp = tmp.type;
+
+	while (tmp = tmp.offsetParent) {
+		ttop += tmp.offsetTop;
+		tleft += tmp.offsetLeft;
+	}
+	dads.top = (ttyp == "image") ? ttop + thei : ttop + thei + 6;
+	dads.left = tleft;
+	outObject = (arguments.length == 1) ? th : obj;
+	outButton = (arguments.length == 1) ? null : th;
+
+	//var reg = /^(\d{1,2})\/(\d{1,2})\/(\d+)$/;
+	//var r = outObject.value.match(reg);	
+	var d = "";
+	if(outObject.value!=""){
+
+    	d = new Date(formatDate1(outObject.value,dateFormat, "yyyy/MM/dd"));
+    }
+    
+	if (d instanceof Date  && !isNaN(d)) {
+		//r[1] = r[1] - 1; // month
+		//var d = new Date(r[3], r[1], r[2]);
+		//if (d.getFullYear() == r[3] && d.getMonth() == r[1]
+			//	&& d.getDate() == r[2]) {
+			outDate = d;
+		//} else
+			//outDate = "";
+		meizzSetDay(d.getFullYear(), d.getMonth() + 1);
+	} else {
+		outDate = "";
+		meizzSetDay(new Date().getFullYear(), new Date().getMonth() + 1);
+		meizzWriteHead(new Date().getFullYear(), new Date().getMonth() + 1);
+	}
+	dads.display = '';
+	event.returnValue = false;
+}
+
+var MonHead = new Array(12);
+MonHead[0] = 31;
+MonHead[1] = 28;
+MonHead[2] = 31;
+MonHead[3] = 30;
+MonHead[4] = 31;
+MonHead[5] = 30;
+MonHead[6] = 31;
+MonHead[7] = 31;
+MonHead[8] = 30;
+MonHead[9] = 31;
+MonHead[10] = 30;
+MonHead[11] = 31;
+
+var meizzTheYear = new Date().getFullYear();
+var meizzTheMonth = new Date().getMonth() + 1;
+var meizzWDay = new Array(42);
+
+document.onclick = function() {
+	with (window.event) {
+		if (srcElement.getAttribute("Author") == null
+				&& srcElement != outObject && srcElement != outButton)
+		{
+			closeLayer();
+		}
+	}
+}
+
+document.onkeyup = function() {
+	if (window.event.keyCode == 27) {
+		if (outObject)
+			outObject.blur();
+		closeLayer();
+	} else if (document.activeElement)
+		if (document.activeElement.getAttribute("Author") == null
+				&& document.activeElement != outObject
+				&& document.activeElement != outButton) {
+			closeLayer();
+		}
+}
+
+function meizzWriteHead(yy, mm) {
+	tmpSelectYearInnerHTML(yy);
+	tmpSelectMonthInnerHTML(mm);
+}
+
+function tmpSelectYearInnerHTML(strYear) {
+	var m = (strYear) ? strYear : new Date().getFullYear();
+	if (m < 1000 || m > 9999) {
+		alert("Year is not betreen 1000 and 9999!");
+		return;
+	}
+	var n = m - 100;
+	if (n < 1000)
+		n = 1000;
+	if (n + 120 > 9999)
+		n = 9974;
+	var s = "<select Author=meizz name=tmpSelectYear style='font-size: 12px' "
+	s += "onchange='"
+	s += "parent.meizzTheYear = this.value; parent.meizzSetDay(parent.meizzTheYear,parent.meizzTheMonth)'>\r\n";
+	var selectInnerHTML = s;
+	for ( var i = n; i < n + 120; i++) {
+		if (i == m) {
+			selectInnerHTML += "<option Author=wayx value='" + i
+					+ "' selected>" + i + "" + "</option>\r\n";
+		} else {
+			selectInnerHTML += "<option Author=wayx value='" + i + "'>" + i
+					+ "" + "</option>\r\n";
+		}
+	}
+	selectInnerHTML += "</select>";
+	odatelayer.tmpSelectYearLayer.style.display = "";
+	odatelayer.tmpSelectYearLayer.innerHTML = selectInnerHTML;
+}
+
+function tmpSelectMonthInnerHTML(strMonth) {
+	// if (strMonth.match(/\D/)!=null){alert("Month is not number!");return;}
+	var m = (strMonth) ? strMonth : new Date().getMonth() + 1;
+	var s = "<select Author=meizz name=tmpSelectMonth style='font-size: 12px' "
+	s += "onchange='"
+	s += "parent.meizzTheMonth = this.value; parent.meizzSetDay(parent.meizzTheYear,parent.meizzTheMonth)'>\r\n";
+	var selectInnerHTML = s;
+	for ( var i = 1; i < 13; i++) {
+		if (i == m) {
+			selectInnerHTML += "<option Author=wayx value='" + i
+					+ "' selected>" + i + "" + "</option>\r\n";
+		} else {
+			selectInnerHTML += "<option Author=wayx value='" + i + "'>" + i
+					+ "" + "</option>\r\n";
+		}
+	}
+	selectInnerHTML += "</select>";
+	odatelayer.tmpSelectMonthLayer.style.display = "";
+	odatelayer.tmpSelectMonthLayer.innerHTML = selectInnerHTML;
+	// odatelayer.tmpSelectMonth.focus();
+}
+
+function closeLayer() {
+	// alert('close')
+	document.all.meizzDateLayer.style.display = "none";
+}
+
+function IsPinYear(year) {
+	if (0 == year % 4 && ((year % 100 != 0) || (year % 400 == 0)))
+		return true;
+	else
+		return false;
+}
+
+function GetMonthCount(year, month) {
+	var c = MonHead[month - 1];
+	if ((month == 2) && IsPinYear(year))
+		c++;
+	return c;
+}
+
+function GetDOW(day, month, year) {
+	var dt = new Date(year, month - 1, day).getDay() / 7;
+	return dt;
+}
+
+function meizzPrevY() {
+	if (meizzTheYear > 999 && meizzTheYear < 10000) {
+		meizzTheYear--;
+	} else {
+		alert("");
+	}
+	meizzSetDay(meizzTheYear, meizzTheMonth);
+}
+
+function meizzNextY() {
+	if (meizzTheYear > 999 && meizzTheYear < 10000) {
+		meizzTheYear++;
+	} else {
+		alert("");
+	}
+	meizzSetDay(meizzTheYear, meizzTheMonth);
+}
+
+function meizzToday() {
+	var today;
+	meizzTheYear = new Date().getFullYear();
+	meizzTheMonth = new Date().getMonth() + 1;
+	today = new Date().getDate();
+	// meizzSetDay(meizzTheYear,meizzTheMonth);
+	if (outObject) {
+		if (today < 10) {
+			today = "0" + today;
+		}
+		var month = meizzTheMonth < 10 ? "0" + meizzTheMonth : ""
+				+ meizzTheMonth;
+		outObject.value = month + "/" + today + "/" + meizzTheYear;
+       if(dateFormat!=""){
+			outObject.value=formatDate1(outObject.value,"MM/dd/yyyy", dateFormat); 
+         }
+	}
+	closeLayer();
+	if (outObject) {
+		outObject.fireEvent("onchange");
+		if (typeof jQuery != 'undefined')
+			jQuery(outObject).focus();
+		else
+			parent.jQuery(outObject).focus();
+	
+	}
+}
+
+function meizzPrevM() {
+	if (meizzTheMonth > 1) {
+		meizzTheMonth--
+	} else {
+		meizzTheYear--;
+		meizzTheMonth = 12;
+	}
+	meizzSetDay(meizzTheYear, meizzTheMonth);
+}
+
+function meizzNextM() {
+	if (meizzTheMonth == 12) {
+		meizzTheYear++;
+		meizzTheMonth = 1
+	} else {
+		meizzTheMonth++
+	}
+	meizzSetDay(meizzTheYear, meizzTheMonth);
+}
+
+function meizzSetDay(yy, mm) {
+	meizzWriteHead(yy, mm);
+	meizzTheYear = yy;
+	meizzTheMonth = mm;
+	for ( var i = 0; i < 42; i++) {
+		meizzWDay[i] = ""
+	}
+	;
+	var day1 = 1, day2 = 1, firstday = new Date(yy, mm - 1, 1).getDay();
+	for (i = 0; i < firstday; i++)
+		meizzWDay[i] = GetMonthCount(mm == 1 ? yy - 1 : yy, mm == 1 ? 12
+				: mm - 1)
+				- firstday + i + 1
+	for (i = firstday; day1 < GetMonthCount(yy, mm) + 1; i++) {
+		meizzWDay[i] = day1;
+		day1++;
+	}
+	for (i = firstday + GetMonthCount(yy, mm); i < 42; i++) {
+		meizzWDay[i] = day2;
+		day2++
+	}
+	for (i = 0; i < 42; i++) {
+		var da = eval("odatelayer.meizzDay" + i)
+		if (meizzWDay[i] != "") {
+			da.borderColorLight = "#0080FF";
+			da.borderColorDark = "#FFFFFF";
+			if (i < firstday) {
+				var fColor = "gray";
+				if (i % 7 == 6)
+					fColor = "green";
+				if (i % 7 == 0)
+					fColor = "red";
+				da.innerHTML = "<font color=" + fColor + ">" + meizzWDay[i]
+						+ "</font>";
+
+				da.title = (mm == 1 ? 12 : mm - 1) + "/" + meizzWDay[i] + "/"
+						+ yy;
+				da.onclick = Function("meizzDayClick(this.innerText,-1)");
+				if (!outDate)
+					da.style.backgroundColor = ((mm == 1 ? yy - 1 : yy) == new Date()
+							.getFullYear()
+							&& (mm == 1 ? 12 : mm - 1) == new Date().getMonth() + 1 && meizzWDay[i] == new Date()
+							.getDate()) ? "#FF8040" : "#e0e0e0";
+				else {
+					da.style.backgroundColor = ((mm == 1 ? yy - 1 : yy) == outDate
+							.getFullYear()
+							&& (mm == 1 ? 12 : mm - 1) == outDate.getMonth() + 1 && meizzWDay[i] == outDate
+							.getDate()) ? "#FF8040" : "#e0e0e0";
+					;
+					if ((mm == 1 ? yy - 1 : yy) == outDate.getFullYear()
+							&& (mm == 1 ? 12 : mm - 1) == outDate.getMonth() + 1
+							&& meizzWDay[i] == outDate.getDate()) {
+						da.borderColorLight = "#FFFFFF";
+						da.borderColorDark = "#0080FF";
+					}
+				}
+			} else if (i >= firstday + GetMonthCount(yy, mm)) {
+				var fColor = "gray";
+				if (i % 7 == 6)
+					fColor = "green";
+				if (i % 7 == 0)
+					fColor = "red";
+				da.innerHTML = "<font color=" + fColor + ">" + meizzWDay[i]
+						+ "</font>";
+
+				da.title = (mm == 12 ? 1 : parseInt(mm) + 1) + "/"
+						+ meizzWDay[i] + "/" + yy;
+				da.onclick = Function("meizzDayClick(this.innerText,1)");
+				if (!outDate)
+					da.style.backgroundColor = ((mm == 12 ? yy + 1 : yy) == new Date()
+							.getFullYear()
+							&& (mm == 12 ? 1 : mm + 1) == new Date().getMonth() + 1 && meizzWDay[i] == new Date()
+							.getDate()) ? "#FF8040" : "#e0e0e0";
+				else {
+					da.style.backgroundColor = ((mm == 12 ? yy + 1 : yy) == outDate
+							.getFullYear()
+							&& (mm == 12 ? 1 : mm + 1) == outDate.getMonth() + 1 && meizzWDay[i] == outDate
+							.getDate()) ? "#FF8040" : "#e0e0e0";
+					if ((mm == 12 ? yy + 1 : yy) == outDate.getFullYear()
+							&& (mm == 12 ? 1 : mm + 1) == outDate.getMonth() + 1
+							&& meizzWDay[i] == outDate.getDate()) {
+						da.borderColorLight = "#FFFFFF";
+						da.borderColorDark = "#0080FF";
+					}
+				}
+			} else {
+				var fColor = "#000000";
+				if (i % 7 == 6)
+					fColor = "green";
+				if (i % 7 == 0)
+					fColor = "red";
+				da.innerHTML = "<font color=\"" + fColor + "\">" + meizzWDay[i]
+						+ "";
+				da.title = mm + "/" + meizzWDay[i] + "/" + yy;
+				da.onclick = Function("meizzDayClick(this.innerText,0)");
+
+				if (!outDate)
+					da.style.backgroundColor = (yy == new Date().getFullYear()
+							&& mm == new Date().getMonth() + 1 && meizzWDay[i] == new Date()
+							.getDate()) ? "#FF8040" : "#e0e0e0";
+				else {
+					da.style.backgroundColor = (yy == outDate.getFullYear()
+							&& mm == outDate.getMonth() + 1 && meizzWDay[i] == outDate
+							.getDate()) ? "#FF8040" : "#e0e0e0";
+					if (yy == outDate.getFullYear()
+							&& mm == outDate.getMonth() + 1
+							&& meizzWDay[i] == outDate.getDate()) {
+						da.borderColorLight = "#FFFFFF";
+						da.borderColorDark = "#0080FF";
+					}
+				}
+			}
+			da.style.cursor = "hand"
+		} else {
+			da.innerHTML = "";
+			da.style.backgroundColor = "";
+			da.style.cursor = "default"
+		}
+	}
+}
+
+function meizzDayClick(n, ex) {
+	var yy = meizzTheYear;
+	var mm = parseInt(meizzTheMonth) + ex;
+	if (mm < 1) {
+		yy--;
+		mm = 12 + mm;
+	} else if (mm > 12) {
+		yy++;
+		mm = mm - 12;
+	}
+	if (mm < 10) {
+		mm = "0" + mm;
+	}
+	if (outObject) {
+		if (!n) {// outObject.value="";
+			return;
+		}
+		if (n < 10) {
+			n = "0" + n;
+		}
+		outObject.value = mm + "/" + n + "/" + yy;	
+		closeLayer();
+		
+		if(dateFormat!=""){
+			outObject.value=formatDate1(outObject.value,"MM/dd/yyyy",dateFormat); 
+        }
+		
+		outObject.fireEvent("onchange");
+		outObject.fireEvent("onblur");
+		if (typeof jQuery != 'undefined')
+			jQuery(outObject).focus();
+		else
+			parent.jQuery(outObject).focus();
+	} else {
+		closeLayer();
+		alert("happen error!");
+	}
+}

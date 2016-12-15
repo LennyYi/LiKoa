@@ -1,0 +1,167 @@
+<%@ include file="/common/head.jsp" %>
+<%@ include file="/common/loading.jsp" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page import="java.util.*,java.text.*,com.aiait.eflow.housekeeping.vo.OTSummaryVO,com.aiait.eflow.util.HtmlUtil" %>
+<html>
+<head>
+<title>Closed Form List</title>
+<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+<script type=text/javascript src="<%=request.getContextPath()%>/common/message.jsp"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+<SCRIPT language="javascript" src="<%=request.getContextPath()%>/js/sorttable.js"></SCRIPT>
+<script language="javascript" src="<%=request.getContextPath()%>/js/resizeCol.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+<script language="javascript">
+   function summaryOT(){
+      if(document.forms[0].yearMonth.value.Trim()==""){
+        alert("Please fill in the field 'Summary For'!")
+        document.forms[0].yearMonth.focus();
+        return;
+      }
+      var url = "<%=request.getContextPath()%>/otFormAction.it?method=checkSummaryFor&yearMonth="+document.forms[0].yearMonth.value.Trim()+"&status=01";
+      var  xmlhttp = createXMLHttpRequest();
+          var result;
+          if(xmlhttp){
+            xmlhttp.open('POST',url,false);
+            xmlhttp.onreadystatechange = function()
+            {
+              if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                 result = xmlhttp.responseText;
+                 if(result.Trim()=="yes"){
+                   alert("Summary of "+document.forms[0].yearMonth.value+" has already existed,please select it in 'View History OT Summary'.")
+                   return;
+                 }else if(result.Trim()=="close"){
+                   alert("Meal Allowance of " + document.forms[0].yearMonth.value + " already had been completed by Account,please select other YearMonth!");
+                   document.forms[0].yearMonth.focus();
+                   return;
+                 }else if(result.Trim()=="no"){
+                    document.forms[0].submit();
+                 }else{
+                    alert("It is error,please contact administrator!");
+                 }
+              }
+           }
+           xmlhttp.setRequestHeader("If-Modified-Since","0");
+           xmlhttp.send(null);
+       }
+   }
+</script>
+<body>
+<%
+    String otDateBegin = (String)request.getParameter("otPlanDateBegin");
+    String otDateEnd = (String)request.getParameter("otPlanDateEnd");
+    Collection summaryHisList = (ArrayList)request.getAttribute("summaryHisList");
+    String currentDate = com.aiait.eflow.util.StringUtil.getCurrentDateStr("yyyy/MM/dd");
+    String yearMonth = com.aiait.eflow.util.StringUtil.getPreviousYearMonth(currentDate);
+    
+    // For HR policy: Only summary the records of the latest 3 months.
+    if (otDateBegin == null || otDateBegin.equals("")) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH, -3);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        Date fromDate = calendar.getTime();
+        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        otDateBegin = dateFormat.format(fromDate);
+    }
+%>
+<FORM nane=AVActionForm method="post" action="<%=request.getContextPath()%>/otFormAction.it?method=showPersonalOTSummary&printFlag=false&type=new&status=01"> 
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+ <tr>
+ 	<td height="10"></td>
+ </tr>
+ <!--<tr>
+ 	<td>
+ 	  <strong><font color='#5980BB' family='Times New Roman'><i18n:message key="personal_meal_query.location"/></font></strong>
+ 	 </td>
+ </tr>
+--></table>
+ <TABLE WIDTH=100% bordercolor="#6595D6" style="border-collapse:collapse;"  BORDER=1 CELLPADDING=3 CELLSPACING=0 class="tr0" >
+   <TR align="center" >
+      <TD height="25" colspan="4" class="tr1"><i18n:message key="personal_meal_query.title"/></TD>
+   </TR>
+    <TR> 
+      <TD width=18% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="personal_meal_query.from"/></span></div></TD>
+      <TD width=35% height="20" > 
+      <font size="2"> 
+       <INPUT Name="otPlanDateBegin" onclick='setday(this)' type="text" value="<%=otDateBegin==null?"":otDateBegin%>" class="text2" style="WIDTH: 130px" id="beginSubmissionDate">(mm/dd/yyyy)
+      </font>
+      </TD>
+      <TD width=18% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="personal_meal_query.to"/></span></div></TD>
+      <TD width=30% height="20" ><font size="2"> 
+       <INPUT Name="otPlanDateEnd" onclick='setday(this)' type="text" value="<%=otDateEnd==null?"":otDateEnd%>" class="text2" style="WIDTH: 130px" id="endSubmissionDate">(mm/dd/yyyy) 
+      </TD>
+    </TR>
+    <TR> 
+      <TD width=18% height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="personal_meal_query.monthtag"/></span></div></TD>
+      <TD width=35% height="20" colspan='3'> 
+      <select name='temDate1' disabled>
+        <option><%=yearMonth%></option>
+       </select>
+       <input type='hidden' name='yearMonth' value='<%=yearMonth%>'>
+        (<font color='red'>*</font>)(yyyy/mm)
+      </TD>
+    </TR>
+    <tr> 
+      <td width=18% height="20" class="tr3"><div align="right"><span class="style1">* Remark</span></div></td>
+      <td width=35% height="20" colspan='3'>
+        <b>Meal Allowance will be banked along with payroll, taxi fee will be banked later separately.</b>
+      </td>
+    </tr>
+    <tr>
+      <td colspan='4' align='center'>
+         <input type="button" name="searchBtn" value='<i18n:message key="personal_meal_query.summary"/>' onclick="summaryOT()"  class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+         <input type="Reset" name="resetBtn" value='<i18n:message key="button.reset"/>' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+      </td>
+    </tr>
+ </TABLE>
+ <table border="0" width="100%" cellspacing="0" cellpadding="0">
+ <tr>
+ 	<td height="10"></td>
+ </tr>
+ </table>
+ <table border="0" width="100%" cellspacing="0" cellpadding="0">
+ <tr>
+ 	<td><b><i18n:message key="personal_meal_query.mas"/></b>&nbsp;(<img src='<%=request.getContextPath()%>/images/process.gif'>:<font color='red'><i18n:message key="personal_meal_query.processing"/> &nbsp;<img src='<%=request.getContextPath()%>/images/paid.gif'>:<i18n:message key="personal_meal_query.paid"/>)</font></td>
+ </tr>
+ </table>
+<table width="100%"  border="0" cellpadding="0" cellspacing="1"  style="border:1px #8899cc solid;">
+ <%
+   if(summaryHisList!=null && summaryHisList.size()>0){
+	   int rowCells = 1;
+	   Iterator it = summaryHisList.iterator();
+	   while(it.hasNext()){
+		   OTSummaryVO vo = (OTSummaryVO)it.next();
+		   if(rowCells%4==1){
+ 	         out.println("<tr>");
+		   }
+		   out.println("<td width='25%' align='left'>");
+		   if("02".equals(vo.getStatus())){
+			   out.print("&nbsp;&nbsp;<img src='"+request.getContextPath()+"/images/paid.gif'>&nbsp;");
+		   }else{
+			   out.print("&nbsp;&nbsp;<img src='"+request.getContextPath()+"/images/process.gif'>&nbsp;");
+		   }
+		   out.print("<a href='"+request.getContextPath()+"/otFormAction.it?method=showPersonalOTSummary&printFlag=false"
+				   +"&yearMonth="+vo.getYearMonth()+"&status="+vo.getStatus()+"&type=old'>"+vo.getYearMonth()+"</a></td>");
+		   if(rowCells%4==0){
+	 	     out.println("</tr>");
+		   }
+		   rowCells++;
+	   }
+	   int bankCell = (rowCells-1)%4;
+	   for(int i=0;i<bankCell;i++){
+		   out.print("<td width='25%'>&nbsp;</td>");
+	   }
+	   if((rowCells-1)%4!=0){
+		   out.println("</tr>");
+	   }
+ %>
+ <%}else{%>
+ <td><i18n:message key="personal_meal_query.tip"/></td>
+ <%}%>
+ </table>
+ </FORM>
+ </body>
+ </html>

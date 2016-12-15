@@ -1,0 +1,15 @@
+[libdefaults]
+	default_realm = AIA.BIZ
+	default_tkt_enctypes = aes128-cts rc4-hmac des3-cbc-sha1 des-cbc-md5 des-cbc-crc
+	default_tgs_enctypes = aes128-cts rc4-hmac des3-cbc-sha1 des-cbc-md5 des-cbc-crc
+	permitted_enctypes = aes128-cts rc4-hmac des3-cbc-sha1 des-cbc-md5 des-cbc-crc
+
+[realms]
+	AIA.BIZ = {
+		kdc = cncspwdom01.aia.biz
+		default_domain = aia.biz
+	}
+
+[domain_realm]
+	aia.biz = AIA.BIZ
+	.aia.biz = AIA.BIZ

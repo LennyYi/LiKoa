@@ -1,0 +1,117 @@
+<%@ include file="/common/head.jsp" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page import="com.aiait.eflow.housekeeping.vo.*,com.aiait.eflow.common.helper.*" %>
+<%@page import="java.util.*" %>
+<html>
+<head>
+ <title>Edit Cost Center</title>
+ <link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+  <script type=text/javascript src="<%=request.getContextPath()%>/common/message.jsp"></script>
+ <script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+   <script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+ <script language="javascript">
+	function submitCode() {
+		var frm = document.forms[0];
+		if (formValidate(frm) == false) return;
+		frm.action = "<%=request.getContextPath()%>/costCenterAction.it?method=saveCode";
+		frm.submit();
+	}
+ </script>
+<body>
+<% 
+  String editType = request.getParameter("editType");
+  CostCenterVO vo = (CostCenterVO) request.getAttribute("costCenter");
+  if (vo == null) {
+	  vo = new CostCenterVO();
+  }
+%>
+<form name="dbForm" action="" method="post">
+  <input type="hidden" name="editType" value="<%=editType%>">
+  <table width="100%"  border="1" cellpadding="3" cellspacing="0" bordercolor="#6595D6" style="border-collapse:collapse;" >
+   <tr class="tr1">
+       <td align='center' colspan='2'>
+          <b> <i18n:message key="housekeeping_costcenter.title"/>
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_costcenter.costCenterCode"/> : 
+       </td>
+       <td>
+         <input type='text' name='cc_code' size='15' maxLength='10' required="true"  title="Cost Center Code"
+         value="<%=vo.getCc_code()== null ? "" : vo.getCc_code()%>" <%=vo.getCc_code() == null ? "" : "readonly"%>/>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_costcenter.costCenterName"/> : 
+       </td>
+       <td>
+         <input type='text' name='cc_name' size='30' maxLength='100' required="true" title="Cost Center Name"
+         value="<%=vo.getCc_name() == null ? "" : vo.getCc_name()%>"/>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+          EXCO: 
+       </td>
+       <td align="left">
+         <select name="exco" required="true" title="EXCO">
+            <option value=''></option>          
+            <%
+            Collection staffList = StaffTeamHelper.getInstance().getStaffList();
+            if(staffList!=null){
+               Iterator staffIt = staffList.iterator();
+               while(staffIt.hasNext()){
+            	  StaffVO staff = (StaffVO)staffIt.next();
+	       		  if(staff.getStaffCode().equals(vo.getExco())){
+	       	  		 out.println("<option value='"+staff.getStaffCode()+"' selected>"+staff.getStaffName()+"</option>");
+	       	  	  }else{
+	       	  	     out.println("<option value='"+staff.getStaffCode()+"'>"+staff.getStaffName()+"</option>");
+	       	  	  }
+	           }
+            }
+            %>
+         </select>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+          <i18n:message key="housekeeping_user.team"/> : 
+       </td>
+       <td align="left">
+         <select name="t_code">
+            <option value=''></option>          
+            <%
+            Collection teamList = StaffTeamHelper.getInstance().getTeamList();
+            if(teamList!=null){
+               Iterator teamIt = teamList.iterator();
+               while(teamIt.hasNext()){
+            	  TeamVO team = (TeamVO)teamIt.next();
+	       		  if(team.getTeamCode().equals(vo.getT_code())){
+	       	  		 out.println("<option value='"+team.getTeamCode()+"' selected>"+team.getTeamName()+"</option>");
+	       	  	  }else{
+	       	  	     out.println("<option value='"+team.getTeamCode()+"'>"+team.getTeamName()+"</option>");
+	       	  	  }
+	           }
+            }
+            %>
+         </select>
+       </td>
+     </tr>     
+     
+     <tr>
+       <td align="center" colspan="2">
+         <input type="button" name="smBtn" value='<i18n:message key="button.submit"/>' onclick="submitCode()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'"/>
+         <input type="button" name="returnBtn" value='<i18n:message key="button.back"/>' onclick="javascript:window.history.go(-1)" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'"/>
+       </td>
+     </tr>
+  </table>
+</form>
+</body>
+</html>

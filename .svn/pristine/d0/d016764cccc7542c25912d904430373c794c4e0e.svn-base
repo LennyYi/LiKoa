@@ -1,0 +1,255 @@
+body {
+	text-align: center; 
+} 
+
+#searchMainDiv{
+	margin-top: 10px;
+	width:96%;
+}
+
+#searchResultDetailDiv{
+	margin-bottom:80px;
+}
+
+.levelBar2{
+	height:35px;
+	line-height:35px;
+	text-align:left;
+	font-weight:bold;
+	text-indent:20px;
+	color:#666666;
+	margin-top:0px;
+}
+
+
+.levelBar {
+	height: 50px; 
+	color: #ffffff; 
+	font-size: 15px; 
+	line-height:50px;
+	background-color: rgb(211, 17, 69);
+	font-weight:bold;
+    -moz-border-radius: 5px 5px 0px 0px;
+    -webkit-border-radius: 5px 5px 0px 0px;
+    border-radius:5px 5px 0px 0px;
+}
+
+
+
+.searchResultList{
+	width:100%;
+	border-collapse:collapse;
+	border: 1px solid #cdcdcd;
+	margin-bottom:10px;
+	background:#F8F8F8;
+}
+
+.searchResultList tr{
+	height:30px;
+}
+
+.searchResultList td{
+	text-indent:10px;
+	border: 1px solid #cdcdcd;
+	width:25%;
+}
+
+.searchResultList a{
+	color:#000000;
+}
+
+
+.searchResultFilter{
+	border: 1px solid #cdcdcd;
+	float:left;
+	margin-bottom:-1px;
+	width:100%;
+	background:#F8F8F8;
+}
+
+.searchResultFilter tr{
+	height:30px;
+}
+
+.searchResultFilter td.rightspace{
+	width:60%;
+}
+
+.searchResultFilter td.rightspace2{
+	width:80%;
+}
+
+.searchResultFilter td{
+	text-indent:5px;
+}
+
+#searchOption{
+	margin-top:20px;
+	margin-bottom:20px;
+	width:100%;
+}
+
+tr.searchframe:hover td,tr.searchframe td{
+	background:#D3D3D4;
+}
+
+.baseInfo div{
+	height: 35px; 
+	line-height:35px;
+	color: #ffffff; 
+	font-size: 15px; 
+	background-color: rgb(118, 118, 118);
+	text-align: left;
+	font-weight:bold;
+	text-indent:30px;
+}
+
+.baseInfo .tableLabel{
+	font-weight:bold;
+	color:#666666;
+	width:150px;
+}
+
+
+.baseInfo td{
+	text-indent:5px;
+}
+
+#search_result_policy_basic,#search_result_bill,#search_result_claim,#search_result_member_basic{
+	margin-bottom:100px;
+	padding-bottom:10px;
+	border: 2px solid #D5063C;
+    -moz-border-radius: 10px 10px 10px 10px ;
+    -webkit-border-radius: 10px 10px 10px 10px ;
+    border-radius: 10px 10px 10px 10px ;
+}
+
+.noimage{
+	background-color:#fff;
+}
+
+#searchKey{
+	height:25px;
+	line-height:25px;
+	width:250px;
+}
+
+#searchBtn{
+	height:25px;
+	width:100%;
+	background:#D5063C;
+	color:#ffffff;
+	cursor:pointer;
+}
+
+
+.SearchTypeP{
+	background:#D3D3D4;
+	width:100%;
+	text-align:center;
+	cursor:pointer;
+    -moz-border-radius: 5px 5px 0px 0px;
+    -webkit-border-radius: 5px 5px 0px 0px;
+    border-radius:5px 5px 0px 0px;
+    height:19px;
+    line-height:19px;
+}
+
+.SearchTypeM{
+	background:#ffffff;
+	width:100%;
+	colspan:3;
+	text-align:center;
+	cursor:pointer;
+	height:19px;
+	line-height:19px;
+}
+
+.optitem{
+    -moz-border-radius: 5px 5px 0px 0px;
+    -webkit-border-radius: 5px 5px 0px 0px;
+    border-radius:5px 5px 0px 0px;
+}
+
+.optitem2{
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border-radius:5px 5px 5px 5px;
+}
+
+.optitem3{
+    -moz-border-radius: 0px 0px 5px 5px ;
+    -webkit-border-radius: 0px 0px 5px 5px ;
+    border-radius: 0px 0px 5px 5px ;
+}
+
+#searchOption table{
+	 border-collapse:collapse;
+	 colpadding:0;
+	 border:0px;
+} 
+
+#searchOption td{
+	 border:0px;
+	 padding:0px;
+} 
+
+.exportButton {
+	font-size:13px !important;
+	height: 25px;
+	width: 60px;
+	background: #D5063C;
+	color: #ffffff;
+	margin-left: 10px;
+}
+
+.exportButton:hover {
+	height: 25px;
+	width: 60px;
+	background: #F90600;
+	color: #000000;
+	margin-left: 10px;
+}
+
+#policyList,#memberList{
+	margin-bottom:2px;
+}
+
+/* .inside_grid
+{
+	 padding-top:0px;
+	 padding-left:20px;
+	 padding-right:20px;
+	 padding-bottom:20px;
+    } */
+
+.inside_grid .ui-jqgrid-hdiv,.inside_grid .ui-corner-bottom
+{
+	 padding-left:20px;
+	 padding-right:20px;
+	 /*width:1700px !important;*/
+    } 
+    
+.inside_grid .ui-jqgrid-bdiv div
+{
+	 padding-left:20px;
+	 padding-right:20px;
+	 width:1700px !important;
+    } 
+    
+.inside_grid .ui-jqgrid-bdiv
+{
+	 width:1800px !important;
+    } 
+
+.inside_grid .ui-pg-table
+{
+	 background-color:#D3D3D4;
+	 color:#000;
+    }     
+
+.inside_grid .ui-helper-clearfix
+{
+	margin-bottom:30px;
+    }
+    

@@ -1,0 +1,508 @@
+function uniQueue(array) {
+	var arr = [];
+	var m;
+	while (array.length > 0) {
+		m = array[0];
+		arr.push(m);
+		array = jQuery.grep(array, function(n, i) {
+			return n == m;
+		}, true);
+	}
+	return arr;
+}
+
+var array_total = new Array(new Array(), new Array(), new Array(), new Array(), new Array(), new Array(), new Array(), new Array(), new Array(),new Array());
+
+jQuery(document).ready(function() {
+	
+	var tableLength = jQuery("#formTable4 tr").length;
+	if(tableLength>1)
+	{
+		var planCode = jQuery("select[name='Plan_id']").length; 
+		
+	}
+	
+	tableLength = jQuery("#formTable9 tr").length;
+	if(tableLength>1)
+	{
+		var selectedMemPlan;
+		jQuery("#formTable9 tr select[name='MemPlan_id']").each(function(){
+			changeMemProduct(this);
+		})
+	}
+	
+    jQuery("#div5").find('input[name="addRowBtn"]').click(function(){
+    	var lastRowNo =  tableLength - 1;
+
+    	if(array_total[0].length==0)
+	        setArray();
+    	setCheckbox();	//20150402 Justin Bin Added NOVA-137   :Refresh the plan
+	    removeCheckbox();
+    });
+    
+    initProducts();
+	addProductPlanControl();
+	showProduct();
+});
+
+//NOVA-66 Hinson BEGIN: trigger this function when package product changed
+function pkgProductChange(selectedID){
+	var planCode = jQuery(selectedID).closest('tr').find('select[name="Plan_id"]');
+	jQuery(planCode).find("option:first-child").attr("selected",true);
+	jQuery(planCode).change();
+	
+	jQuery('select[name="MemProduct_id"]').each(function(){	//load member pkg products
+		loadMemPkgPdt(this);
+//		changeMemProduct(this);
+	});
+}
+
+function loadMemPkgPdt(selectedID){
+	var selected = jQuery("select[name='Product_id']");
+	var selectedVal = jQuery(selectedID).val();
+	var options = [];
+
+	jQuery(selectedID).empty();			
+	jQuery(selectedID).append("<option value=''></option>");
+	
+	if(selected.length>0)
+	{			
+		jQuery.each(selected,function(i,item){
+			value = jQuery(item).find("option:selected").val();
+			text = jQuery(item).find("option:selected").text();	
+			if(value!=''){
+				options.push("<option value='"+value+"'>"+text+"</option>");
+			}
+		});
+		
+		options = uniQueue(options);			
+		jQuery(selectedID).append(options);
+	}
+	if(selectedVal!='')
+		jQuery(selectedID).val(selectedVal);
+	else
+		jQuery(selectedID).find("option:first-child").attr("selected", true);	
+}
+
+//NOVA-66 Hinson END
+
+
+function loadNProduct(selectedID,srcChange){
+	var selectedVal = jQuery(selectedID).val();
+	
+	var tr = jQuery(selectedID).closest('tr');
+	
+	var index = jQuery("#formTable4 tr").index(jQuery(selectedID).closest('tr'));
+	
+	var formSystemId2 = jQuery("input[name='formSystemId'][type='hidden']").val();
+	
+	if(selectedVal==''||srcChange)
+	{
+		var sql = "";
+		if(index>1)
+		{
+			var productCode = jQuery("#formTable4 select[name='Product_id']").eq(0).val(); 
+			sql = "select distinct NOVA_PRODCODE,NOVA_PRODCODE_Local from TNovaProductMapping where form_System_id="
+				+ formSystemId2 + " and PRODCODE = (select distinct PRODCODE from TNovaProductMapping where NOVA_PRODCODE = '"+productCode+"')";
+		}
+		else
+			sql = "select distinct NOVA_PRODCODE,NOVA_PRODCODE_Local from TNovaProductMapping where form_System_id="+ formSystemId2;
+		
+		var jsonObj = selectFromSQLJson('',sql);
+		
+		var prodCode = '';
+		if(jsonObj.length>0 ){
+			jQuery(selectedID).empty();
+			//NOVA-66-20150309 Hinson BEGIN
+//				jQuery(selectedID).append("<option value='null'></option>");
+			jQuery(selectedID).append("<option value=''></option>");
+			//NOVA-66-20150309 Hinson END
+			jQuery.each(jsonObj,function(i,item){
+				jQuery(selectedID).append("<option value='"+item.NOVA_PRODCODE+"'>"+item.NOVA_PRODCODE_LOCAL+"</option>");   
+			});
+		}
+		
+		if(selectedVal!='')
+			jQuery(selectedID).val(selectedVal);
+		else
+			jQuery(selectedID).find("option:first-child").attr("selected", true);
+
+	}
+}
+
+function loadPlan(selectedID,srcChange){
+	
+	var selectedVal = jQuery(selectedID).val();
+	var tr = jQuery(selectedID).closest('tr');
+	var productVal = tr.find('select[name="Product_id"]').val();
+	
+	if(selectedVal==''||srcChange)
+	{
+		var prodCode = '';
+		
+		var sql = "select distinct NOVA_BENPLNCD,NOVA_BENPLNCD_Local from TNOVAProductMapping where NOVA_PRODCODE='"+ productVal +"'";
+		
+		var data = selectFromSQLJson('',sql);
+		jQuery(selectedID).empty();
+		
+		if(data.length>0)
+		{	
+			//NOVA-66-20150309 Hinson BEGIN
+//			jQuery(selectedID).append("<option value='null'></option>");
+			jQuery(selectedID).append("<option value=''></option>");
+			//NOVA-66-20150309 Hinson END
+			
+			jQuery.each(data,function(i,item) {
+				value = item.NOVA_BENPLNCD;
+				text = item.NOVA_BENPLNCD_LOCAL;
+				jQuery(selectedID).append("<option value='"+value+"'>"+text+"</option>");  
+			});
+		}
+		if(selectedVal!='')
+			jQuery(selectedID).val(selectedVal);
+		else
+			jQuery(selectedID).find("option:first-child").attr("selected", true);
+		
+		//jQuery(selectedID).trigger("onchange");
+	}
+}
+
+function planChange(selectedID){
+	var tr = jQuery(selectedID).closest('tr');	
+	var selectedVal = jQuery(selectedID).val();
+	var productVal = tr.find('select[name="Product_id"]').val();
+	var memProduct2 = jQuery("select[name='MemProduct_id']");
+	if(memProduct2.length>0){
+		jQuery.each(memProduct2,function(i,item) {
+			loadMemProduct(item,true,true,true);
+		});
+	}
+}
+
+function productChange(selectedID,isLoad){
+	var tr = jQuery(selectedID).closest('tr');
+	var index = jQuery("#formTable4 tr").index(jQuery(selectedID).closest('tr'));
+
+	if(jQuery("#formTable4 tr").length>1 && index==1)
+	{
+		var productItem = jQuery("#formTable4 select[name='Product_id']");
+		productItem.each(function(i){
+			if(i>0)
+			{
+				loadNProduct(this,true);
+				if(jQuery(this).val()=="")
+					jQuery(this).val(jQuery(selectedID).val());
+				//bindCompassPlanProduct(this ,true,isLoad);
+			}
+		});		
+	}
+	
+	if(isLoad) {
+		//NOVA-70-20150306 begin: refresh member product and plan
+		var productPlan = tr.find('select[name="Plan_id"]');
+		planChange(productPlan);
+		//NOVA-70-20150306 end
+	}
+		
+	calSumFun();
+}
+
+
+function flexPlanChange(selectedID){
+	
+    var selectedValue = jQuery(selectedID).val();
+    var rowIndex = jQuery("#formTable4 tr").index(jQuery(selectedID).closest("tr"));
+	var rowTDs = jQuery(selectedID).closest("tr").find("td");
+    refreshPlan();
+    countPeopleByPlan();	//20150323 Justin Bin Added
+}
+
+function loadMemProduct(selectedID,srcChange,strShow,isLoad){
+	var selected = jQuery("#formTable4 tr td select[name='Product_id']");
+	var selectedVal = jQuery(selectedID).val();
+	var options = [];	
+	if(selectedVal==''||srcChange || selectedVal==null)
+	{
+		jQuery(selectedID).empty();
+		jQuery(selectedID).append("<option value=''></option>");
+		jQuery.each(selected,function(i,item){
+			value = jQuery(item).find("option:selected").val();
+			text = jQuery(item).find("option:selected").text();
+			options.push("<option value='"+value+"'>"+text+"</option>");
+		});
+		options = uniQueue(options);		
+		jQuery(selectedID).append(options);		
+		if(selectedVal!='' && selectedVal!=null )
+			jQuery(selectedID).val(selectedVal);
+		else
+			jQuery(selectedID).find("option:first-child").attr("selected", true);
+		changeMemProduct(selectedID,strShow,isLoad);
+	}
+}
+
+function changeMemProduct(selectedID){
+	var selectedVal = jQuery(selectedID).closest('tr').find('select[name="MemProduct_id"]').val();
+	var options = [];
+	
+	var curSelectPlan = jQuery(selectedID).closest('tr').find('select[name="MemPlan_id"]');
+	var curSelectPlanVal = curSelectPlan.val();
+	
+	curSelectPlan.empty();
+	//NOVA-66-20150309 Hinson begin
+//	if(selectedVal!='null')
+	if(selectedVal!='')
+	//NOVA-66-20150309 Hinson end
+	{
+		var selectedProduct = jQuery("#formTable4 select[name='Product_id']");
+		
+		
+		if(selectedProduct.length>0)
+		{
+			//NOVA-68 hinson begin: default value should be blank instead of 'null'
+//			jQuery(curSelectPlan).append("<option value='null'></option>"); 
+			jQuery(curSelectPlan).append("<option value=''></option>"); 
+			//NOVA-68 hinson end
+			selectedProduct.each(function(i){
+				selectedPlanVal = selectedProduct.eq(i).find("option:selected").val();
+				
+				if(selectedPlanVal == selectedVal)
+				{
+					selectedPlan = selectedProduct.eq(i).closest('tr').find("select[name='Plan_id']");
+					
+					value = selectedPlan.find("option:selected").val();
+					text = selectedPlan.find("option:selected").text();
+					
+					//NOVA-66-20150309 hinson begin: if plan is blank, not add to the member plan
+//					options.push("<option value='"+value+"'>"+text+"</option>");
+					if(value!==''){
+						options.push("<option value='"+value+"'>"+text+"</option>");
+					}
+					//NOVA-66-20150309 hinson end
+				}
+			});
+			
+			options = uniQueue(options);
+			
+			curSelectPlan.append(options);
+			
+			//jQuery(curSelectPlan).find("option:first-child").attr("selected", true);
+		}
+		
+		if(curSelectPlanVal!=""&&curSelectPlanVal!=null){
+			curSelectPlan.val(curSelectPlanVal);
+		}
+		
+		changeMemPlan(curSelectPlan);
+	}
+	
+	//selectSHIP = jQuery(selectedID).closest('tr').find('select[name="field_9_13"]');
+	
+	//jQuery(selectSHIP).find("option:first-child").attr("selected", true);
+	
+	//selectSHIP.removeAttr('disabled');
+
+	//calculatePremium(selectedID);
+}
+
+function changeMemPlan(selectedID){
+	
+	//calculatePremium(selectedID);
+	var dobField = jQuery(selectedID).closest('tr').find('input[name="field_9_9"]');
+	
+	calculatePremium(dobField,true);
+	
+	var shipField = jQuery(selectedID).closest('tr').find('select[name="field_9_13"]');
+
+	shipField.trigger('change');
+	//dobField.trigger('onblur');
+	countPeopleByPlan();		//20150323 Justin Bin Added
+}
+
+function changeMemSHIP(selectedID){
+	
+	var productVal = jQuery(selectedID).closest('tr').find('select[name="field_9_20"]').val();
+	var planVal = jQuery(selectedID).closest('tr').find('select[name="MemPlan_id"]').val();
+	var sql = "select SHIP from TNovaProductMapping where NOVA_PRODCODE = '"+ productVal +"' and NOVA_BENPLNCD = '" + planVal + "'";
+	
+	var data = selectFromSQLJson('',sql);
+	
+	var selectedTR = jQuery(selectedID).closest('tr');
+	var selectedTD = jQuery(selectedID).closest('td');
+	
+	selectedTR.css('background-color','rgb(235, 235, 233)');
+	selectedTD.css('background-color','rgb(235, 235, 233)');
+	
+	if(data.length>0){	
+		var value = data[0].SHIP;
+		
+		var selectSHIP = jQuery(selectedID).closest('tr').find('select[name="field_9_13"]').val();
+		var statusField = jQuery(selectedID).closest('tr').find('textarea[name="field_9_19"]');
+		
+		var smemstatus = statusField.val();
+		
+		statusField.val(smemstatus.replace("w",""));
+		
+		if(selectSHIP!=""){
+			if (value!=selectSHIP)
+			{
+				selectedTR.css('background-color','#F8FEC3');
+				selectedTD.css('background-color','#FFB3B3');
+				statusField.val(statusField.val()+"w");
+			}
+		}
+		else if(statusField.val() != "")
+		{
+			selectedTR.css('background-color','#F8FEC3');
+			selectedTD.css('background-color','#F8FEC3');
+		}
+	}
+}
+
+function setArray(){
+	
+}
+
+function removeCheckbox(){
+	
+}
+
+function setCheckbox(){
+	
+}
+
+//20150507 Justin Bin
+function showProduct(obj){
+	//var deObj=jQuery('#formTable4')
+	//break;
+	initProducts();
+	var tableA=jQuery('#formTableProduct')
+	var trList=tableA.find("tr");
+	for(var i=0;i<trList.length;i++){
+		var prod=jQuery(trList[i]).find('select[name="field_Product_1"]').val();
+		switch(prod){
+		case "201C1":
+			jQuery("td:eq(4)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(5)",jQuery("#formTable4 tr")).show();
+			break;
+		case "201C2":
+			jQuery("td:eq(6)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(7)",jQuery("#formTable4 tr")).show();
+			break;
+		case "211C3":
+			jQuery("td:eq(8)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(9)",jQuery("#formTable4 tr")).show();
+			break;
+		case "211D1":
+			jQuery("td:eq(10)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(11)",jQuery("#formTable4 tr")).show();
+			break;
+		case "211D2":
+			jQuery("td:eq(12)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(13)",jQuery("#formTable4 tr")).show();
+			break;
+		case "211S5":
+			jQuery("td:eq(14)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(15)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(16)",jQuery("#formTable4 tr")).show();
+			break;
+		case "211T1":
+			jQuery("td:eq(17)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(18)",jQuery("#formTable4 tr")).show();
+			break;
+		case "214S1":
+			jQuery("td:eq(19)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(20)",jQuery("#formTable4 tr")).show();
+			break;
+		case "214S2":
+			jQuery("td:eq(21)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(22)",jQuery("#formTable4 tr")).show();
+			break;
+		case "311S1":
+			jQuery("td:eq(23)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(24)",jQuery("#formTable4 tr")).show();
+			break;
+		case "311S3":
+			jQuery("td:eq(25)",jQuery("#formTable4 tr")).show();
+			jQuery("td:eq(26)",jQuery("#formTable4 tr")).show();
+			break;
+			
+		}
+		
+	}
+}
+
+function initProducts(){
+	jQuery("td:eq(4)",jQuery("#formTable4 tr")).hide();			//GTL
+	jQuery("td:eq(5)",jQuery("#formTable4 tr")).hide();			//GTL
+	jQuery("td:eq(6)",jQuery("#formTable4 tr")).hide();			//GTLPD
+	jQuery("td:eq(7)",jQuery("#formTable4 tr")).hide();			//GTLPD
+	jQuery("td:eq(8)",jQuery("#formTable4 tr")).hide();			//GABD
+	jQuery("td:eq(9)",jQuery("#formTable4 tr")).hide();			//GABD
+	jQuery("td:eq(10)",jQuery("#formTable4 tr")).hide(); 		//GADD2014
+	jQuery("td:eq(11)",jQuery("#formTable4 tr")).hide();		//GADD2014
+	jQuery("td:eq(12)",jQuery("#formTable4 tr")).hide();		//GPCA2014
+	jQuery("td:eq(13)",jQuery("#formTable4 tr")).hide();
+	jQuery("td:eq(14)",jQuery("#formTable4 tr")).hide();		//GAMR(A3)
+	jQuery("td:eq(15)",jQuery("#formTable4 tr")).hide();
+	jQuery("td:eq(16)",jQuery("#formTable4 tr")).hide();		//GADR(2014)
+	jQuery("td:eq(17)",jQuery("#formTable4 tr")).hide();
+	jQuery("td:eq(18)",jQuery("#formTable4 tr")).hide(); 		//GCIR25
+	jQuery("td:eq(19)",jQuery("#formTable4 tr")).hide();
+	jQuery("td:eq(20)",jQuery("#formTable4 tr")).hide();		//GCIR34
+	jQuery("td:eq(21)",jQuery("#formTable4 tr")).hide();
+	jQuery("td:eq(22)",jQuery("#formTable4 tr")).hide();		//GAHIR(B)
+	jQuery("td:eq(23)",jQuery("#formTable4 tr")).hide();
+	jQuery("td:eq(24)",jQuery("#formTable4 tr")).hide();
+	jQuery("td:eq(25)",jQuery("#formTable4 tr")).hide();		//GHIR
+	jQuery("td:eq(26)",jQuery("#formTable4 tr")).hide();
+}
+
+function addProductPlanControl(){
+	var table = jQuery('#formTable4');
+	var formSystemId2 = jQuery("input[name='formSystemId'][type='hidden']").val();
+	
+	if(formSystemId2 == "30321" )
+	{
+		
+		jQuery("#div6 input[name='addRowBtn'][type='button']").click(function(){
+			
+			/*
+			jQuery("td:eq(4)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(5)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(6)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(7)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(8)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(9)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(10)",jQuery("#formTable4 tr")).hide(); 
+			jQuery("td:eq(11)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(12)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(13)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(14)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(15)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(16)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(17)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(18)",jQuery("#formTable4 tr")).hide(); 
+			jQuery("td:eq(19)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(20)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(21)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(22)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(23)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(24)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(25)",jQuery("#formTable4 tr")).hide();
+			jQuery("td:eq(26)",jQuery("#formTable4 tr")).hide();*/
+			  
+		});
+		
+		var saveType = jQuery('input[type="hidden"][name="saveType"]');
+		
+	}
+}
+
+function removeCommas(nStr){     
+	nStr += '';   
+	var re = /,/g; 
+	nStr = nStr.replace(re,'');
+	return nStr;
+}
+
+

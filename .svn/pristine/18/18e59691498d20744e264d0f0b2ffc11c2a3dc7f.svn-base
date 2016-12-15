@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN">
+<meta http-equiv="Content-Type" content="text/html; charset=GBK" />
+<%@ page contentType="text/html;charset=GBK" pageEncoding="GBK"%>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n"%>
+<%@page
+	import="java.util.*,java.text.SimpleDateFormat,com.aiait.eflow.util.StringUtil,com.aiait.eflow.wkf.vo.*,com.aiait.eflow.wkf.util.DataMapUtil,com.aiait.eflow.common.helper.*"%>
+<%@page
+	import="com.aiait.eflow.housekeeping.vo.FormTypeVO,com.aiait.eflow.common.CommonName,com.aiait.eflow.common.helper.FormTypeHelper,com.aiait.eflow.formmanage.vo.FormManageVO,com.aiait.eflow.housekeeping.vo.StaffVO"%>
+<%@page import="com.aiait.framework.i18n.*,com.aiait.eflow.common.*,com.aiait.framework.util.CommonUtil"%>
+<!-- %@ include file="/common/loading.jsp"%> -->
+
+<html>
+<i18n:jsmessage jsRelativePath="js" prefixName="message" />
+<head>
+<title>Nova Search</title>
+
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/js/NovaJS/jqGrid/CSS/jquery-ui-custom.css" media="screen">
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/js/NovaJS/jqGrid/CSS/ui.jqgrid.css" media="screen">
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/js/NovaJS/jqGrid/CSS/ui.multiselect.css" media="screen">
+
+<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+<link href="<%=request.getContextPath()%>/css/SearchStyle.css" rel="stylesheet" type="text/css">
+
+<!--[if lt IE 10]> 
+<script type=text/javascript src="<%=request.getContextPath()%>/js/PIE.js"></script>
+<![endif]--> 
+
+
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/json2.js"></script>
+<script type=text/javascript src="<%=request.getContextPath()%>/js/jquery.min.js"></script>
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/jquery-ui-custom.min.js"></script>
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/jquery.layout.js"></script>
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/grid.locale-cn.js"></script>
+
+
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/ui.multiselect.js"></script>
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/jquery.jqGrid.js"></script>
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/jquery.tablednd.js"></script>
+<script type=text/javascript src="<%=request.getContextPath()%>/js/NovaJS/jqGrid/jquery.contextmenu.js"></script>
+
+<script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+
+<script language="javascript" src="<%=request.getContextPath()%>/js/NovaJS/SlideJS.js"></script>
+<script type="text/javascript" language="javascript" src="<%=request.getContextPath()%>/js/NovaJS/searchMain.js"></script>
+<%
+	String basePath = request.getScheme() + "://"+ request.getServerName() + ":" + request.getServerPort()+ request.getContextPath();
+	request.setAttribute("basePath", basePath);
+%>
+<script language="javascript">
+
+$(function(){
+	$("#searchResultDetailDiv").css({display:'none'});
+	$("#policyList").css({display:'none'});
+	$("#clientList").css({display:'none'});
+	$("#memberList").css({display:'none'});
+	$("#loadPicture").css({position: "absolute"}); 	
+	$("#loadPicture").css("left",window.screen.height/2); 
+	$("#loadPicture").css("top",window.screen.width/4);
+	var searchKey = '<%=CommonUtil.decoderURL(CommonUtil.decoderURL((String)request.getParameter("searchKey")))%>';
+	var searchContext = '<%=(String)request.getParameter("searchContext")%>';
+	basePath = '<%=basePath%>';
+	if(common.isNotEmpty(searchKey) && common.isNotEmpty(searchContext)){
+		searchByMainPage(searchContext,searchKey);
+		document.getElementById(searchContext).click();
+	}
+});
+
+$(function() { 
+	if (window.PIE) { 
+	$('.rounded').each(function() { 
+	PIE.attach(this); 
+	}); 
+	} 
+	}); 
+	
+
+ /*Modernizr.load([{ both: [ '../js/NovaJS/jquery.min.js', '../js/NovaJS/modernizr/jquery.stackslider.js' ], 
+	complete: function(){ if ( !window.jQuery ) { 
+		Modernizr.load([{ both: [ '../js/NovaJS/jquery.min.js', '../js/NovaJS/modernizr/jquery.stackslider.js' ],
+		 complete : function(){ 
+		 	init(); } }]); 
+	       }
+		  else {
+		   init();
+		     }
+		   } 
+		}
+		]);
+     function init(){
+      	$( function() {
+				$( '#st-stack' ).stackslider();
+			});
+    } */
+	
+</script>
+
+</head>
+<body onunload="setReflush()">
+
+
+
+
+	
+
+   <div class="ui-overlay" style="display:none">
+      <div class="ui-widget-overlay">
+	      <img  id="loadPicture" src="../css/NovaLoad.gif">
+      </div>
+   </div>
+	<div id="searchMainDiv">
+		<form>
+			<div id="searchOption">
+				<table>
+					<tr class=over_cancel>
+						<td><div id=P class="SearchTypeP optitem rounded" onclick="setSerarchContext('P');M.style.background='#ffffff';this.style.background='#D3D3D4';"><i18n:message key="common.policy"/> </div></td>
+						<td><div id=M class="SearchTypeM optitem rounded" onclick="setSerarchContext('M');P.style.background='#ffffff';this.style.background='#D3D3D4';"><i18n:message key="common.member"/></div></td>
+						<td class=SearchTypeR colspan=2 width=105></td>
+					</tr>
+					<tr class=searchframe style="height:33px;">
+						<td rowspan="3" colspan=3><input type="text" id="searchKey" name="searchKey" onkeydown="enterSearch(event)" style="padding-right:5px;text-indent:5px;"> </td>
+						<td><input type="button" id="searchBtn" style="border-left:3px solid #D3D3D4;border-right:3px solid #D3D3D4;" value="<i18n:message key='button.search'/>" onclick="document.getElementById('divTop').style.display='none';search()"> </td>
+					</tr>
+				</table>
+			</div>
+			<div id="policyList">
+			
+ 				<div id="policyListhead" onclick="$('#policySlide').slideToggle('slow');allround(this.id,'');" class="tdSectionTitle levelBar2 optitem rounded"><i18n:message key="common.policyCode"/></div>
+				
+				
+				<div id="policySlide">
+					<table class=searchResultFilter >
+						<tr class="over_cancel">
+							<td><p><i18n:message key="common.package"/> :</p> </td>
+							<td>
+								<Select id="polPackage" name="polPackage" onChange="filterPolicyList()" onkeydown="enterFilter(event,'policy')">
+									<option value="" selected="true"></option>
+									<option value="Y"><i18n:message key="common.package"/></option>
+									<option value="N"><i18n:message key="common.notpackage"/></option>
+								</Select>
+							</td>
+							<td><p><i18n:message key="common.policy"/> :</p> </td>
+							<td><input type="text" id="policy" name="policy" onblur="filterPolicyList()" onkeydown="enterFilter(event,'policy')"></td>
+							<td><p><i18n:message key="common.branchCode"/> : </p></td>
+							<td><input type="text" id="branchCode" name="branchCode" onblur="filterPolicyList()" onkeydown="enterFilter(event,'policy')"></td>
+							<td><p><i18n:message key="common.channel"/> : </p></td>
+							<td class=rightspace><input type="text" id="channel" name="channel" onblur="filterPolicyList()" onkeydown="enterFilter(event,'policy')"></td>
+						</tr>
+					</table>
+					<table id="policyListTable" class="searchResultList interval_color"></table>
+					<span id="policyListPager"></span>
+				</div>
+			</div>
+			<div id="clientList">
+				<div id="clientlisthead" onclick="$('#clientSlide').slideToggle('slow');allround(this.id,'');" class="tdSectionTitle levelBar2 optitem rounded"><i18n:message key="common.clientCode"/> </div>
+
+				<div id="clientSlide">
+					<table class=searchResultFilter>
+							<tr class="over_cancel">
+								<td><p><i18n:message key="common.package"/> : </p></td>
+								<td>
+									<Select id="polPackage2" name="polPackage2" onChange="filterClientList()" onkeydown="enterFilter(event,'client')">
+										<option value="" selected="true"></option>
+										<option value="Y"><i18n:message key="common.package"/></option>
+										<option value="N"><i18n:message key="common.notpackage"/></option>
+									</Select>
+								</td>
+								<td><p><i18n:message key="common.policy"/> :</p> </td>
+								<td><input type="text" id="policy2" name="policy2" onblur="filterClientList()" onkeydown="enterFilter(event,'client')"></td>
+								<td><p><i18n:message key="common.branchCode"/> : </p></td>
+								<td><input type="text" id="branchCode2" name="branchCode2" onblur="filterClientList()" onkeydown="enterFilter(event,'client')"></td>
+								<td><p><i18n:message key="common.channel"/> : </p></td>
+								<td class=rightspace><input type="text" id="channel2" name="channel2" onblur="filterClientList()" onkeydown="enterFilter(event,'client')"></td>
+							</tr>
+					</table>
+					<table id="clientListTable" class="searchResultList interval_color"></table>
+					<span id="clientListPager"></span>
+				</div>
+			</div>
+			<div id="memberList">
+			
+				<div id="memberlisthead" onclick="$('#memberSlide').slideToggle('slow');allround(this.id,'');" class="tdSectionTitle levelBar2 optitem rounded"><i18n:message key="common.memberCode"/></div>
+
+				<div id="memberSlide">
+					<table class=searchResultFilter >
+						<tr class="over_cancel">
+							<td><p><i18n:message key="common.status"/> : </p></td>
+							<td><input type="text" id="status" name="status" onblur="filterMemberList()"></td>
+							<td><p><i18n:message key="common.subOfficeCode"/> :</p></td>
+							<td class=rightspace2><input type="text" id="subOfficeCode" name="subOfficeCode" onblur="filterMemberList()"></td>
+						</tr>
+					</table>
+					<table id="memberListTable" class="searchResultList interval_color"></table>
+					<span id="memberListPager"></span>
+				</div>
+			</div>
+		</form>
+		
+		<div id="searchResultDetailDiv">
+		  <!-- <div id="baseview">
+		    用于添加baseview的div
+					<section class="main">
+											<ul id="st-stack" class="st-stack-raw">
+												<li><div class="st-item"><div style="width:200px;height:200px;color:red"><p>abc1</p></div></div><div class="st-title"><h2>Graverobber</h2><h3>by Isaac Montemayor</h3></div></li>
+												<li><div class="st-item"><div style="width:200px;height:200px;color:red"><p>abc2</p></div></div><div class="st-title"><h2>Hideous Snake Queen</h2><h3>by Isaac Montemayor</h3></div></li>
+											</ul>
+					</section>
+			</div>  -->
+			<IFRAME id="searchDetailIframe" name="searchDetailIframe" frameBorder="0"  src="" scrolling="no" style="HEIGHT: 100%; WIDTH: 100%;Z-INDEX: 1;overflow-y:hidden;">
+			 
+			   
+			</IFRAME>
+		</div>
+	</div>
+	
+
+ <div style="position: absolute; bottom: 50px; right: 50px; text-align:right;display:none;" id="divTop">
+<!-- 	<DIV class=sideCatalogBg>
+		<DIV id=sideCatalog-catalog>
+		</DIV>
+	</DIV> -->
+	<div>
+		<a class="sideToolbar-up" title="<i18n:message key="common.backToTOP"/>" href="#" id="likTop" ></a>
+		
+		<a class="sideCatalogBtn" title="<i18n:message key="common.policyOutline"/>" style="background: url(../images/AnchorMenu_Basic.gif)" href="javascript:void(0);" onclick="anchor(searchDetailIframe,1)"></a>
+		<a class="sideCatalogBtn" title="<i18n:message key="common.policyBPOutline"/>" style="background: url(../images/AnchorMenu_Bill.gif)" href="javascript:void(0);" onclick="anchor(searchDetailIframe,2)"></a>
+		<a class="sideCatalogBtn" title="<i18n:message key="common.claimsOutline"/>" style="background: url(../images/AnchorMenu_Claim.gif)" href="javascript:void(0);" onclick="anchor(searchDetailIframe,3)"></a>
+		
+		<a class="sideToolbar-down" title="<i18n:message key="common.backToDOWN"/>" href="#bottom" id="likDown" onclick=""></a>
+	</div>
+</div>
+
+<a name=bottom></a>
+</body>
+</html>

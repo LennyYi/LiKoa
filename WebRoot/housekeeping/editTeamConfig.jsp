@@ -1,0 +1,178 @@
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@ page contentType="text/html;charset=GBK" pageEncoding="GBK"%>
+<%@page import="java.util.*,com.aiait.eflow.common.helper.ScriptBuildTreeHelper,com.aiait.eflow.housekeeping.vo.TeamTypeVO;" %>
+<%	
+	Collection teamList = (ArrayList)request.getAttribute("root");
+	Collection teamTypeList = (ArrayList)request.getAttribute("teamTypeList");
+	
+%>
+<html>
+<head>
+	<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+	<script type=text/javascript src="<%=request.getContextPath()%>/common/message.jsp"></script>
+    <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/loading.css" />
+    <script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+    <script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+    <link type="text/css" rel="stylesheet" href="<%=request.getContextPath()%>/js/xtree/xtree.css" />
+    <script src="<%=request.getContextPath()%>/js/xtree/TreeNormal.js"></script>
+    <script src="<%=request.getContextPath()%>/js/xtree/NodeNormal.js"></script>
+    <script src="<%=request.getContextPath()%>/js/xtree/DivTreeNormal.js"></script>
+    
+	<script language="javascript">
+	var treeTeam = new xyTree.DivTreeNormal('Team Data');
+    <%       
+	    out.println(ScriptBuildTreeHelper.buildtree(request,teamList,null));
+ 
+ 	%>
+	
+	var curnode = null;
+	
+	function selectNode(node){		
+  		if(node.level>1){
+  		    curnode = node;
+  			document.all['smBtn'].disabled = false;
+  			document.all['teamId'].value = node.id;  			
+  			//alert(node.fieldType);
+    		if (node.fieldType!=null&&node.fieldType!=''){      			  			
+    			document.all['teamType'].value = node.fieldType;
+		    	document.getElementById("div2").style.display  = "block";
+		    }else{
+				document.all['teamType'].value = "00";
+			}
+		}else{
+			document.all['smBtn'].disabled = true;
+		}
+	}
+
+	function init(){
+	  document.getElementById('teamTreeId').appendChild(treeTeam.div);
+	  treeTeam.init(selectNode);
+	}
+
+	function submitForm()
+	{
+		var url= "<%=request.getContextPath()%>/teamManageAction.it?method=updateTeamConfig&teamCode="+document.all['teamId'].value+"&teamType="+document.all['teamType'].value;		
+		if(confirm(basedatamain_sure_submit))
+		{
+	    	var  xmlhttp = createXMLHttpRequest();
+    	 	var  result;
+    	 	if(xmlhttp)
+    	 	{
+    	 		document.getElementById("loading").style.display="block";
+	        	xmlhttp.open('GET',url,true);
+    	 		xmlhttp.onreadystatechange = function()
+          		{
+             		if(xmlhttp.readyState==1)
+             		{
+  	            		document.getElementById("loading").style.display="block";
+  	         		}
+  	         		else if(xmlhttp.readyState==2)
+  	         		{
+ 	           			document.getElementById("loading").style.display="block";
+             		}
+             		else if(xmlhttp.readyState==3)
+             		{ 
+ 	           			document.getElementById("loading").style.display="block";
+             		}
+             		else if (xmlhttp.readyState == 4 && xmlhttp.statusText=="OK")
+             		{
+                		if(xmlhttp.status == 200)
+                		{
+                   			result = xmlhttp.responseText;
+                   			document.getElementById("loading").style.display="none";
+                   		}
+                   		if(result.Trim()=="success")
+                   		{//update successfully
+                   			curnode.fieldType = document.all['teamType'].value;
+                     		alert(basedatamain_suc_save)
+                   		}
+                   		else if(result.Trim()=="fail")
+                   		{
+                     		alert(common_fail_to_save);
+                   		}
+                   		else
+                   		{//new save successfully
+                     		alert(basedatamain_suc_save);
+                     		//document.all['masterId'].value=result.Trim();
+                   		}
+                   	}
+                }
+           }
+           xmlhttp.setRequestHeader("If-Modified-Since","0");
+           xmlhttp.send(null);
+     	}
+	}
+	
+	window.onload = init;
+	</script>
+	
+<title>Insert title here</title>
+</head>
+<body>
+<input type="hidden" name="teamId" value="" >
+<table width="100%"  border="0">
+     <tr class="tr1">     
+       <td align='center'><B><i18n:message key="teamconfig_title"/></B></td>     
+     </tr>
+</table>
+<div style="margin:5px;">
+	<div id="div1" style="float:left; width:45%; border:solid 1px black; padding:10px">
+      <div id="teamTreeId"></div> <br/>
+    </div>
+    <div style="float:left;width:5%">
+    </div>
+    <div id="div2" style="position:absolute;float:left; width:45%; border:solid 1px black; padding:10px">
+    	<table width="100%"  border="1" cellpadding="3" cellspacing="0" bordercolor="#6595D6" style="border-collapse:collapse;" >
+    		<tr class="tr1">
+				<td align='center' colspan='4'><B>Edit Master Data</B></td>
+			</tr>
+			<tr>
+       			<td align="right">
+         			<i18n:message key="teamconfig_teamtype"/> :
+       			</td>
+       			<td>
+          		<select name="teamType">
+            		<option value="00">Undefined</option>
+            		<%
+            			if(teamTypeList!=null && teamTypeList.size()>0){            		
+         	   				Iterator it = teamTypeList.iterator();
+			         	   	while(it.hasNext()){
+			         	   	TeamTypeVO typeVo = (TeamTypeVO)it.next();
+         		   				out.println("<option value='" + typeVo.getTeamTypeId()+"'>"+typeVo.getTeamTypeName()+"</option>");
+         	   				}
+            			}
+            		%>
+          		</select>
+       			</td>
+     		</tr>
+     		<tr>
+       			<td align="center" colspan="2">
+		        	<input type="button" name="smBtn" value='<i18n:message key="button.submit"/>' onclick="submitForm()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+		           	onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+         			<input type="button" name="returnBtn" value='<i18n:message key="button.back"/>' onclick="javascript:window.history.go(-1)" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+		           	onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+       			</td>
+     		</tr>
+    	</table>
+    </div>
+    
+    <div id="loading" style="display:none;top:250px; left:350px;">
+	   <div class="loading-indicator">
+		 It is processing...
+	   </div>
+     </div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+<!--
+function $(obj){return document.getElementById(obj)}
+  window.onscroll=function(){
+  var oTextbox=$("div2");
+  if(document.body.parentNode.scrollTop==0)
+    oTextbox.style.top=(document.body.scrollTop+100)+"px";
+  else
+   oTextbox.style.top=(document.body.parentNode.scrollTop+100)+"px";
+}
+//-->
+</script>

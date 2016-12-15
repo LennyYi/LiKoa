@@ -1,0 +1,204 @@
+
+
+function updateForm(currentNodeId,needValid){
+    var frm = document.forms[0];
+    //var str = "Are you sure to save the updated section";
+    if (needValid == true) {
+    	if (typeof(beforeFormValid) == "function") {
+            if (beforeFormValid() == false) {
+                return false;
+            }
+        }
+    	if (validateForm(frm) == false) {
+      		return false;
+    	}
+    	if (typeof(validationSubmit) == "function") {
+            if (validationSubmit() == false) {
+                return false;
+            }
+        }
+        if (typeof(validationUpdate) == "function") {
+            if (validationUpdate(currentNodeId) == false) {
+                return false;
+            }
+        }
+    }
+    //check the length of every fields
+    for(var i=0;i<frm.length;i++)   
+    {   
+      if((frm[i].tagName.toUpperCase()=="INPUT" &&frm[i].type.toUpperCase()=="TEXT") || frm[i].tagName.toUpperCase()=="TEXTAREA"){
+       //此时的obj为文本框   
+       //var value = frm[i].value.Trim();
+       var value = "";
+       if(frm[i].isNumber=="true")
+    	   value = frm[i].value.Trim().replace(/,/g,"");
+       else
+    	   value = frm[i].value.Trim();
+       var length = value.len();
+       if(length>frm[i].maxLength){
+          alert(field_length_long+":"+frm[i].title);
+          frm[i].focus();
+          return false;
+        }
+      }
+    }
+    //if(confirm(str)){
+    //enable all input
+    for(var i=0;i<frm.length;i++) frm[i].disabled = false;
+    //***********************
+      frm.action= document.all['requestUrl'].value+"/formManageAction.it?method=updateFormFill&currentNodeId="+currentNodeId;
+      document.forms[0].submit();
+    //}
+    return true;
+  }
+  
+  
+    function withDrawForm(requestNo){
+     document.all['withDrawBtn'].disabled = "true";
+     if(confirm(confirm_withdraw)){
+         var xmlhttp = createXMLHttpRequest();
+         var url = document.all['requestUrl'].value+"/wkfProcessAction.it?method=withDrawForm&requestNo="+requestNo;
+         document.forms[0].action = url;
+         document.forms[0].submit();
+     }else{
+       document.all['withDrawBtn'].disabled = "";
+     }
+  }
+  
+  //审批通过该form
+  function approveForm(requestNo,currentNodeId,requestStaffCode,updateSections,newSectionFields){
+     //如果该form是exceptional case,则需要给出提示
+     if(document.all['isExceptionalCase'].value=="true"){
+       if(confirm(confirm_exceptional)==false){
+          return;
+       }
+     }
+     var handleType = document.all['approveRejectType'].value ;
+     //url,width,height,moveX,moveY
+     var url = document.all['requestUrl'].value+"/wkfProcessAction.it?method=enterAuditForm&requestNo="+requestNo
+               +"&formSystemId="+document.all['formSystemId'].value+"&handleType="+handleType+"&currentNodeId="+currentNodeId
+               +"&requestStaffCode="+requestStaffCode+"&tempDate="+Math.random()*100000+"&updateSectionFields="+updateSections+"&newSectionFields="+newSectionFields;
+     openCenterWindow(url,380,270);
+  }
+  
+// Reject/Return Form
+function rejectForm(formReturn) {
+    if (formReturn == null) {
+        if (!confirm(confirm_reject)) {
+            return;
+        }
+    } else if (!confirm(confirm_return)) {
+        return;
+    }
+    var url = document.all['requestUrl'].value + "/wkfProcessAction.it?method=enterAuditForm&requestNo="
+            + document.all['requestNo'].value + "&formSystemId=" + document.all['formSystemId'].value
+            + "&handleType=04&currentNodeId=" + document.all['currentNodeId'].value + "&requestStaffCode="
+            + document.all['requestStaffCode'].value + "&tempDate=" + Math.random() * 100000
+            + "&updateSectionFields=&newSectionFields=&formReturn=" + formReturn;
+    openCenterWindow(url, 380, 270);
+}
+  
+   //邀请专家 1.IT0958
+  function inviteExpert(){
+     var url = document.all['requestUrl'].value+"/wkfProcessAction.it?method=enterInviteExpert&requestNo="+document.all['requestNo'].value;
+     openCenterWindow(url,490,560);
+  }
+  //打开专家建议填写页面  2.IT0958
+  function adviseForm(){
+     var url = document.all['requestUrl'].value+"/wkfProcessAction.it?method=enterExpertAdvise&requestNo="+document.all['requestNo'].value;
+     openCenterWindow(url,380,270);
+  }
+  
+  
+  function openProcessFile(requestNo,fileName){
+    var url = document.all['requestUrl'].value+"/upload/download.jsp?type=process&requestNo="+requestNo+"&fileName=";
+    fileName = formatStringAllChar(fileName);
+    url = url + fileName;
+    window.open(url);
+  }
+  
+  function openFile(fileName){
+    //fileName = formatStringAllChar(fileName);
+    fileName = encodeURIComponent(encodeURIComponent(fileName));
+    var url = document.all['requestUrl'].value+"/upload/download.jsp?fileName="+fileName;
+    window.open(url);
+  }
+  
+  function openProcessFile(requestNo,fileName){
+    var url = document.all['requestUrl'].value+"/upload/download.jsp?type=process&requestNo="+requestNo+"&fileName=";
+    fileName = formatStringAllChar(fileName);
+    url = url + fileName;
+    window.open(url);
+  }
+  
+  function printForm(status){
+    var url = document.all['requestUrl'].value+"/formManageAction.it?method=displayFormContent&operateType=view&status="+status+"&formSystemId="+document.all['formSystemId'].value+"&requestNo="+
+             document.all['requestNo'].value+"&print=true";
+    openCenterWindow(url,800,600);
+  }
+  
+  function exportPDF(){
+    if(confirm(confirm_export_pdf)==false){
+      return;
+    }
+    var url = document.all['requestUrl'].value+"/formManageAction.it?method=exportPDF&formSystemId="+document.all['formSystemId'].value+"&requestNo="+document.all['requestNo'].value;
+    openCenterWindow(url,800,600);
+  }
+  
+  //
+  function addRow(tableId){
+     var tr = document.all[tableId].insertRow();
+	 td = tr.insertCell();
+	 
+  }
+  
+  function	showRefFormWindow(formsystemId,sectionId){
+  	var url =document.all['requestUrl'].value+"/formManageAction.it?method=enterRefFormWindow&sfilId=reference_form&formId="+document.forms[0].curformId.value+"&formsystemId="+formsystemId+"&sectionId="+sectionId+"&requestNo="+document.forms[0].requestNo.value
+  	           +"&tempdate="+Math.random()*100000; 		
+  	openRefFormWindow(document.all['requestUrl'].value,url,document.forms[0].formSystemId.value);
+  }
+  
+  /**
+  *动态生成指定的section table中的一空白行
+  **/
+  function createTableSectionRow(tableId,sectionId,nodeId){
+     createFormSectionRow(document.all['requestUrl'].value,tableId,sectionId,document.all['formSystemId'].value,nodeId);
+     if (typeof(bindTableNewRowAction) == "function")
+    	 bindTableNewRowAction(tableId, 0);
+  }
+  
+  /**
+   *动态生成指定的section table中的一空白行	20150514 Justin Bin Added
+   **/
+   function createTableSectionRow2(tableId,sectionId,nodeId){
+      createFormSectionRow2(document.all['requestUrl'].value,tableId,sectionId,document.all['formSystemId'].value,nodeId);
+      if (typeof(bindTableNewRowAction) == "function")
+     	 bindTableNewRowAction(tableId, 0);
+   }
+  
+    
+  //暂时不支持table型，field名以逗号分隔，field值以|分隔
+  function getFieldVals(doc, iFields){
+  	var result = "";
+  	var fieldsArr = iFields.value.split(",");
+  	for(var i=0;i<fieldsArr.length;i++){
+  		if(i>0)result += "|";
+  		if(fieldsArr[i].indexOf(".")<0)continue;
+  		try{
+  			result += doc.getElementsByName(fieldsArr[i].split(".")[1])[0].value;
+  		}catch(e){}
+  	}
+  	return result;
+  }
+  //判断审批人有无修改内容
+  function fieldsChanged(doc){
+	var updateFieldsValNow = getFieldVals(doc, doc.all.updateSections);
+	var newFieldsValNow = getFieldVals(doc, doc.all.newSectionFields);
+	if(updateFieldsValNow != doc.all.updateFieldsVal.value ||
+			newFieldsValNow != doc.all.newFieldsVal.value)
+		return true;
+	else
+		return false;
+  }
+ //屏蔽鼠标右键
+ document.oncontextmenu = function() { return false;};

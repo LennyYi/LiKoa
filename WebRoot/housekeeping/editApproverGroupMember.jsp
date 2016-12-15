@@ -1,0 +1,125 @@
+<%@ include file="/common/head.jsp" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page import="java.util.*,com.aiait.eflow.housekeeping.vo.*"%>
+<%
+  Collection memberList = (ArrayList)request.getAttribute("memberList");
+  Collection staffList = (ArrayList)request.getAttribute("staffList");
+  String groupId = (String)request.getParameter("groupId");
+%>
+<HTML>
+  <HEAD>
+		<title>Setting Approver Group Member</title>
+  </HEAD>
+  <META HTTP-EQUIV="pragma" CONTENT="no-cache">
+  <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate">
+  <META HTTP-EQUIV="expires" CONTENT="Wed, 26 Feb 1997 08:21:57 GMT">
+   <link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+<STYLE type=text/css>
+.multipleSelectBoxControl SPAN {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px; FONT-FAMILY: arial
+}
+.multipleSelectBoxControl DIV SELECT {
+	FONT-FAMILY: arial; HEIGHT: 100%
+}
+.multipleSelectBoxControl INPUT {
+	WIDTH: 25px
+}
+.multipleSelectBoxControl DIV {
+	FLOAT: left
+}
+.multipleSelectBoxDiv {
+	
+}
+FIELDSET {
+	MARGIN: 10px; WIDTH: 500px
+}
+</STYLE>
+<script type=text/javascript src="<%=request.getContextPath()%>/common/message.jsp"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/selectmulti.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+<script language="javascript">
+    function submitNode(){
+        var obj = document.getElementById('toBox[]');
+        var selectIdStr = "";
+		for(var no=0;no<obj.options.length;no++){
+			//obj.options[no].selected = true;
+			selectIdStr = selectIdStr + obj.options[no].value + ",";
+		}
+        //if(selectIdStr==""){
+        //  alert("You must select one approver at least!");
+        //  return;
+        //}
+        var url = "<%=request.getContextPath()%>/approverGroupAction.it?method=saveGroupMember&groupId=<%=groupId%>&memberList=" + selectIdStr;
+        var  xmlhttp = createXMLHttpRequest();
+        var result;
+       if(xmlhttp){
+           xmlhttp.open('POST',url,false);
+           xmlhttp.onreadystatechange = function()
+           {
+             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                 result = xmlhttp.responseText;
+             }
+           }
+           xmlhttp.setRequestHeader("If-Modified-Since","0");
+           xmlhttp.send(null);
+       } 
+       if(result.Trim()=="success"){    
+         alert(ApproverGroup_mem_sav_suc);
+         window.returnValue=true;
+       }else{
+         alert(ApproverGroup_mem_sav_fail);
+         return;
+       }
+	    window.close();	
+	}
+  </script>
+<BODY>
+ <form id="Form1" method="post">
+<table width="100%"  border="1" cellpadding="3" cellspacing="0" bordercolor="#6595D6" style="border-collapse:collapse;" >
+   <TR>
+	 <TD style="WIDTH: 323px; HEIGHT: 21px" noWrap>
+		<SELECT id=fromBox multiple name=fromBox>
+        <%
+         if(staffList!=null && staffList.size()>0){
+           Iterator staffIt = staffList.iterator();
+           while(staffIt.hasNext()){
+        	  StaffVO staff = (StaffVO)staffIt.next();
+        %>
+          <option value="<%=staff.getStaffCode()%>"><%=staff.getStaffName()%></option>
+        <%
+        	}
+         }
+        %>
+	   </SELECT>
+		<SELECT id=toBox[] multiple name=toBox[] multiple>
+         <%
+          if(memberList!=null && memberList.size()>0){
+        	 Iterator it = memberList.iterator();
+        	 while(it.hasNext()){
+        	   ApproverGroupMemberVO vo = (ApproverGroupMemberVO)it.next();
+        %>
+             <option value="<%=vo.getStaffCode()%>"><%=vo.getStaffName()%></option>
+        <%
+        	 }
+         }
+        %>
+		</SELECT>
+		<SCRIPT type=text/javascript>
+           createMovableOptions("fromBox","toBox[]",450,300,ApproverGroup_staff_list,ApproverGroup_group_mem);
+       </SCRIPT>
+	 </TD>
+   </TR>
+  <TR>
+    <TD  align='center'>
+        <input id="btnSelect"  type="button" value='<i18n:message key="button.submit"/>' onclick="javascript:submitNode()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+		<input name="btnClose" type="button" onclick="javascript:window.close();" value='<i18n:message key="button.close"/>' class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+	</TD>
+  </TR>
+ </TABLE>
+
+</form>
+</BODY>
+</HTML>

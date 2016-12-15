@@ -1,0 +1,307 @@
+/*
+ * NO  Task_ID    Author     Modify_Date    Description
+1.  IT0973     Young.Yan   12/28/2007     Adding a new setter to 
+2.  IT0973     Robin.Hou   12/30/2007     DS-015 Add basic system field  “Submit By”
+3.  IT1029     Young.Yan   07/01/2008     DS-004 Company field as a regular basic information field
+ * */
+package com.aiait.eflow.common.helper;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import com.aiait.eflow.common.CommonName;
+import com.aiait.eflow.formmanage.vo.FormSectionFieldVO;
+import com.aiait.eflow.housekeeping.dao.SystemFieldDAO;
+import com.aiait.eflow.housekeeping.vo.SystemFieldVO;
+import com.aiait.eflow.reportmanage.vo.ReportSectionFieldVO;
+import com.aiait.eflow.util.FieldUtil;
+import com.aiait.eflow.util.StringUtil;
+import com.aiait.framework.db.DBManagerFactory;
+import com.aiait.framework.db.IDBManager;
+
+public class SystemFieldHelper {
+	private static HashMap systemFieldMap = new HashMap();
+	private static Collection systemFieldList = new ArrayList();
+	private static SystemFieldHelper helper = null;
+	
+	private SystemFieldHelper(){
+		initData();
+	}
+		
+	public static SystemFieldHelper getInstance(){
+		if(helper==null){
+			synchronized(SystemFieldHelper.class){
+				if(helper==null){
+				  helper = new SystemFieldHelper();
+				}
+			}
+		}
+		return helper;
+	}
+		
+	public void refresh(){
+		systemFieldList.clear();
+		systemFieldMap.clear();
+		initData();
+	}
+	
+	public void initData(){
+		IDBManager dbManager = null;
+		try{
+		  dbManager =  DBManagerFactory.getDBManager();
+		  SystemFieldDAO dao = new SystemFieldDAO(dbManager);
+		  //获取所有的system Field
+		  Collection sysFieldList = dao.getAllField(); 
+		  systemFieldList = sysFieldList;
+		  if(sysFieldList!=null && sysFieldList.size()>0){
+			  Iterator it = sysFieldList.iterator();
+			  int orderId = 1;
+			  systemFieldMap.clear();
+			  while(it.hasNext()){
+				  SystemFieldVO vo = (SystemFieldVO)it.next();
+				  //if (!"03".equals(vo.getFieldType())){//只有那些fieldType<>'03'的才可以存入内存中（静态不变的）
+					  FormSectionFieldVO sectionFieldVo = new FormSectionFieldVO();
+					  sectionFieldVo.setFieldId(vo.getFieldId());
+					  
+					  sectionFieldVo.setFieldLabel(vo.getFieldLabel());
+					  sectionFieldVo.setFieldType(7); //来自于系统定义
+					  if(vo.getColumnType()!=3){ //非数字型都默认为必填
+					     sectionFieldVo.setIsRequired(true);
+					  }else{
+						  sectionFieldVo.setIsRequired(false); 
+					  }
+					  sectionFieldVo.setFieldLength(vo.getColumnLength());
+					  if(vo.getColumnType()==3){ //数字型都默认为有两位小数
+						  sectionFieldVo.setDecimalDigits(2);
+					  }
+					  sectionFieldVo.setDataType(vo.getColumnType());
+					  sectionFieldVo.setOrderId(orderId);
+					  sectionFieldVo.setOptionList(vo.getOptionList());
+					  //new method
+					  sectionFieldVo.setColumnType(vo.getColumnType());
+					  sectionFieldVo.setSystemFieldType(vo.getFieldType());
+					  sectionFieldVo.setSystemFieldParams(vo.getParams());
+					  sectionFieldVo.setFieldDataSrSQL(vo.getSrcSQL());
+					  orderId++;				  
+					  systemFieldMap.put(vo.getFieldId(),sectionFieldVo);					  
+				 // }
+			  }
+		  }
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			dbManager.freeConnection();
+		}
+	}
+	
+	public Collection getSystemFieldList(){
+		return systemFieldList;
+	}
+	
+	/**
+	 * 动态获取指定的系统字段，并且根据传入的参数与参数值 来 运行所对应的sql，把得到的结果返回
+	 * @param fieldId
+	 * @param paramNames
+	 * @param paramValues
+	 * @return
+	 */
+	public String getSystemFieldValue(String dataSQL,String[] paramNames,String[] paramValues){
+		IDBManager dbManager = null;
+		try{
+		  dbManager =  DBManagerFactory.getDBManager();
+		  SystemFieldDAO dao = new SystemFieldDAO(dbManager);
+		  //SystemFieldVO systemField = dao.getField(fieldId);
+		  String sql =  dataSQL;//systemField.getSrcSQL();
+		  if(sql!=null && !"".equals(sql)){
+			 for(int i=0;i<paramNames.length;i++){
+		    	  sql = StringUtil.replace(sql,paramNames[i],paramValues[i]);
+		     }
+			 //System.out.println(sql);
+		     Collection resultList = dbManager.query(sql);
+			 if(resultList==null) return "";
+			 Iterator it = resultList.iterator();
+			 return FieldUtil.convertSafeString((HashMap)it.next(),"VALUE");
+		  }
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			dbManager.freeConnection();
+		}
+		return "";
+	}
+	
+	public  FormSectionFieldVO getSystemFieldById(String fieldId){
+		FormSectionFieldVO vo  =null;		
+		if(systemFieldMap.containsKey(fieldId)){
+			vo = (FormSectionFieldVO)systemFieldMap.get(fieldId);
+		}
+		return vo;
+	}
+	
+	public  ReportSectionFieldVO getSystemFieldByIdforReport(String fieldId){
+		ReportSectionFieldVO vo  =null;		
+		if(systemFieldMap.containsKey(fieldId)){
+			vo = (ReportSectionFieldVO)systemFieldMap.get(fieldId);
+		}
+		return vo;
+	}
+	
+	public  FormSectionFieldVO getBasicFieldById(String fieldId){
+		if(fieldId==null) return null;
+		if(CommonName.SYSTEM_ID_REQUEST_NO.equals(fieldId)){
+			return getRequestNo();
+		}else if(CommonName.SYSTEM_ID_REQUEST_STAFF_CODE.equals(fieldId)){
+			return getApplicateStaffCode();
+		}else if(CommonName.SYSTEM_ID_REQUEST_DATE.equals(fieldId)){
+			return getApplicateDate();
+		}else if(CommonName.SYSTEM_ID_REQUESTOR_TEAM_CODE.equals(fieldId)){
+			return getTeamCode();
+		}else if(CommonName.SYSTEM_ID_SUBMIT_STAFF_CODE.equals(fieldId)){
+			return getSubmitStaffCode();
+		}else if(CommonName.SYSTEM_ID_FILE_NAME.equals(fieldId)){
+			return getAttachedFileName();
+		}else if(CommonName.SYSTEM_ID_FILE_DESCRIPTION.equals(fieldId)){
+			return getAttachedFileDescription();
+		}else if (CommonName.SYSTEM_ID_COMPANY_ID.equals(fieldId)){
+			return getCompany();
+		}
+		return null;
+	}
+	
+	
+	public  ReportSectionFieldVO getBasicFieldByIdforReport(String fieldId){
+		if(fieldId==null) return null;
+		if(CommonName.SYSTEM_ID_REQUEST_NO.equals(fieldId)){
+			return getRequestNoforReport();
+		}/*else if(CommonName.SYSTEM_ID_REQUEST_STAFF_CODE.equals(fieldId)){
+			return getApplicateStaffCode();
+		}else if(CommonName.SYSTEM_ID_REQUEST_DATE.equals(fieldId)){
+			return getApplicateDate();
+		}else if(CommonName.SYSTEM_ID_REQUESTOR_TEAM_CODE.equals(fieldId)){
+			return getTeamCode();
+		}else if(CommonName.SYSTEM_ID_SUBMIT_STAFF_CODE.equals(fieldId)){
+			return getSubmitStaffCode();
+		}else if(CommonName.SYSTEM_ID_FILE_NAME.equals(fieldId)){
+			return getAttachedFileName();
+		}else if(CommonName.SYSTEM_ID_FILE_DESCRIPTION.equals(fieldId)){
+			return getAttachedFileDescription();
+		}else if (CommonName.SYSTEM_ID_COMPANY_ID.equals(fieldId)){
+			return getCompany();
+		}*/
+		return null;
+	}
+	
+	private FormSectionFieldVO getCompany(){
+		FormSectionFieldVO companyVo = new FormSectionFieldVO();
+		companyVo.setFieldId(CommonName.SYSTEM_ID_COMPANY_ID);
+		companyVo.setFieldLabel("Company");
+		companyVo.setFieldType(CommonName.FIELD_TYPE_BASIC);
+		companyVo.setIsRequired(true);
+		companyVo.setFieldLength(10);
+		companyVo.setDataType(1);
+		companyVo.setOrderId(-4);
+		return companyVo;
+	}
+	
+	private  FormSectionFieldVO getRequestNo(){
+		 FormSectionFieldVO requestNoVo = new FormSectionFieldVO();
+		 requestNoVo.setFieldId(CommonName.SYSTEM_ID_REQUEST_NO);
+		 requestNoVo.setFieldLabel("Request No");
+		 requestNoVo.setFieldType(CommonName.FIELD_TYPE_BASIC);
+		 requestNoVo.setIsRequired(true);
+		 requestNoVo.setFieldLength(30);
+		 requestNoVo.setDataType(1);
+		 requestNoVo.setOrderId(-6);
+		 return requestNoVo;		
+	}
+	
+	private  ReportSectionFieldVO getRequestNoforReport(){
+		 ReportSectionFieldVO requestNoVo = new ReportSectionFieldVO();
+		 requestNoVo.setFieldId(CommonName.SYSTEM_ID_REQUEST_NO);
+		 requestNoVo.setFieldLabel("Request No");
+		 requestNoVo.setFieldType(CommonName.FIELD_TYPE_BASIC);
+		 requestNoVo.setIsRequired(true);
+		 requestNoVo.setFieldLength(30);
+		 requestNoVo.setDataType(1);
+		 requestNoVo.setOrderId(-6);
+		 return requestNoVo;		
+	}
+	
+	//ADD FOR DS-015
+	private  FormSectionFieldVO getSubmitStaffCode(){
+		 FormSectionFieldVO staffCodeVo = new FormSectionFieldVO();
+		 staffCodeVo.setFieldId(CommonName.SYSTEM_ID_SUBMIT_STAFF_CODE);
+		 staffCodeVo.setFieldLabel("Submitted By");
+		 staffCodeVo.setFieldType(CommonName.FIELD_TYPE_BASIC);
+		 staffCodeVo.setIsRequired(true);
+		 staffCodeVo.setFieldLength(20);
+		 staffCodeVo.setDataType(1);
+		 staffCodeVo.setOrderId(-5);
+		 return staffCodeVo;
+	}
+
+	private FormSectionFieldVO getApplicateStaffCode(){
+		 FormSectionFieldVO staffCodeVo = new FormSectionFieldVO();
+		 staffCodeVo.setFieldId(CommonName.SYSTEM_ID_REQUEST_STAFF_CODE);
+		 staffCodeVo.setFieldLabel("Requester's Name");
+		 staffCodeVo.setFieldType(CommonName.FIELD_TYPE_BASIC);
+		 staffCodeVo.setIsRequired(true);
+		 staffCodeVo.setFieldLength(20);
+		 staffCodeVo.setDataType(1);
+		 staffCodeVo.setOrderId(-2);
+		 return staffCodeVo;
+	}
+
+	private  FormSectionFieldVO getTeamCode(){
+		 FormSectionFieldVO teamVo = new FormSectionFieldVO();
+		 teamVo.setFieldId(CommonName.SYSTEM_ID_REQUESTOR_TEAM_CODE);
+		 teamVo.setFieldLabel("Requester's Team");
+		 teamVo.setFieldType(CommonName.FIELD_TYPE_BASIC);
+		 teamVo.setIsRequired(true);
+		 teamVo.setFieldLength(20);
+		 teamVo.setDataType(1);
+		 teamVo.setOrderId(-3);
+		 return teamVo;
+	}
+	
+	private  FormSectionFieldVO getApplicateDate(){
+		 FormSectionFieldVO dateVo = new FormSectionFieldVO();
+		 dateVo.setFieldId(CommonName.SYSTEM_ID_REQUEST_DATE);
+		 dateVo.setFieldLabel("Request Date");
+		 dateVo.setFieldType(CommonName.FIELD_TYPE_BASIC);
+		 dateVo.setIsRequired(true);
+		 dateVo.setFieldLength(20);
+		 dateVo.setDataType(2);
+		 dateVo.setOrderId(-1);
+		 return dateVo;
+	}
+	
+
+	
+	private FormSectionFieldVO getAttachedFileName(){
+		 FormSectionFieldVO fileNameVo = new FormSectionFieldVO();
+		 fileNameVo.setFieldId(CommonName.SYSTEM_ID_FILE_NAME);
+		 fileNameVo.setFieldLabel("File Name");
+		 fileNameVo.setFieldType(CommonName.FIELD_TYPE_ATTACH);
+		 fileNameVo.setIsRequired(true);
+		 fileNameVo.setFieldLength(100);
+		 fileNameVo.setDataType(1);
+		 fileNameVo.setOrderId(1);
+		 return fileNameVo;
+	}
+	
+	private FormSectionFieldVO getAttachedFileDescription(){
+		 FormSectionFieldVO attachVo = new FormSectionFieldVO();
+		 attachVo.setFieldId(CommonName.SYSTEM_ID_FILE_DESCRIPTION);
+		 attachVo.setFieldLabel("File Description");
+		 attachVo.setFieldType(CommonName.FIELD_TYPE_ATTACH);
+		 attachVo.setIsRequired(true);
+		 attachVo.setFieldLength(100);
+		 attachVo.setDataType(1);
+		 attachVo.setOrderId(2);
+		 return attachVo;
+	}
+	
+}

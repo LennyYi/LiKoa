@@ -1,0 +1,489 @@
+<%--
+    Task_ID    Author     Modify_Date    Description
+1.  IT0958     Robin.Hou   11/01/2007     initial
+--%>
+
+<%@ include file="/common/head.jsp"%>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page
+	import="java.util.*,java.text.SimpleDateFormat,com.aiait.eflow.util.StringUtil,com.aiait.eflow.wkf.vo.*,com.aiait.eflow.wkf.util.DataMapUtil,com.aiait.eflow.common.helper.StaffTeamHelper"%>
+<%@page
+	import="com.aiait.eflow.housekeeping.vo.FormTypeVO,com.aiait.eflow.housekeeping.vo.StaffVO,com.aiait.eflow.common.helper.FormTypeHelper,com.aiait.eflow.formmanage.vo.FormManageVO,com.aiait.eflow.common.*,com.aiait.eflow.common.helper.AuthorityHelper"%>
+<%@ include file="/common/loading.jsp"%>
+<%@ include file="/common/ajaxmessage.jsp" %>
+<html>
+<head>
+  <META HTTP-EQUIV="Cache-Control" CONTENT="PRIVATE">
+  <META HTTP-EQUIV="expires" CONTENT="Wed, 26 Feb 1997 08:21:57 GMT">
+<title>Advance Query Form List</title>
+<link href="<%=request.getContextPath()%>/css/style.css"
+	rel="stylesheet" type="text/css">
+<i18n:jsmessage jsRelativePath="js" prefixName="message"/>
+
+<script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+<SCRIPT language="javascript" src="<%=request.getContextPath()%>/js/sorttable.js"></SCRIPT>
+<script language="javascript" src="<%=request.getContextPath()%>/js/resizeCol.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/tableColorChange.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/BubbleTooltips.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/aiaitjsframe.js"></script>
+
+<script language="javascript">
+   var xmlhttp = createXMLHttpRequest();
+   var fieldValueId;
+   var count = 1;
+   
+   function getOptionList(formType){
+    type = formType;
+    var url = "<%=request.getContextPath()%>/formManageAction.it?method=getFormList&formType="+formType+"&moduleId=<%=ModuleOperateName.MODULE_COMMON_QUERY%>";
+    xmlhttp.open("GET", url, true);
+    var objId = "formSystemId";
+    xmlhttp.onreadystatechange=handleFormTypeChange;
+    xmlhttp.setRequestHeader("If-Modified-Since","0");
+    xmlhttp.send(null);
+    
+    var select;
+    select = document.all("fieldValueDisplay");
+    select.innerHTML = "<input type='text' name='fieldsValue' size='40'>";
+    select = document.all("fieldId");
+    select.value = "";
+    clearSelect(select);
+  }
+
+    function getFormTypeFieldList(formType) {
+        var url = "<%=request.getContextPath()%>/formManageAction.it?method=getFormTypeFieldList&formType=" + formType;
+        xmlhttp.open("GET", url, true);
+        xmlhttp.onreadystatechange=handleFormChange;
+        xmlhttp.setRequestHeader("If-Modified-Since", "0");
+        xmlhttp.send(null);
+        var select;
+        select = document.all("fieldValueDisplay");
+        select.innerHTML = "<input type='text' name='fieldsValue' size='40'>";
+        delAllRow();
+    }
+   
+  function getFieldOptionList(formSystemId){
+    var rows = document.all.tbDetailPrepare.rows.length;
+    
+    if(rows>3){
+      for(i = 3;i<document.all.tbDetailPrepare.rows.length;i++){
+        document.all.tbDetailPrepare.deleteRow(i);
+        i = i - 1;
+      }
+    }
+    count = 1;
+    var url = "<%=request.getContextPath()%>/formManageAction.it?method=getFormFieldList&formSystemId="+formSystemId;
+    xmlhttp.open("GET", url, true);
+    //var objId = "fieldList";
+    xmlhttp.onreadystatechange=handleFormChange;
+    xmlhttp.setRequestHeader("If-Modified-Since","0");
+    xmlhttp.send(null);	
+    var select;
+    select = document.all("fieldValueDisplay");
+    select.innerHTML = "<input type='text' name='fieldsValue' size='40'>";
+    delAllRow();
+  }
+  
+  function getFieldValueList(fieldId,fieldValueDisplay) {
+    var url = "<%=request.getContextPath()%>/formManageAction.it?method=getFormFieldValue&formSystemId="+document.all['formSystemId'].value
+                +"&fieldId="+fieldId+"&formType=" + document.all("formType").value;
+    xmlhttp.open("GET", url, true);
+    fieldValueId = fieldValueDisplay;
+    xmlhttp.onreadystatechange=handleFieldChange;
+    xmlhttp.setRequestHeader("If-Modified-Since","0");
+    xmlhttp.send(null);
+  }
+
+  function handleFormTypeChange() {
+      handleStateChange();
+      if (xmlhttp.readyState == 4) {
+          if (xmlhttp.status == 200) {
+              formType = document.all("formType").value;
+              getFormTypeFieldList(formType);
+          }
+      }
+  }
+  
+  function handleFormChange(){
+      if(xmlhttp.readyState == 4) {
+        if(xmlhttp.status == 200) {
+          var select;
+          select = document.all("fieldId");
+          select.value = "";
+          clearSelect(select);
+          var options = xmlhttp.responseXML.getElementsByTagName("option");
+          if(options.length>0){
+              select.appendChild(createEmptyElement(""));
+          }
+          for (var i = 0, n = options.length; i < n; i++) {
+             select.appendChild(createElementWithValue(options[i],"id"));
+          }
+        }
+     }
+  }
+  
+  function handleFieldChange(){
+      if(xmlhttp.readyState == 4) {
+        if(xmlhttp.status == 200) {
+          var select;
+          select = document.getElementById(fieldValueId);
+          select.innerHTML = xmlhttp.responseText;
+        }
+     }
+  }
+
+  function delAllRow() {
+      var rows = document.all('conditionTable').rows;
+      for (var i = rows.length - 1; i >= 2; i--) {
+          document.all('conditionTable').deleteRow(i);
+      }
+  }
+  
+    function delRow1(tableId,checkBoxId) //?????   
+  {   
+      var alltbDetailUsed = document.all(tableId).rows; 
+      
+      if(checkSelect(checkBoxId)<=0){
+        alert(have_no_select);
+        return;
+      }  
+      if(confirm(confirm_delete_records)==false)   
+        return false;   
+      for(var i=0;i<alltbDetailUsed.length;i++)   
+      {   
+         if(alltbDetailUsed[i].all(checkBoxId)!=null && alltbDetailUsed[i].all(checkBoxId).checked==true)   
+         {   
+           document.all(tableId).deleteRow(i);   
+           i=i-1;   
+         }   
+      }   
+  } 
+    
+    function addRow(){
+      var insertValueStr = "";  //?????????server????
+
+      var fieldId = document.all['fieldId'].value;
+       
+      if(document.all['fieldId'].options.length<=0){
+        alert(select_field);
+        document.all['fieldId'].focus();
+        return;
+      }
+       
+      var fieldLabel = document.all['fieldId'].options[document.all['fieldId'].selectedIndex].text;
+      if(fieldLabel.Trim()==""){
+        alert(select_field);
+        document.all['fieldId'].focus();
+        return;
+      }
+
+	  var fieldType = "";
+      if($("fieldValueDisplay").innerHTML.indexOf("MM/DD/YYYY")>0){
+    	  fieldType = "datetime";
+      }else{
+    	  fieldType = "normal";
+      }
+      insertValueStr = insertValueStr + fieldId + "||";
+      
+      var compareTypeId = document.all['compareType'].value;
+      var compareTypeLabel = document.all['compareType'].options[document.all['compareType'].selectedIndex].text;
+      compareTypeLabel = compareTypeLabel.replace(/</g, "&lt;");
+      insertValueStr = insertValueStr + compareTypeId + "||";
+      
+      
+      var valueType = document.getElementById('fieldsValue').tagName;
+         valueType = valueType.toUpperCase();
+
+         var valueId =  "";
+         if(valueType=="SELECT"){
+            valueId = document.all['fieldsValue'].options[document.all['fieldsValue'].selectedIndex].text;
+         }else{
+            valueId = document.all['fieldsValue'].value;
+         }
+         if(valueId.Trim()==""){
+           alert(fill_value);
+           document.all['fieldsValue'].focus();
+           return;
+         }
+         insertValueStr = insertValueStr + document.all['fieldsValue'].value.Trim() + "||";
+     
+      
+      
+      var logicValue = document.all['logicFlag'].value;
+      //alert(logicValue)
+      var logicLabel = document.all['logicFlag'].options[document.all['logicFlag'].selectedIndex].text;
+      insertValueStr = insertValueStr + logicValue + "||";
+    
+      insertValueStr = insertValueStr + fieldLabel + "||" + valueId + "||"+type + " ||"+fieldType;
+ 
+      var objTable = document.getElementById('conditionTable');
+      var oTR = objTable.insertRow(objTable.rows.length);
+       var oTD0 = oTR.insertCell();
+       insertValueStr = formatStringAllChar(insertValueStr);
+       insertValueStr = insertValueStr.replace(/\'/g,"&#39;");  	       
+       oTD0.innerHTML = "<input type='checkbox' name='conditionId'>"+"<input type='hidden' name='conditionStr' value='"+insertValueStr+"'>";
+       
+       var oTD1 = oTR.insertCell();
+       oTD1.innerHTML = fieldLabel;
+       var oTD2 = oTR.insertCell();
+       oTD2.innerHTML = compareTypeLabel;
+       var oTD3 = oTR.insertCell();
+       oTD3.innerHTML = valueId;
+       var oTD4 = oTR.insertCell();
+       oTD4.innerHTML = logicLabel;
+    }
+   
+   function handleFieldChange(){
+      if(xmlhttp.readyState == 4) {
+        if(xmlhttp.status == 200) {
+          var select;
+          select = document.getElementById("fieldValueDisplay");
+          select.innerHTML = xmlhttp.responseText;
+        }
+     }
+  }
+  
+  function changeValueType(obj){
+    if(obj.value=="1"){
+       document.all['fieldsValue'].disabled = "";
+       document.all['functionName'].disabled = "true";
+    }else{
+      document.all['fieldsValue'].disabled = "true";
+      document.all['functionName'].disabled = "";
+    }
+    document.all['valueTypeHidden'].value = obj.value;
+  }
+  
+   function searchForm(){
+	  document.all['exp_form_id'].value="";
+      var conditionId = document.all['conditionId'];
+      var formName = document.all['formSystemId'].value;
+      //if(formName==""){
+      if (!conditionId) {
+        alert(select_search_form);
+        document.all['formSystemId'].focus();
+        return;
+      }
+
+      var url = "<%=request.getContextPath()%>/wkfProcessAction.it?method=listCommonQueryForm";
+      document.forms[0].action = url;
+      document.forms[0].target="iframeName";
+      document.forms[0].submit();
+   }
+
+    function exportToExcel(){
+      if(document.forms[0].formSystemId.value==""){
+        if($("hasResult").value=="true"){
+	     	var url = "<%=request.getContextPath()%>/wkfProcessAction.it?method=listCommonQueryForm&display=EXCEL";
+
+			document.forms[0].action = url;
+			document.forms[0].target = "_blank";
+			document.forms[0].submit();
+			document.forms[0].target = "";
+		  	return;
+        }
+        else{
+	        alert(select_export_form);
+	        document.forms[0].formSystemId.focus();
+	        return;
+        }
+      }
+      var url = "<%=request.getContextPath()%>/wkfProcessAction.it?method=enterSettingExportExcel&formSystemId="+document.forms[0].formSystemId.value
+                +"&queryType=02";
+      var newWindow = window.open("","newwindow","height=1, width=1, top=0, left=0,toolbar =no, menubar=no, scrollbars=yes, resizable=yes, location=no, status=no");
+	  if(document.all){     
+       newWindow.moveTo(350,350);     
+       //newWindow.resizeTo(600,350)     
+      }     
+      newWindow.location=url;
+   }
+   function changeCompType(obj){
+	   if(obj.value=="empty"||obj.value=="notempty")
+		document.all['fieldsValue'].value = "--------------";
+	   else
+		document.all['fieldsValue'].value = "";
+	}
+</script>
+<%Collection formList = (ArrayList) request
+					.getAttribute("inquiryFormList"); // search result list
+
+			Collection formSelectList = (ArrayList) request
+					.getAttribute("formSelectList"); // select form list
+
+			String formSystemId = (String) request.getParameter("formSystemId");
+
+			String requestNo = (String) request.getParameter("requestNo");
+			if (requestNo == null) {
+				requestNo = (String) request.getAttribute("requestNo");
+			}
+			String formType = (String) request.getParameter("formType");
+			String status = (String) request.getParameter("status");
+			String beginSubmissionDate = (String) request
+					.getParameter("beginSubmissionDate");
+			String endSubmissionDate = (String) request
+					.getParameter("endSubmissionDate");
+			String needquery = (String) request.getParameter("needquery");
+			if (needquery != null && "false".equals(needquery)) {
+				beginSubmissionDate = (String) request
+						.getAttribute("beginSubmissionDate");
+				endSubmissionDate = (String) request
+						.getAttribute("endSubmissionDate");
+			}
+			  StaffVO currentStaff = (StaffVO)request.getSession().getAttribute(CommonName.CURRENT_STAFF_INFOR);
+			  AuthorityHelper authority = AuthorityHelper.getInstance();
+			%>
+<body>
+<FORM nane=AVActionForm method="post">
+<input type="hidden" name="count">
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+	<tr>
+		<td height="10"></td>
+	</tr>
+	<!--<tr>
+		<td><strong><font color='#5980BB' family='Times New Roman'><i18n:message key="advance_query.navigate"/></font></strong></td>
+	</tr>
+--></table>
+<TABLE WIDTH=100% bordercolor="#6595D6"
+	style="border-collapse:collapse;" BORDER=1 CELLPADDING=3 CELLSPACING=0
+	class="tr0" id="queryTable">
+	<TR align="center">
+		<TD height="25" colspan="8" class="tr1"><i18n:message key="menu.monitor.advancy_query"/></TD>
+	</TR>
+	<tbody id='tbDetailPrepare'>
+	<TR>
+		<TD width=15% height="20" class="tr3">
+		<div align="right"><span class="style1"><i18n:message key="common.form_type"/></span></div>
+		</TD>
+		<TD width=30% height="20" colspan='7'><font size="2"> <select
+			name="formType" onchange="getOptionList(this.value);$('hasResult').value='false'">
+			<option value="">All</option>
+          <% 
+            Collection typeList = FormTypeHelper.getInstance().getFormTypeList();
+            if(typeList!=null && typeList.size()>0){
+  		      Iterator it = typeList.iterator();
+  		      while(it.hasNext()){
+  			    FormTypeVO typeVo = (FormTypeVO)it.next();
+  			    if(authority.checkAuthorityByFormType(currentStaff.getCurrentRoleId(),ModuleOperateName.MODULE_COMMON_QUERY,typeVo.getFormTypeId())){
+  			    %>
+  			    <option value="<%=typeVo.getFormTypeId()%>" <%=(formType!=null && (typeVo.getFormTypeId()).equals(formType))?"selected" : ""%>><%=typeVo.getFormTypeName()%></option>
+  			    <% 	
+  			    }
+              }
+          }
+          %>
+		</select></TD>
+	</TR>
+	<tr>
+		<TD width=18% height="20" class="tr3">
+		<div align="right"><span class="style1"><i18n:message key="common.form"/></span></div>
+		</TD>
+		<TD width=30% height="20" colspan='7'><font size="2"> <select
+			name="formSystemId" onchange="getFieldOptionList(this.value)">
+			<option value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
+			<%if (formSelectList != null && formSelectList.size() > 0) {
+				Iterator formIt = formSelectList.iterator();
+				while (formIt.hasNext()) {
+					FormManageVO form = (FormManageVO) formIt.next();
+					out.print("<option value='" + form.getFormSystemId() + "'");
+					if (formSystemId != null && !"".equals(formSystemId)
+							&& formSystemId.equals("" + form.getFormSystemId())) {
+						out.print(" selected ");
+					}
+					out.print(">" + form.getFormId() + " - "
+							+ form.getFormName() + "</option>");
+				}
+			}%>
+		</select></TD>
+	</tr>
+	<tr>
+		<TD width=10% height="20" class="tr3">
+		<div align="right"><span class="style1"><i18n:message key="comnon.field"/></span></div>
+		</TD>
+		<TD width=20% height="20"><font size="2"> 
+		<select
+			name="fieldId" onchange="getFieldValueList(this.value,'fieldValueDisplay')">
+			<option value=""></option>
+		</select></TD>
+		<TD width=10% height="20" class="tr3">
+		<div align="right"><span class="style1"><i18n:message key="comnon.compare_type"/></span></div>
+		</TD>
+		<TD width=10% height="20"><font size="2"> 
+	      <select name="compareType" onchange="changeCompType(this)">
+			<option value="like">like</option>
+			<option value="not like">not like</option>
+			<option value="=" selected>=</option>
+			<option value=">">></option>
+			<option value=">=">>=</option>
+			<option value="<">&lt;</option>
+			<option value="<=">&lt;=</option>
+			<option value="<>"><></option>
+			<option value="empty">empty or null</option>			
+			<option value="notempty">not empty nor null</option>
+		   </select>
+		</TD>
+		<TD width=10% height="20" class="tr3">
+		<div align="right"><span class="style1"><i18n:message key="comnon.value"/></span></div>
+		</TD>
+		<TD width=20% height="20"><font size="2"> 
+		  <div id="fieldValueDisplay">
+		  <input type="text" name="fieldsValue" size='40'>
+		  </div>
+		</TD>
+		<TD width=10% height="20" class="tr3">
+		<div align="right"><span class="style1"><i18n:message key="comnon.logic"/></span></div>
+		</TD>
+		<TD width=10% height="20">
+		  <select name="logicFlag">
+		    <option value="01">And</option>
+		    <option value="02">Or</option>
+		  </select>
+		</TD>
+	</tr>
+	</tbody>
+	<tr>
+          <td style="WIDTH:20%" align='center' colspan='8'>
+            <input type="button" value='<i18n:message key="button.add_codition"/>' name="addBtn" onclick="addRow()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+            <input type="button" value='<i18n:message key="button.remove_condition"/>' name="delBtn" onclick="delRow1('conditionTable','conditionId')" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+          </td>
+   </tr>
+  </table>
+ <table width="100%" id="conditionTable"  border="1" cellpadding="3" cellspacing="0" bordercolor="#6595D6" style="border-collapse:collapse;" >
+        <tr>
+          <td colspan='5' class='tr3' align='center'><b>Search Condition List</b></td>
+        </tr>
+        <tr class='tr3'>
+          <td align="center" style="WIDTH:4%"><input type="checkbox" name="allBtn" onclick="selectAll(this,'conditionId')"></td>
+          <td align="center" style="WIDTH:40%"><b><i18n:message key="comnon.field"/></b></td>
+          <td align="center" style="WIDTH:9%"><b><i18n:message key="comnon.compare_type"/></b></td>
+          <td align="center" style="WIDTH:40%"><b><i18n:message key="comnon.value"/></b></td>
+          <td align="center" style="WIDTH:7%"><b><i18n:message key="comnon.logic"/></b></td>
+        </tr> 
+</TABLE>
+ <table width="100%">
+        <tr>
+          <td align='center' colspan='2'>
+            <input type="button" value='<i18n:message key="button.search"/>' name="subBtn" onclick="searchForm()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+           <input type="button" value='<i18n:message key="button.export_file"/>' name="subBtn" onclick="exportToExcel()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+          </td>
+        </tr>
+</table>
+<br>
+<table width="100%">
+  <tr>
+     <td width="100%">
+     <input type=hidden name="hasResult" value="false">
+     <input type=hidden name="exp_form_id" value="">
+	 <IFRAME frameBorder=0 id='iframeName' name="iframeName" scrolling="no" src="<%=request.getContextPath()%>/workflow/listCommonQueryForm.jsp" style="HEIGHT:100%;VISIBILITY:inherit;WIDTH:100%;Z-INDEX:1"></IFRAME>
+	</td>
+  </tr>
+</table>
+</FORM>
+</body>
+</html>
+
+

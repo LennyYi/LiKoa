@@ -1,0 +1,47 @@
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+  <i18n:jsmessage jsRelativePath="js" prefixName="message"/>
+<%String ctx=request.getContextPath();%>
+<link rel="stylesheet" type="text/css"
+			href="<%=ctx%>/css/loading.css" />
+ <div class="ui-overlay" style="display:none">
+      <div class="ui-widget-overlay">
+	      <img id="loadPicture" src="../css/wait.jpg">
+      </div>
+   </div>
+<script type="text/javascript">
+
+document.onreadystatechange=function()
+{
+	try
+	{
+		if (document.readyState == "complete") 
+		{
+	     	delNode("loading");
+	    }
+    }
+    catch(e)
+    {
+    	alert("Fail to load page!");
+    }
+}
+
+//DIV
+function  delNode(nodeId)
+{   
+  try
+  {   
+	  var div =document.getElementById(nodeId);  
+	  if(div !==null)
+	  {
+		  div.parentNode.removeChild(div);   
+		  div=null;    
+		  //CollectGarbage(); 
+	  }  
+  }
+  catch(e)
+  {   
+  	   alert("It can find ID "+e.message);
+  }   
+}
+</script>
+

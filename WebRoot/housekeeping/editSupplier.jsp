@@ -1,0 +1,216 @@
+<%@ include file="/common/head.jsp" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page contentType="text/html;charset=GBK" pageEncoding="GBK"%>
+<%@page import="com.aiait.eflow.housekeeping.vo.*" %>
+<%@page import="java.util.*" %>
+<html>
+<head>
+ <title>Edit Supplier</title>
+ <link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+  <script type=text/javascript src="<%=request.getContextPath()%>/common/message.jsp"></script>
+ <script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+ <script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+ <script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+ <script language="javascript">
+	function submitCode() {
+		var frm = document.forms[0];
+		if (formValidate(frm) == false) return;
+		frm.action = "<%=request.getContextPath()%>/supplierAction.it?method=saveSupplier";
+		frm.submit();
+	}
+ </script>
+<body>
+<% 
+  String editType = request.getParameter("editType");
+  SupplierVO vo = (SupplierVO) request.getAttribute("vo");
+  if (vo == null) {
+	  vo = new SupplierVO();
+  }
+%>
+<form name="dbForm" action="" method="post">
+  <input type="hidden" name="editType" value="<%=editType%>">
+  <table width="100%"  border="1" cellpadding="3" cellspacing="0" bordercolor="#6595D6" style="border-collapse:collapse;" >
+    <tr class="tr1">
+      <td align='center' colspan='4'>
+        <b> <i18n:message key="housekeeping_supplier.title"/>
+      </td>
+    </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.code"/> : 
+       </td>
+       <td>
+         <input type='text' name='code' size='10' maxLength='10'
+          required="true" value="<%=vo.getCode() == null ? "" : vo.getCode()%>" <%=vo.getCode() == null ? "" : "readonly"%>/>
+         (<font color="red">*</font>)
+       </td>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.type"/> : 
+       </td>
+       <td>
+         <input type='text' name='type' size='30' maxLength='50' required="true" value="<%=vo.getType() == null ? "" : vo.getType()%>"/>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.name_c"/> : 
+       </td>
+       <td>
+         <input type='text' name='name_c' size='30' maxLength='50' required="true" value="<%=vo.getNameC() == null ? "" : vo.getNameC()%>"/>
+         (<font color="red">*</font>)
+       </td>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.name_e"/> : 
+       </td>
+       <td>
+         <input type='text' name='name_e' size='30' maxLength='50' value="<%=vo.getNameE() == null ? "" : vo.getNameE()%>"/>
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.product"/> : 
+       </td>
+       <td>
+         <input type='text' name='product' size='30' maxLength='50' required="true" value="<%=vo.getProduct() == null ? "" : vo.getProduct()%>"/>
+         (<font color="red">*</font>)
+       </td>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.contacter"/> : 
+       </td>
+       <td>
+         <input type='text' name='contacter' size='30' maxLength='50' required="true" value="<%=vo.getContacter() == null ? "" : vo.getContacter()%>"/>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.tel"/> : 
+       </td>
+       <td>
+         <input type='text' name='tel' size='30' maxLength='50' required="true" value="<%=vo.getTel() == null ? "" : vo.getTel()%>"/>
+         (<font color="red">*</font>)
+       </td>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.fax"/> : 
+       </td>
+       <td>
+         <input type='text' name='fax' size='30' maxLength='50' value="<%=vo.getFax() == null ? "" : vo.getFax()%>"/>
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.address_c"/> : 
+       </td>
+       <td>
+         <input type='text' name='address_c' size='30' maxLength='50' required="true" value="<%=vo.getAddressC() == null ? "" : vo.getAddressC()%>"/>
+         (<font color="red">*</font>)
+       </td>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.address_e"/> : 
+       </td>
+       <td>
+         <input type='text' name='address_e' size='30' maxLength='50' value="<%=vo.getAddressE() == null ? "" : vo.getAddressE()%>"/>
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.evaluate_comments"/> : 
+       </td>
+       <td>
+         <input type='text' name='evaluate_comments' size='30' maxLength='50' required="true" value="<%=vo.getEvaluateComments() == null ? "" : vo.getEvaluateComments()%>"/>
+         (<font color="red">*</font>)
+       </td>
+       <td align="right">认证分类 : 
+       </td>
+       <td>
+         <input type='text' name='class' size='30' maxLength='50' required="true" value="<%=vo.getCertClass() == null ? "" : vo.getCertClass()%>"/>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.bank"/> : 
+       </td>
+       <td>
+         <input type='text' name='bank' size='30' maxLength='50' required="true" value="<%=vo.getBank() == null ? "" : vo.getBank()%>"/>
+         (<font color="red">*</font>)
+       </td>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.bank_account"/> : 
+       </td>
+       <td>
+         <input type='text' name='bank_account' size='30' maxLength='50' required="true" value="<%=vo.getBankAccount() == null ? "" : vo.getBankAccount()%>"/>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.province"/> : 
+       </td>
+       <td>
+         <input type='text' name='province' size='30' maxLength='50' value="<%=vo.getProvince() == null ? "" : vo.getProvince()%>"/>
+       </td>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.city"/> : 
+       </td>
+       <td>
+         <input type='text' name='city' size='30' maxLength='50' required="true" value="<%=vo.getCity() == null ? "" : vo.getCity()%>"/>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.team_name"/> : 
+       </td>
+       <td>
+         <input type='text' name='team_name' size='30' maxLength='50' required="true" value="<%=vo.getTeamName() == null ? "" : vo.getTeamName()%>"/>
+         (<font color="red">*</font>)
+       </td>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.team_contacter"/> : 
+       </td>
+       <td>
+         <input type='text' name='team_contacter' size='30' maxLength='50' required="true" value="<%=vo.getTeamContacter()%>"/>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.eff_date"/> : 
+       </td>
+       <td>
+         <input type='text' name='eff_date' size='30' maxLength='30' onclick='setday(this)' required="true" value="<%=vo.getEffDate() == null ? "" : vo.getEffDate()%>"/>
+		(<font color="red">*</font>)
+       </td>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.status"/> : 
+       </td>
+       <td>
+         <select name='status' size='1' maxLength='1' required="true" >
+	         <option value="A" <%="A".equals(vo.getStatus())?"selected":""%>>Active</option>
+	         <option value="T" <%="T".equals(vo.getStatus())?"selected":""%>>Terminated</option>
+         </select>
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="housekeeping_supplier.term_date"/> : 
+       </td>
+       <td>
+         <input type='text' name='term_date' size='30' maxLength='30' onclick='setday(this)' value="<%=vo.getTermDate() == null ? "" : vo.getTermDate()%>"/>
+       </td>
+     </tr>
+     <tr>
+       <td align="center" colspan="4">
+         <input type="button" name="smBtn" value='<i18n:message key="button.submit"/>' onclick="submitCode()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'"/>
+         <input type="button" name="returnBtn" value='<i18n:message key="button.back"/>' onclick="javascript:window.history.go(-1)" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'"/>
+       </td>
+     </tr>
+  </table>
+</form>
+</body>
+</html>

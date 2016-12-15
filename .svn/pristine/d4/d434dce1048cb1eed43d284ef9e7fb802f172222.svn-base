@@ -1,0 +1,322 @@
+<%@ include file="/common/head.jsp" %>
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@page import="java.util.*,java.text.SimpleDateFormat,com.aiait.eflow.util.StringUtil,com.aiait.eflow.wkf.vo.*,com.aiait.eflow.wkf.util.DataMapUtil,com.aiait.eflow.common.helper.StaffTeamHelper,com.aiait.eflow.housekeeping.vo.StaffVO" %>
+<%@page import="com.aiait.eflow.housekeeping.vo.*,com.aiait.eflow.common.helper.FormTypeHelper,com.aiait.eflow.formmanage.vo.FormManageVO,com.aiait.eflow.common.*,com.aiait.eflow.common.helper.AuthorityHelper"%>
+<%@ include file="/common/loading.jsp" %>
+<%@ include file="/common/ajaxmessage.jsp" %>
+<html>
+<head>
+<title>Overtime Form List</title>
+<link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+<script type=text/javascript src="<%=request.getContextPath()%>/common/message.jsp"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/calendar.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+<SCRIPT language="javascript" src="<%=request.getContextPath()%>/js/sorttable.js"></SCRIPT>
+<script language="javascript" src="<%=request.getContextPath()%>/js/resizeCol.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/tableColorChange.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/BubbleTooltips.js"></script>
+<script language="javascript" src="<%=request.getContextPath()%>/js/aiaitjsframe.js"></script>
+<script language="javascript">
+   var xmlhttp = createXMLHttpRequest();
+  function getOptionList(formType){
+    type = formType;
+    var url = "<%=request.getContextPath()%>/formManageAction.it?method=getFormList&formType="+formType;
+    xmlhttp.open("GET", url, true);
+    var objId = "formSystemId";
+    xmlhttp.onreadystatechange=handleStateChange;
+    xmlhttp.setRequestHeader("If-Modified-Since","0");
+    xmlhttp.send(null);	
+  }
+   function searchForm(){
+      if (!validation()) return;
+      var url = "<%=request.getContextPath()%>/wkfProcessAction.it?method=listOvertimeForm";
+      document.forms[0].action = url;
+      document.forms[0].submit();
+   }
+
+   function validation() {
+       if(document.forms[0].beginSubmissionDate.value.Trim()!=""){
+         if(isDate(document.forms[0].beginSubmissionDate,"Submitted From")==false){
+           return false;
+         }
+       }
+       if(document.forms[0].endSubmissionDate.value.Trim()!=""){
+         if(isDate(document.forms[0].endSubmissionDate,"Submitted To")==false){
+           return false;
+         }
+       }
+       if(document.forms[0].beginSubmissionDate.value.Trim()!="" && document.forms[0].endSubmissionDate.value.Trim()!=""){
+          if(compareDate(document.forms[0].beginSubmissionDate.value.Trim(),document.forms[0].endSubmissionDate.value.Trim())==false){
+             alert(from_to_date_compare);
+             document.forms[0].beginSubmissionDate.focus();
+             return false;
+          }
+       }
+       return true;
+    }
+
+    function exportQuery() {
+        if (!validation()) return;
+		var url = "<%=request.getContextPath()%>/wkfProcessAction.it?method=exportOvertimeForm";
+		document.forms[0].action = url;
+		document.forms[0].target = "_blank";
+		document.forms[0].submit();
+		document.forms[0].target = "";
+	}
+
+   function notify() {
+       if (checkSelect("id") <= 0) {
+           alert('<i18n:message key="common.check_select_form" />');
+           return;
+       }
+       var message = confirm_notify;
+       if (!confirm(message)) {
+           return;
+       }
+       url = "<%=request.getContextPath()%>/wkfProcessAction.it?method=overdueNotify";
+       document.forms[0].action = url;
+       document.forms[0].submit();
+   }
+
+   function getStaffList(orgId){
+   	var url = "<%=request.getContextPath()%>/userManageAction.it?method=getCompanyStaffList";
+    	var param = "orgId="+orgId;
+    	var myAjax = new Ajax.Request(
+        url,
+       {
+           method:"post",       //
+           parameters:param,   //
+           setRequestHeader:{"If-Modified-Since":"0"},     //
+           onComplete:function(x){    //
+                  updateStaffList(x.responseXML);
+           },
+           onError:function(x){          //
+                   alert('Fail to get staff list for company');
+           } 
+       } 
+      ); 
+   }
+</script>
+<%
+StaffVO currentStaff = (StaffVO)session.getAttribute(
+		CommonName.CURRENT_STAFF_INFOR);
+  AuthorityHelper authority = AuthorityHelper.getInstance();
+  Collection formList = (ArrayList)request.getAttribute("overtimeFormList");
+Collection formSelectList = (ArrayList)request.getAttribute("formSelectList"); // select form list
+String formSystemId = (String)request.getParameter("formSystemId");
+  String requestNo = (String)request.getParameter("requestNo");
+  String formType = (String)request.getParameter("formType");
+  String companyId = (String)request.getParameter("companyId");
+  String requestedBy = (String)request.getParameter("requestedBy");
+  Collection staffList = (Collection) request.getAttribute("staffList");
+  String beginSubmissionDate = (String)request.getParameter("beginSubmissionDate");
+  String endSubmissionDate = (String)request.getParameter("endSubmissionDate");
+  String needquery = (String)request.getParameter("needquery");
+  if(needquery!=null && "false".equals(needquery)){
+	  beginSubmissionDate = (String)request.getAttribute("beginSubmissionDate");
+	  endSubmissionDate = (String)request.getAttribute("endSubmissionDate");
+  }
+%>
+<body>
+<FORM name="AVActionForm" method="post"> 
+<table border="0" width="100%" cellspacing="0" cellpadding="0">
+ <tr>
+ 	<td height="10"></td>
+ </tr>
+ <!--<tr>
+ 	<td>
+ 	  <strong><font color='#5980BB' family='Times New Roman'>
+     <i18n:message key="form_overdue.navigate"/>
+     </font></strong>
+ 	 </td>
+ </tr>
+--></table>
+ <TABLE WIDTH="100%" bordercolor="#6595D6" style="border-collapse:collapse;"  BORDER=1 CELLPADDING=3 CELLSPACING=0 class="tr0" >
+   <TR align="center" >
+      <TD height="25" colspan="4" class="tr1"><i18n:message key="menu.monitor.overdue_form"/></TD>
+   </TR>
+   <TR> 
+      <TD width="15%" height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="common.request_no"/></span></div></TD>
+      <TD width="35%" height="20" > 
+      <font size="2"> 
+      <INPUT Name="requestNo" Type="text" value="<%=requestNo==null?"":requestNo%>" class="text2" style="WIDTH: 130px" value="" id="requestNo" size="20">
+      </font>
+      </TD>
+      <TD width="15%" height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="common.form_type"/></span></div></TD>
+      <TD width="35%" height="20"> 
+        <select name="formType" onchange="getOptionList(this.value)">
+          <option value="">All</option>
+                <% 
+            Collection typeList = FormTypeHelper.getInstance().getFormTypeList();
+            if(typeList!=null && typeList.size()>0){
+  		      Iterator it = typeList.iterator();
+  		      while(it.hasNext()){
+  			    FormTypeVO typeVo = (FormTypeVO)it.next();
+  			    if(authority.checkAuthorityByFormType(currentStaff.getCurrentRoleId(),ModuleOperateName.MODULE_OVERDUE_FORM,typeVo.getFormTypeId())){
+  			    %>
+  			    <option value="<%=typeVo.getFormTypeId()%>" <%=(formType!=null && (typeVo.getFormTypeId()).equals(formType))?"selected" : ""%>><%=typeVo.getFormTypeName()%></option>
+  			    <% 	
+  			    }
+              }
+          }
+          %>
+        </select>
+      </TD>
+    </TR>
+    <tr>
+      <TD width="15%" height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="common.form"/></span></div></TD>
+      <TD width="35%" height="20" colspan='3'> 
+        <select name="formSystemId">
+        <option value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
+        <% 
+           if(formSelectList!=null && formSelectList.size()>0){
+        	   Iterator formIt = formSelectList.iterator();
+        	   while(formIt.hasNext()){
+        		   FormManageVO form = (FormManageVO)formIt.next();
+        		   out.print("<option value='" + form.getFormSystemId()+"'");
+        		   if(formSystemId!=null && !"".equals(formSystemId) && formSystemId.equals(""+form.getFormSystemId())){
+        			   out.print(" selected ");
+        		   }
+        		   out.print(">"+form.getFormId()+" - "+form.getFormName()+"</option>");
+               }
+         }%>
+       </select>
+      </TD>
+    </tr>
+    <tr>
+      <TD width="15%" height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="common.company"/></span></div></TD>
+      <TD width="35%" height="20">
+      <select name="companyId" onchange="getStaffList(this.value)">
+      <option value=""></option>
+      <%
+        if (companyId == null) {
+            companyId = currentStaff.getOrgId();
+        }
+       Collection companyList = currentStaff.getOwnCompanyList();
+       if(companyList!=null){
+           Iterator companyIt = companyList.iterator();
+           while(companyIt.hasNext()){
+               CompanyVO company = (CompanyVO)companyIt.next();
+               if(company.getOrgId().equals(companyId)){
+                 out.println("<option value='"+company.getOrgId()+"' selected>"+company.getOrgName()+"</option>");
+               }else{
+                   out.println("<option value='"+company.getOrgId()+"'>"+company.getOrgName()+"</option>");
+               }
+           }
+       }
+      %>
+      </select>
+      </TD>
+      <TD width="15%" height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="common.request_by"/></span></div></TD>
+      <TD width="35%" height="20">
+      <select name="requestedBy">
+      <option value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
+      <%
+       if(staffList!=null){
+           Iterator staffIt = staffList.iterator();
+            while(staffIt.hasNext()){
+               StaffVO staff = (StaffVO)staffIt.next();
+               if(staff.getStaffCode().equals(requestedBy)){
+                 out.println("<option value='"+staff.getStaffCode()+"' selected>"+staff.getStaffName()+"</option>");
+               }else{
+                   out.println("<option value='"+staff.getStaffCode()+"'>"+staff.getStaffName()+"</option>");
+               }
+           }
+       }
+      %>
+      </select>
+      </TD>
+    </tr>
+    <TR> 
+      <TD width="15%" height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="common.submit_date_from"/></span></div></TD>
+      <TD width="35%" height="20"> 
+       <INPUT Name="beginSubmissionDate" onclick='setday(this)'  Type="text" value="<%=beginSubmissionDate==null?"":beginSubmissionDate%>" class="text2" style="WIDTH: 130px" id="beginSubmissionDate">(mm/dd/yyyy)
+      </TD>
+      <TD width="15%" height="20" class="tr3"><div align="right"><span class="style1"><i18n:message key="common.submit_date_to"/></span></div></TD>
+      <TD width="35%" height="20"> 
+       <INPUT Name="endSubmissionDate" onclick='setday(this)'  Type="text" value="<%=endSubmissionDate==null?"":endSubmissionDate%>" class="text2" style="WIDTH: 130px" id="endSubmissionDate">(mm/dd/yyyy) 
+      </TD>
+    </TR>
+    <tr>
+      <td colspan='4' align='center'>
+         <input type="button" name="searchBtn" value='<i18n:message key="button.search"/>' onclick="searchForm()" class="btn3_mouseout" onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+         <input type="Reset" name="resetBtn" value='<i18n:message key="button.reset"/>' class="btn3_mouseout" onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">&nbsp;&nbsp;
+         <input type="button" name="exportQueryBtn" value='<i18n:message key="button.export_query"/>' class="btn3_mouseout" onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'" onclick="exportQuery()">&nbsp;&nbsp;
+         <input type="button" name="notifyBtn" value="<i18n:message key="button.notify"/>" onclick="notify()" class="btn3_mouseout" onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+      </td>
+    </tr>
+ </TABLE>
+ 
+ <table width="100%"  border="0" cellpadding="0" cellspacing="1" class="sortable" id="mytable" style="border:1px #8899cc solid;">
+          <tr class="liebiao_tou">
+            <td align='center'><input type="checkbox" name="allBtn" onclick="selectAll(this, 'id')"></td>
+            <td align='center' ><i18n:message key="common.request_no"/></td>
+            <td align='center' ><i18n:message key="common.request_form"/></td>
+            <td align='center' ><i18n:message key="common.highlight_content"/></td>
+            <td align='center' ><i18n:message key="common.submit_date"/></td>
+            <td align='center' ><i18n:message key="common.request_by"/></td>
+            <td align='center' ><i18n:message key="form_overdue.current_overdue"/></td>
+            <td align='center' ><i18n:message key="form_overdue.receive_date"/></td>
+            <td align='center' ><i18n:message key="common.remaining"/></td>
+          </tr>
+          <%
+            if(formList!=null){
+            	int i = 1;
+            	SimpleDateFormat   df   =new   SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            	Iterator formIt = formList.iterator();
+            while(formIt.hasNext()){
+            	WorkFlowProcessVO vo = (WorkFlowProcessVO)formIt.next();
+            	Date cDate = null;
+            	if(vo.getRemainTime()!=null && Double.parseDouble(vo.getRemainTime())>0){
+            	  continue;
+            	}
+            	if(vo.getReceivingDateStr()!=null && !"".equals(vo.getReceivingDateStr())){
+            	   cDate = df.parse(vo.getReceivingDateStr());
+            	}
+          %>
+            <tr class="tr_change">
+              <td align='center'><input type="checkbox" name="id" value="<%=vo.getRequestNo()%>"></td>
+              <td ><a href="<%=request.getContextPath()%>/formManageAction.it?method=displayFormContent&operateType=view&requestNo=<%=vo.getRequestNo()%>&formSystemId=<%=vo.getFormSystemId()%>"
+              		<%=vo.getHtmlTitleAttr()%>><%=vo.getRequestNo()%>&nbsp;&nbsp;</td>
+              <td ><%=vo.getFormName()%>&nbsp;</td>
+              <td ><%=vo.getHighlightContent()%></td>
+              <td ><%=(vo.getSubmissionDateStr()!=null && !"".equals(vo.getSubmissionDateStr()))?StringUtil.getDateStr(cDate,"MM/dd/yyyy HH:mm:ss"):""%>&nbsp;&nbsp;</td>
+              <td><%=StaffTeamHelper.getInstance().getStaffNameByCode(vo.getRequestStaffCode())%>&nbsp;&nbsp;</td>
+              <td ><%=vo.getNodeName()%>&nbsp;(<%=StaffTeamHelper.getInstance().getStaffNameByCode(vo.getCurrentInProcessor())%>)</td>
+              <td ><%=(vo.getReceivingDateStr()!=null && !"".equals(vo.getReceivingDateStr()))?StringUtil.getDateStr(cDate,"MM/dd/yyyy HH:mm:ss"):""%>&nbsp;&nbsp;</td>
+              <td align='right' >
+                <b><font color='red'><%=vo.getRemainTime()%></font></b>&nbsp;
+                <input type="hidden" name="<%=vo.getRequestNo()%>" value="<%=vo.getRemainTime()%>">
+              </td>
+            </tr>
+          <%
+            i++;}
+          }else{
+          %>
+            <tr class="liebiao_nr2">
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+              <td>&nbsp;&nbsp;</td>
+            </tr>
+          <%}%>
+        </table>
+  </FORM>
+  </body>
+  </html>
+<script language="javascript">
+	setResizeAble(mytable);
+	window.onload=function(){enableTooltips()};
+ </script>

@@ -1,0 +1,120 @@
+<%@ taglib uri="/WEB-INF/taglibs-i18n.tld" prefix="i18n" %>
+<%@ page contentType="text/html;charset=GBK" pageEncoding="GBK"%>
+<%@page import="com.aiait.eflow.basedata.vo.BaseDataVO" %>
+  <%
+     BaseDataVO vo = (BaseDataVO)request.getAttribute("baseVo");
+     String masterId = "";
+     String optionValue = "";
+     String optionLable = "";
+     String type = (String)request.getParameter("type");
+     if(type==null){
+	   type = "new";
+	 }
+     if("new".equals(type)){
+       masterId = (String)request.getParameter("masterId");
+     }else{
+       masterId = ""+vo.getMasterId();
+       optionLable = vo.getOptionLabel();
+       optionValue = vo.getOptionValue();
+     }
+  %>
+<html>
+  <head>
+    <title>Edit Option Label</title>
+    <link href="<%=request.getContextPath()%>/css/style.css" rel="stylesheet" type="text/css">
+    <i18n:jsmessage jsRelativePath="js" prefixName="message"/>
+    <script language="javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
+    <script language="javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+    <script language="javascript">
+      function submitForm(){
+        var type = "<%=type%>";
+        if(type=="new"){
+          if(document.all['optionValue'].value.Trim()==""){
+            alert(optionlabel_not_be_null);
+            document.all['optionValue'].focus();
+            return;
+          }
+        }
+        if(document.all['optionLabel'].value.Trim()==""){
+          alert(optionlabel_not_be_null);
+          document.all['optionLabel'].focus();
+          return;
+        }
+        var url = "<%=request.getContextPath()%>/baseDataManageAction.it?method=updateOptionLabel&masterId=<%=masterId%>"
+                                +"&optionValue="+document.all['optionValue'].value.Trim()+"&optionLabel="
+                                +document.all['optionLabel'].value.Trim()+"&type=<%=type%>";
+        var xmlhttp = createXMLHttpRequest();
+        var result;
+        if(xmlhttp){
+          xmlhttp.open('POST',encodeURI(encodeURI(url)),true);
+          xmlhttp.onreadystatechange = function()
+         {
+            if(xmlHttp.readyState!=4){
+             	window.opener.document.getElementById("loading").style.display="block";
+           }
+           if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+             result = xmlhttp.responseText;
+             window.opener.document.getElementById("loading").style.display="none";
+             if(result.Trim()=="success"){
+               alert(optionlabel_sav_suc);
+               window.opener.createDetailList("<%=masterId%>");
+               window.close();
+             }else if(result.Trim()=="fail"){
+                alert(optionlabel_get_fail);
+             }else{
+                alert(result.Trim());
+             }
+           }
+         }
+         xmlhttp.setRequestHeader("If-Modified-Since","0");
+         xmlhttp.send(result);
+      }
+    }
+  </script>
+  </head>
+
+  <body>
+    <form name="optionForm" action="" method="post">
+     <table width="100%"  border="1" cellpadding="3" cellspacing="0" bordercolor="#6595D6" style="border-collapse:collapse;" >
+     <tr class="tr1">
+       <td align='center' colspan='2'>
+          <b> <i18n:message key="Option_label.title"/></b>
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="Option_label.value"/> : 
+       </td>
+       <td>
+       <%if(!"new".equals(type)){%>
+        <input type='text' name='optionValueShow' size='18' maxLength='50' title="Option Value" required="true" value="<%=optionValue%>"
+          disabled>
+         (<font color="red">*</font>)
+         <input type="hidden" name="optionValue" value="<%=optionValue%>">
+        <%}else{%>
+          <input type='text' name='optionValue' size='18' maxLength='50' title="Option Value" required="true" value="">
+         (<font color="red">*</font>)
+        <%}%>
+       </td>
+     </tr>
+     <tr>
+       <td align="right">
+         <i18n:message key="Option_label.label"/> : 
+       </td>
+       <td>
+        <input type='text' name='optionLabel' size='30' maxLength='200' title="Option Label" required="true" value="<%=optionLable%>">
+         (<font color="red">*</font>)
+       </td>
+     </tr>
+     <tr>
+       <td align="center" colspan="2">
+         <input type="button" name="smBtn" value='<i18n:message key="button.submit"/>' onclick="submitForm()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+         <input type="button" name="returnBtn" value='<i18n:message key="button.close"/>' onclick="javascript:window.close()" class=btn3_mouseout onmouseover="this.className='btn3_mouseover'" onmouseout="this.className='btn3_mouseout'"
+           onmousedown="this.className='btn3_mousedown'" onmouseup="this.className='btn3_mouseup'">
+       </td>
+     </tr>
+     </table>
+    </form>
+  </body>
+ </html>
